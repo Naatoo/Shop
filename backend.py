@@ -14,7 +14,6 @@ def view(table_name):
     cursor.execute(sql, data)
     column_names = cursor.fetchall()
     column_names_final = [tup[0] for tup in column_names]
-    print(column_names_final)
 
     connection.close()
     return column_names_final, rows

@@ -9,7 +9,7 @@ from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5.QtGui import QIcon
 
 import backend
-from tables import sql_insert
+import tables
 
 
 class App(QMainWindow):
@@ -54,58 +54,71 @@ class MyTableWidget(QWidget):
 
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
+
         self.tab2 = QWidget()
-        #self.tabs.resize(300, 200)
 
         self.tabs.addTab(self.tab1, "Products")
         self.tabs.addTab(self.tab2, "Tab 2")
-        self.create_tab1()
+
         self.create_tab2()
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
-    def create_tab1(self):
         self.tab1.layout = QVBoxLayout(self)
 
         self.data = backend.view("products")
+
         column_names = self.data[0]
         self.rows = self.data[1]
         self.buttonclick = QPushButton("Add new item", self)
         self.buttonclick.setToolTip("Add an item which is not in the list yet")
         self.buttonclick.move(500, 80)
         self.buttonclick.clicked.connect(self.add_new_item)
+        self.buttonclick.clicked.connect(self.update)
         self.tab1.layout.addWidget(self.buttonclick)
-        self.create_products_view(column_names, self.rows)
+        self.goods_view = QTableWidget()
+        self.goods_view.repaint()
+        self.goods_view.setHorizontalHeaderLabels(column_names)
+        self.goods_view.move(0, 0)
+        self.add_table()
+
         self.tab1.layout.addWidget(self.goods_view)
 
         self.tab1.setLayout(self.tab1.layout)
 
-    def create_products_view(self, column_names, rows):
+        self.tab1.layout.addWidget(self.goods_view)
+
+        self.tab1.setLayout(self.tab1.layout)
+
+    def add_table(self):
+        self.data = backend.view("products")
+
+        self.rows = self.data[1]
         columns = 5
-        self.goods_view = QTableWidget()
-        self.goods_view.setRowCount(len(rows))
+        self.row = len(self.rows)
+
+        self.goods_view.setRowCount(self.row)
         self.goods_view.setColumnCount(columns)
 
-        for row_id, row in enumerate(rows):
+        for row_id, row in enumerate(self.rows):
             for column_id, cell in enumerate(row):
                 self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-        self.goods_view.setHorizontalHeaderLabels(column_names)
-        self.goods_view.move(0, 0)
-
-        # table selection change
-     #   self.goods_view.doubleClicked.connect(self.on_click)
-
-
-    # def getText(self):
-    #     text, okPressed = QInputDialog.getText(self, "Get text", "Your name:", QLineEdit.Normal, "")
-    #     text, okPressed = QInputDialog.getText(self, "Get text", "Your name:", QLineEdit.Normal, "")
-    #     if okPressed and text != '':
-    #         print(text)
+        self.tab1.layout.update()
 
     @pyqtSlot()
     def add_new_item(self):
+        from PyQt5 import QtCore, QtGui
+
         self.new_item = NewItemWidget(self.data)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.goods_view.setRowCount(self.row)
+        for row_id, row in enumerate(self.rows):
+            for column_id, cell in enumerate(row):
+                self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+        self.goods_view.update()
+        self.add_table()
+
 
     def create_tab2(self):
         self.tab2.layout = QVBoxLayout(self)
@@ -123,7 +136,6 @@ class MyTableWidget(QWidget):
         self.tab2.layout.addWidget(self.textbutton)
         self.tab2.layout.addWidget(self.label)
         self.tab2.setLayout(self.tab2.layout)
-
 
     @pyqtSlot()
     def on_click_text_button(self):
@@ -204,11 +216,9 @@ class NewItemWidget(QWidget):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        sql_insert([self.id_input.text(), self.name_input_edit.text(),
+        tables.sql_insert([self.id_input.text(), self.name_input_edit.text(),
                     self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
-
-
 
 
 if __name__ == "__main__":

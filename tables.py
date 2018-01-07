@@ -65,5 +65,4 @@ def sql_insert(data):
 
 data = ((1, 'Telefon_Samsung_S8', 4, 2900, "MOB"), (2, 'Telefon LG G6/32GB/Szary', 12, 2300, "MOB"),
         (3, 'Gra Fifa18', 32, 219, "GAM"))
-create_table(data)
 
