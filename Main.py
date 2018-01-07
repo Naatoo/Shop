@@ -1,11 +1,15 @@
 import sys
+
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QDialog
 from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget
-from PyQt5.QtWidgets import QLineEdit, QInputDialog
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
+from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox
+from PyQt5.QtWidgets import QDoubleSpinBox, QTableView
 from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5.QtGui import QIcon
+
 import backend
+from tables import sql_insert
 
 
 class App(QMainWindow):
@@ -15,8 +19,8 @@ class App(QMainWindow):
         self.title = "Shop"
         self.left = 100
         self.top = 100
-        self.width = 800
-        self.height = 600
+        self.width = 1000
+        self.height = 750
 
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
@@ -51,9 +55,9 @@ class MyTableWidget(QWidget):
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
-        self.tabs.resize(300, 200)
+        #self.tabs.resize(300, 200)
 
-        self.tabs.addTab(self.tab1, "Tab 1")
+        self.tabs.addTab(self.tab1, "Products")
         self.tabs.addTab(self.tab2, "Tab 2")
         self.create_tab1()
         self.create_tab2()
@@ -63,43 +67,45 @@ class MyTableWidget(QWidget):
 
     def create_tab1(self):
         self.tab1.layout = QVBoxLayout(self)
-        self.buttonclick = QPushButton("Button", self)
-        self.buttonclick.setToolTip("First button")
-        self.buttonclick.move(500, 80)
-        self.buttonclick.clicked.connect(self.on_click)
-        self.tab1.layout.addWidget(self.buttonclick)
 
-        data = backend.view("products")
-        column_names = data[0]
-        rows = data[1]
-        for a in rows:
-            print(a)
-        self.create_products_view(column_names, rows)
+        self.data = backend.view("products")
+        column_names = self.data[0]
+        self.rows = self.data[1]
+        self.buttonclick = QPushButton("Add new item", self)
+        self.buttonclick.setToolTip("Add an item which is not in the list yet")
+        self.buttonclick.move(500, 80)
+        self.buttonclick.clicked.connect(self.add_new_item)
+        self.tab1.layout.addWidget(self.buttonclick)
+        self.create_products_view(column_names, self.rows)
         self.tab1.layout.addWidget(self.goods_view)
 
         self.tab1.setLayout(self.tab1.layout)
 
     def create_products_view(self, column_names, rows):
-        columns = 6
+        columns = 5
         self.goods_view = QTableWidget()
         self.goods_view.setRowCount(len(rows))
         self.goods_view.setColumnCount(columns)
 
         for row_id, row in enumerate(rows):
             for column_id, cell in enumerate(row):
-                print(cell)
                 self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
         self.goods_view.setHorizontalHeaderLabels(column_names)
         self.goods_view.move(0, 0)
 
         # table selection change
-        self.goods_view.doubleClicked.connect(self.on_click)
+     #   self.goods_view.doubleClicked.connect(self.on_click)
+
+
+    # def getText(self):
+    #     text, okPressed = QInputDialog.getText(self, "Get text", "Your name:", QLineEdit.Normal, "")
+    #     text, okPressed = QInputDialog.getText(self, "Get text", "Your name:", QLineEdit.Normal, "")
+    #     if okPressed and text != '':
+    #         print(text)
 
     @pyqtSlot()
-    def on_click(self):
-        print("\n")
-        for currentQTableWidgetItem in self.tableWidget.selectedItems():
-            print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
+    def add_new_item(self):
+        self.new_item = NewItemWidget(self.data)
 
     def create_tab2(self):
         self.tab2.layout = QVBoxLayout(self)
@@ -118,15 +124,91 @@ class MyTableWidget(QWidget):
         self.tab2.layout.addWidget(self.label)
         self.tab2.setLayout(self.tab2.layout)
 
-    @pyqtSlot()
-    def on_click(self):
-        print("clicked")
 
     @pyqtSlot()
     def on_click_text_button(self):
         textboxvalue = self.textbox.text()
         QMessageBox.question(self, "Message", "You typed: " + textboxvalue, QMessageBox.Ok, QMessageBox.Ok)
         self.textbox.setText("")
+
+
+class NewItemWidget(QWidget):
+    def __init__(self, data):
+        super(QWidget, self).__init__()
+
+        self.title = "Add new item"
+        self.left = 100
+        self.top = 100
+        self.width = 400
+        self.height = 300
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+
+        self.groupbox= QGroupBox()
+        self.layout = QGridLayout()
+        self.layout.setRowStretch(1, 6)
+        self.layout.setColumnStretch(1, 2)
+
+        self.id_label = QLabel("Product id")
+        self.id_input = QSpinBox()
+        self.id_input.setMaximum(100000)
+        self.id_input.setValue(max([item_id[0] for item_id in data[1]]) + 1)
+        self.layout.addWidget(self.id_label, 0, 0)
+        self.layout.addWidget(self.id_input, 0, 1)
+
+        self.name_label = QLabel("Name")
+        self.name_input = QComboBox()
+        self.name_input.addItems([item_id[1] for item_id in data[1]])
+        self.name_input_edit = QLineEdit()
+        self.name_input.setLineEdit(self.name_input_edit)
+        self.layout.addWidget(self.name_label, 1, 0)
+        self.layout.addWidget(self.name_input, 1, 1)
+
+        self.quantity_label = QLabel("Quantity")
+        self.quantity_input = QSpinBox()
+        self.quantity_input.setMaximum(100000)
+        self.quantity_input.setValue(1)
+        self.layout.addWidget(self.quantity_label, 2, 0)
+        self.layout.addWidget(self.quantity_input, 2, 1)
+
+        self.price_sell_label = QLabel("Selling price")
+        self.price_sell_input = QDoubleSpinBox()
+        self.price_sell_input.setMaximum(100000)
+        self.price_sell_input.setValue(100.00)
+        self.layout.addWidget(self.price_sell_label, 3, 0)
+        self.layout.addWidget(self.price_sell_input, 3, 1)
+
+        self.category_label = QLabel("Category")
+        self.category_input = QComboBox()
+        self.category_input.addItems([item_id[4] for item_id in data[1]])
+        self.category_input_edit = QLineEdit()
+        self.category_input.setLineEdit(self.category_input_edit)
+        self.layout.addWidget(self.category_label, 4, 0)
+        self.layout.addWidget(self.category_input, 4, 1)
+
+        self.add_item_button = QPushButton("Add item")
+        self.layout.addWidget(self.add_item_button, 5, 0)
+
+        self.add_item_button.clicked.connect(self.add_item)
+
+        self.cancel_button = QPushButton("Cancel")
+
+        self.groupbox.setLayout(self.layout)
+        windowLayout = QVBoxLayout()
+        windowLayout.addWidget(self.groupbox)
+        self.setLayout(windowLayout)
+        self.show()
+
+    @pyqtSlot()
+    def add_item(self):
+        price = self.price_sell_input.text()
+        if "," in price:
+            price = price.replace(",", ".")
+        sql_insert([self.id_input.text(), self.name_input_edit.text(),
+                    self.quantity_input.text(), price, self.category_input_edit.text()])
+        self.close()
+
+
 
 
 if __name__ == "__main__":
