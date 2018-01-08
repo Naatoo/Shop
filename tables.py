@@ -47,13 +47,16 @@ def sql_insert(data):
 #     return rows
 #
 #
-# def delete(item):
-#     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-#     cursor = connection.cursor()
-#     cursor.execute("DELETE FROM store WHERE item=%s", (item,))
-#     connection.commit()
-#     connection.close()
-#
+
+def delete(id):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = "DELETE FROM products WHERE Pozycja_towaru=%s;"
+    cursor.execute(sql, (id,))
+    connection.commit()
+    connection.close()
+
+
 #
 # def update(quantity, price, item):
 #     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")

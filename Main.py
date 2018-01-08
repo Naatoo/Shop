@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSp
 from PyQt5.QtWidgets import QDoubleSpinBox, QTableView
 from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5.QtGui import QIcon
+from PyQt5 import QtCore
 
 import backend
 import tables
@@ -17,8 +18,8 @@ class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.title = "Shop"
-        self.left = 100
-        self.top = 100
+        self.left = 30
+        self.top = 30
         self.width = 1000
         self.height = 750
 
@@ -67,22 +68,40 @@ class MyTableWidget(QWidget):
 
         self.tab1.layout = QVBoxLayout(self)
 
-        self.data = backend.view("products")
+        self.add_button = QPushButton("Add new product", self)
+        self.add_button.setToolTip("Add an item which is not in the list yet")
+        self.add_button.move(500, 80)
+        self.add_button.clicked.connect(self.add_item)
+        self.tab1.layout.addWidget(self.add_button)
 
+        self.update_button = QPushButton("Update product", self)
+        self.update_button.setToolTip("Update selected product")
+        self.update_button.move(500, 80)
+        self.update_button.clicked.connect(self.add_item)
+        self.tab1.layout.addWidget(self.update_button)
+
+        self.delete_button = QPushButton("Delete product", self)
+        self.delete_button.setToolTip("Delete selected product")
+        self.delete_button.move(500, 80)
+        self.delete_button.clicked.connect(self.delete_item)
+        self.tab1.layout.addWidget(self.delete_button)
+
+        self.data = backend.view("products")
         column_names = self.data[0]
         self.rows = self.data[1]
-        self.buttonclick = QPushButton("Add new item", self)
-        self.buttonclick.setToolTip("Add an item which is not in the list yet")
-        self.buttonclick.move(500, 80)
-        self.buttonclick.clicked.connect(self.add_new_item)
-        self.buttonclick.clicked.connect(self.update)
-        self.tab1.layout.addWidget(self.buttonclick)
+
         self.goods_view = QTableWidget()
         self.goods_view.repaint()
         self.goods_view.setHorizontalHeaderLabels(column_names)
         self.goods_view.move(0, 0)
-        self.add_table()
+        self.goods_view.itemSelectionChanged.connect(self.change)
 
+        from PyQt5 import QtWidgets
+        self.goods_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.goods_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+
+        self.refresh_table()
+        self.goods_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tab1.layout.addWidget(self.goods_view)
 
         self.tab1.setLayout(self.tab1.layout)
@@ -91,15 +110,20 @@ class MyTableWidget(QWidget):
 
         self.tab1.setLayout(self.tab1.layout)
 
-    def add_table(self):
+    def change(self):
+        items = self.goods_view.selectedItems()
+        self.row_data = [cell.text() for cell in items]
+        print(self.row_data)
+
+    def refresh_table(self):
         self.data = backend.view("products")
-
         self.rows = self.data[1]
         columns = 5
+        column_names = self.data[0]
         self.row = len(self.rows)
-
         self.goods_view.setRowCount(self.row)
         self.goods_view.setColumnCount(columns)
+        self.goods_view.setHorizontalHeaderLabels(column_names)
 
         for row_id, row in enumerate(self.rows):
             for column_id, cell in enumerate(row):
@@ -107,18 +131,25 @@ class MyTableWidget(QWidget):
         self.tab1.layout.update()
 
     @pyqtSlot()
-    def add_new_item(self):
-        from PyQt5 import QtCore, QtGui
-
+    def add_item(self):
         self.new_item = NewItemWidget(self.data)
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
-        self.goods_view.setRowCount(self.row)
         for row_id, row in enumerate(self.rows):
             for column_id, cell in enumerate(row):
                 self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-        self.goods_view.update()
-        self.add_table()
+        self.refresh_table()
 
+    @pyqtSlot()
+    def delete_item(self):
+        buttonReply = QMessageBox.question(self, 'Confirmation', "Do you like want to remove " + self.row_data[1],
+                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if buttonReply == QMessageBox.No:
+            return
+        else:
+            tables.delete(self.row_data[0])
+            for row_id, row in enumerate(self.rows):
+                for column_id, cell in enumerate(row):
+                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+            self.refresh_table()
 
     def create_tab2(self):
         self.tab2.layout = QVBoxLayout(self)
@@ -164,7 +195,15 @@ class NewItemWidget(QWidget):
         self.id_label = QLabel("Product id")
         self.id_input = QSpinBox()
         self.id_input.setMaximum(100000)
-        self.id_input.setValue(max([item_id[0] for item_id in data[1]]) + 1)
+
+        # Default id value
+        indexes = [number[0] for number in data[1]]
+        indexes_sorted = sorted(indexes)
+        for id in indexes_sorted:
+            if id + 1 not in indexes:
+                self.id_input.setValue(id + 1)
+                break
+
         self.layout.addWidget(self.id_label, 0, 0)
         self.layout.addWidget(self.id_input, 0, 1)
 
@@ -201,7 +240,7 @@ class NewItemWidget(QWidget):
         self.add_item_button = QPushButton("Add item")
         self.layout.addWidget(self.add_item_button, 5, 0)
 
-        self.add_item_button.clicked.connect(self.add_item)
+        self.add_item_button.clicked.connect(self.add)
 
         self.cancel_button = QPushButton("Cancel")
 
@@ -212,7 +251,7 @@ class NewItemWidget(QWidget):
         self.show()
 
     @pyqtSlot()
-    def add_item(self):
+    def add(self):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
