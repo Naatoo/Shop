@@ -50,6 +50,23 @@ def delete(id):
     connection.close()
 
 
+def sql_update(data):
+    print(data)
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''UPDATE products
+             SET
+             Nazwa=%s
+             Ilość_w_magazynie=%s
+             Cena_sprzedaży=%s
+             kat=%s
+             WHERE Pozycja_towaru=%s
+             '''
+    cursor.execute(sql, data)
+    connection.commit()
+    connection.close()
+
+
 def view(table_name):
     data = (table_name,)
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
@@ -72,7 +89,7 @@ data = ((1, 'Telefon_Samsung_S8', 4, 2900, "MOB"), (2, 'Telefon LG G6/32GB/Szary
         (3, 'Gra Fifa18', 32, 219, "GAM"))
 
 
-class NewItemWidget(QWidget):
+class NewItem(QWidget):
     def __init__(self, data):
         super(QWidget, self).__init__()
 
@@ -94,19 +111,23 @@ class NewItemWidget(QWidget):
         self.id_input.setMaximum(100000)
 
         # Default id value
-        indexes = [number[0] for number in data[1]]
-        indexes_sorted = sorted(indexes)
-        for id in indexes_sorted:
-            if id + 1 not in indexes:
-                self.id_input.setValue(id + 1)
-                break
+        self.indexes = [number[0] for number in data[1]]
+        print(self.indexes)
+        if min(self.indexes) > 1:
+            self.id_input.setValue(min(range(1, min(self.indexes) - 1)))
+        else:
+            self.indexes_sorted = sorted(self.indexes)
+            for id in self.indexes_sorted:
+                if id + 1 not in self.indexes:
+                    self.id_input.setValue(id + 1)
+                    break
 
         self.layout.addWidget(self.id_label, 0, 0)
         self.layout.addWidget(self.id_input, 0, 1)
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
-        self.name_input.addItems([item_id[1] for item_id in data[1]])
+        self.name_input.addItems(set([item_id[1] for item_id in data[1]]))
         self.name_input_edit = QLineEdit()
         self.name_input.setLineEdit(self.name_input_edit)
         self.layout.addWidget(self.name_label, 1, 0)
@@ -128,7 +149,7 @@ class NewItemWidget(QWidget):
 
         self.category_label = QLabel("Category")
         self.category_input = QComboBox()
-        self.category_input.addItems([item_id[4] for item_id in data[1]])
+        self.category_input.addItems(set([item_id[4] for item_id in data[1]]))
         self.category_input_edit = QLineEdit()
         self.category_input.setLineEdit(self.category_input_edit)
         self.layout.addWidget(self.category_label, 4, 0)
@@ -154,4 +175,75 @@ class NewItemWidget(QWidget):
             price = price.replace(",", ".")
         sql_insert([self.id_input.text(), self.name_input_edit.text(),
                     self.quantity_input.text(), price, self.category_input_edit.text()])
+        self.close()
+
+
+class UpdateItem(QWidget):
+    def __init__(self, data, row_data):
+        super(QWidget, self).__init__()
+
+        self.title = "Update product"
+        self.left = 100
+        self.top = 100
+        self.width = 400
+        self.height = 300
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+
+        self.groupbox= QGroupBox()
+        self.layout = QGridLayout()
+        self.layout.setRowStretch(1, 6)
+        self.layout.setColumnStretch(1, 2)
+
+        self.id = row_data
+
+        self.name_label = QLabel("Name")
+        self.name_input = QLineEdit()
+        self.name_input.setText(data[1][row_data][1])
+
+        self.layout.addWidget(self.name_label, 1, 0)
+        self.layout.addWidget(self.name_input, 1, 1)
+
+        self.quantity_label = QLabel("Quantity")
+        self.quantity_input = QSpinBox()
+        self.quantity_input.setMaximum(100000)
+        self.quantity_input.setValue(data[1][row_data][2])
+        self.layout.addWidget(self.quantity_label, 2, 0)
+        self.layout.addWidget(self.quantity_input, 2, 1)
+
+        self.price_sell_label = QLabel("Selling price")
+        self.price_sell_input = QDoubleSpinBox()
+        self.price_sell_input.setMaximum(100000)
+        self.price_sell_input.setValue(data[1][row_data][3])
+        self.layout.addWidget(self.price_sell_label, 3, 0)
+        self.layout.addWidget(self.price_sell_input, 3, 1)
+
+        self.category_label = QLabel("Category")
+        self.category_input = QLineEdit()
+        self.category_input.setText(data[1][row_data][4])
+        self.layout.addWidget(self.category_label, 4, 0)
+        self.layout.addWidget(self.category_input, 4, 1)
+
+        self.update_item_button = QPushButton("Update item")
+        self.layout.addWidget(self.update_item_button, 5, 0)
+
+        self.update_item_button.clicked.connect(self.update)
+
+        self.cancel_button = QPushButton("Cancel")
+
+        self.groupbox.setLayout(self.layout)
+        windowLayout = QVBoxLayout()
+        windowLayout.addWidget(self.groupbox)
+        self.setLayout(windowLayout)
+        self.show()
+
+
+    @pyqtSlot()
+    def update(self):
+
+        price = self.price_sell_input.text()
+        if "," in price:
+            price = price.replace(",", ".")
+        sql_update([self.name_input_edit.text(),
+                    self.quantity_input.text(), price, self.category_input_edit.text(), self.id])
         self.close()

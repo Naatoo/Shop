@@ -77,7 +77,7 @@ class MyTableWidget(QWidget):
         self.update_button = QPushButton("Update product", self)
         self.update_button.setToolTip("Update selected product")
         self.update_button.move(500, 80)
-        self.update_button.clicked.connect(self.add_item)
+        self.update_button.clicked.connect(self.update_item)
         self.tab1.layout.addWidget(self.update_button)
 
         self.delete_button = QPushButton("Delete product", self)
@@ -113,9 +113,11 @@ class MyTableWidget(QWidget):
     def change(self):
         items = self.goods_view.selectedItems()
         self.row_data = [cell.text() for cell in items]
-        print(self.row_data)
 
     def refresh_table(self):
+        for row_id, row in enumerate(self.rows):
+            for column_id, cell in enumerate(row):
+                self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
         self.data = products.view("products")
         self.rows = self.data[1]
         columns = 5
@@ -132,10 +134,7 @@ class MyTableWidget(QWidget):
 
     @pyqtSlot()
     def add_item(self):
-        self.new_item = products.NewItemWidget(self.data)
-        for row_id, row in enumerate(self.rows):
-            for column_id, cell in enumerate(row):
-                self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+        self.new_item = products.NewItem(self.data)
         self.refresh_table()
 
     @pyqtSlot()
@@ -146,10 +145,12 @@ class MyTableWidget(QWidget):
             return
         else:
             products.delete(self.row_data[0])
-            for row_id, row in enumerate(self.rows):
-                for column_id, cell in enumerate(row):
-                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
             self.refresh_table()
+
+    @pyqtSlot()
+    def update_item(self):
+        self.update_item = products.UpdateItem(self.data, self.goods_view.currentRow())
+        self.refresh_table()
 
     def create_tab2(self):
         self.tab2.layout = QVBoxLayout(self)
