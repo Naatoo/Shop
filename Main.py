@@ -4,10 +4,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QDi
 from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
 from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox
-from PyQt5.QtWidgets import QDoubleSpinBox, QTableView
 from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5.QtGui import QIcon
-from PyQt5 import QtCore
 from PyQt5 import QtWidgets
 
 import products
@@ -68,6 +66,10 @@ class MyTableWidget(QWidget):
 
         self.tab1.layout = QVBoxLayout(self)
 
+        self.data = products.view("products")
+        column_names = self.data[0]
+        self.rows = self.data[1]
+
         self.add_button = QPushButton("Add new product", self)
         self.add_button.setToolTip("Add an item which is not in the list yet")
         self.add_button.move(500, 80)
@@ -86,16 +88,19 @@ class MyTableWidget(QWidget):
         self.delete_button.clicked.connect(self.delete_item)
         self.tab1.layout.addWidget(self.delete_button)
 
-        self.data = products.view("products")
-        column_names = self.data[0]
-        self.rows = self.data[1]
+        self.dropdownlist_category = QComboBox()
+        categories = set([item_id[4] for item_id in self.data[1]])
+        categories.add("All products")
+        self.dropdownlist_category.addItems(categories)
+        self.dropdownlist_category.activated.connect(self.select_category)
+        self.tab1.layout.addWidget(self.dropdownlist_category)
 
         self.goods_view = QTableWidget()
         self.goods_view.repaint()
+        self.goods_view.setColumnCount(len(self.data[0]))
         self.goods_view.setHorizontalHeaderLabels(column_names)
         self.goods_view.move(0, 0)
         self.goods_view.itemSelectionChanged.connect(self.change)
-
 
         self.goods_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.goods_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -115,22 +120,24 @@ class MyTableWidget(QWidget):
         self.row_data = [cell.text() for cell in items]
 
     def refresh_table(self):
-        for row_id, row in enumerate(self.rows):
-            for column_id, cell in enumerate(row):
-                self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-        self.data = products.view("products")
-        self.rows = self.data[1]
-        columns = 5
-        column_names = self.data[0]
-        self.row = len(self.rows)
-        self.goods_view.setRowCount(self.row)
-        self.goods_view.setColumnCount(columns)
-        self.goods_view.setHorizontalHeaderLabels(column_names)
+        self.category = self.dropdownlist_category.currentText()
+        if self.category == "All products":
+            self.rows_table = len(self.data[1])
+        else:
+            self.rows_table = [row[4] for row in self.data[1]].count(self.category)
+        self.goods_view.setRowCount(self.rows_table)
 
-        for row_id, row in enumerate(self.rows):
-            for column_id, cell in enumerate(row):
-                self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+        row_id = 0
+        for row in self.rows:
+            if self.category == row[4] or self.category == "All products":
+                for column_id, cell in enumerate(row):
+                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                row_id += 1
         self.tab1.layout.update()
+
+    @pyqtSlot()
+    def select_category(self):
+        self.refresh_table()
 
     @pyqtSlot()
     def add_item(self):

@@ -51,14 +51,13 @@ def delete(id):
 
 
 def sql_update(data):
-    print(data)
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
     sql = '''UPDATE products
              SET
-             Nazwa=%s
-             Ilość_w_magazynie=%s
-             Cena_sprzedaży=%s
+             Nazwa=%s,
+             Ilość_w_magazynie=%s,
+             Cena_sprzedaży=%s,
              kat=%s
              WHERE Pozycja_towaru=%s
              '''
@@ -72,7 +71,7 @@ def view(table_name):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
 
-    sql = "SELECT * FROM %s" % table_name
+    sql = '''SELECT * FROM %s ORDER BY Pozycja_towaru''' % table_name
     cursor.execute(sql)
     rows = cursor.fetchall()
 
@@ -112,7 +111,6 @@ class NewItem(QWidget):
 
         # Default id value
         self.indexes = [number[0] for number in data[1]]
-        print(self.indexes)
         if min(self.indexes) > 1:
             self.id_input.setValue(min(range(1, min(self.indexes) - 1)))
         else:
@@ -196,7 +194,6 @@ class UpdateItem(QWidget):
         self.layout.setColumnStretch(1, 2)
 
         self.id = row_data
-
         self.name_label = QLabel("Name")
         self.name_input = QLineEdit()
         self.name_input.setText(data[1][row_data][1])
@@ -237,13 +234,11 @@ class UpdateItem(QWidget):
         self.setLayout(windowLayout)
         self.show()
 
-
     @pyqtSlot()
     def update(self):
-
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        sql_update([self.name_input_edit.text(),
-                    self.quantity_input.text(), price, self.category_input_edit.text(), self.id])
+        sql_update([self.name_input.text(),
+                    self.quantity_input.text(), price, self.category_input.text(), self.id])
         self.close()
