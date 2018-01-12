@@ -86,7 +86,7 @@ def view(table_name):
 
 data = ((1, 'Telefon_Samsung_S8', 4, 2900, "MOB"), (2, 'Telefon LG G6/32GB/Szary', 12, 2300, "MOB"),
         (3, 'Gra Fifa18', 32, 219, "GAM"))
-
+#create_table(data)
 
 class NewItem(QWidget):
     def __init__(self, data):
@@ -110,9 +110,13 @@ class NewItem(QWidget):
         self.id_input.setMaximum(100000)
 
         # Default id value
+        for number in data[1]:
+            print(number[0])
         self.indexes = [number[0] for number in data[1]]
-        if min(self.indexes) > 1:
+        if min(self.indexes) > 2:
             self.id_input.setValue(min(range(1, min(self.indexes) - 1)))
+        elif min(self.indexes) == 2:
+            self.id_input.setValue(1)
         else:
             self.indexes_sorted = sorted(self.indexes)
             for id in self.indexes_sorted:

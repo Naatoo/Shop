@@ -3,10 +3,11 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QDialog
 from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
-from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox
+from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox, QStyleFactory
 from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets
+
 
 import products
 
@@ -110,9 +111,7 @@ class MyTableWidget(QWidget):
         self.tab1.layout.addWidget(self.goods_view)
 
         self.tab1.setLayout(self.tab1.layout)
-
         self.tab1.layout.addWidget(self.goods_view)
-
         self.tab1.setLayout(self.tab1.layout)
 
     def change(self):
@@ -120,13 +119,13 @@ class MyTableWidget(QWidget):
         self.row_data = [cell.text() for cell in items]
 
     def refresh_table(self):
+        self.rows = self.data[1]
         self.category = self.dropdownlist_category.currentText()
         if self.category == "All products":
-            self.rows_table = len(self.data[1])
+            self.goods_view.setRowCount(len(self.data[1]))
         else:
             self.rows_table = [row[4] for row in self.data[1]].count(self.category)
-        self.goods_view.setRowCount(self.rows_table)
-
+            self.goods_view.setRowCount(self.rows_table)
         row_id = 0
         for row in self.rows:
             if self.category == row[4] or self.category == "All products":
@@ -142,6 +141,12 @@ class MyTableWidget(QWidget):
     @pyqtSlot()
     def add_item(self):
         self.new_item = products.NewItem(self.data)
+        row_id = 0
+        for row in self.rows:
+            if self.category == row[4] or self.category == "All products":
+                for column_id, cell in enumerate(row):
+                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                row_id += 1
         self.refresh_table()
 
     @pyqtSlot()
@@ -185,5 +190,6 @@ class MyTableWidget(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyle(QStyleFactory.create("Fusion"))
     shop = App()
     sys.exit(app.exec_())
