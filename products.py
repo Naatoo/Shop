@@ -11,7 +11,7 @@ def create_table(data):
     cursor.execute('''DROP TABLE IF EXISTS products''')
     cursor.execute('''CREATE TABLE products
                    (Pozycja_towaru INT PRIMARY KEY NOT NULL,
-                     Nazwa CHAR(40) NOT NULL,
+                     Nazwa TEXT NOT NULL,
                      Ilość_w_magazynie INT NULL,
                      Cena_sprzedaży FLOAT NOT NULL,
                      kat CHAR(3) NOT NULL);''')
@@ -88,6 +88,7 @@ data = ((1, 'Telefon_Samsung_S8', 4, 2900, "MOB"), (2, 'Telefon LG G6/32GB/Szary
         (3, 'Gra Fifa18', 32, 219, "GAM"))
 #create_table(data)
 
+
 class NewItem(QWidget):
     def __init__(self, data):
         super(QWidget, self).__init__()
@@ -105,25 +106,26 @@ class NewItem(QWidget):
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
 
+        self.default_values = []
+
         self.id_label = QLabel("Product id")
         self.id_input = QSpinBox()
         self.id_input.setMaximum(100000)
 
-        # Default id value
-        for number in data[1]:
-            print(number[0])
+        # Default values
         self.indexes = [number[0] for number in data[1]]
         if min(self.indexes) > 2:
-            self.id_input.setValue(min(range(1, min(self.indexes) - 1)))
+            self.id_default = min(range(1, min(self.indexes) - 1))
         elif min(self.indexes) == 2:
-            self.id_input.setValue(1)
+            self.id_default = 1
         else:
             self.indexes_sorted = sorted(self.indexes)
             for id in self.indexes_sorted:
                 if id + 1 not in self.indexes:
-                    self.id_input.setValue(id + 1)
+                    self.id_default = id + 1
                     break
 
+        self.id_input.setValue(self.id_default)
         self.layout.addWidget(self.id_label, 0, 0)
         self.layout.addWidget(self.id_input, 0, 1)
 
@@ -131,6 +133,7 @@ class NewItem(QWidget):
         self.name_input = QComboBox()
         self.name_input.addItems(set([item_id[1] for item_id in data[1]]))
         self.name_input_edit = QLineEdit()
+
         self.name_input.setLineEdit(self.name_input_edit)
         self.layout.addWidget(self.name_label, 1, 0)
         self.layout.addWidget(self.name_input, 1, 1)
@@ -159,10 +162,15 @@ class NewItem(QWidget):
 
         self.add_item_button = QPushButton("Add item")
         self.layout.addWidget(self.add_item_button, 5, 0)
-
         self.add_item_button.clicked.connect(self.add)
 
         self.cancel_button = QPushButton("Cancel")
+        self.layout.addWidget(self.cancel_button, 5, 1)
+        self.cancel_button.clicked.connect(self.close)
+
+        self.reset_button = QPushButton("Reset to default")
+        self.layout.addWidget(self.reset_button, 5, 2)
+        self.reset_button.clicked.connect(self.reset_to_default)
 
         self.groupbox.setLayout(self.layout)
         windowLayout = QVBoxLayout()
@@ -171,7 +179,32 @@ class NewItem(QWidget):
         self.show()
 
     @pyqtSlot()
+    def reset_to_default(self):
+        self.id_input.setValue(self.id_default)
+        self.name_input.setCurrentIndex(0)
+        self.quantity_input.setValue(1)
+        self.price_sell_input.setValue(100.00)
+        self.category_input.setCurrentIndex(0)
+
+    @pyqtSlot()
     def add(self):
+        data = view("products")[1]
+        if len(self.name_input_edit.text()) > 40 or self.name_input_edit.text() in [row[1] for row in data]:
+            return
+        if self.id_input.text() in [str(row[0]) for row in data] or self.id_input.text() == 0:
+            return
+        if self.price_sell_input.text() == "0,00":
+            return
+        if len(self.category_input_edit.text()) != 3 or self.category_input_edit.text().isupper() is not True:
+            return
+        try:
+            int(self.id_input.text())
+            int(self.quantity_input.text())
+            price = self.price_sell_input.text()
+            price = price.replace(",", ".")
+            float(price.replace(",", "."))
+        except ValueError:
+            return
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
