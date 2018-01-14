@@ -5,33 +5,6 @@ from PyQt5.QtCore import pyqtSlot
 import psycopg2
 
 
-def create_table(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-    cursor.execute('''DROP TABLE IF EXISTS products''')
-    cursor.execute('''CREATE TABLE products
-                   (Pozycja_towaru INT PRIMARY KEY NOT NULL,
-                     Nazwa TEXT NOT NULL,
-                     Ilość_w_magazynie INT NULL,
-                     Cena_sprzedaży FLOAT NOT NULL,
-                     kat CHAR(3) NOT NULL);''')
-    # INDEX `fk_kat_idx` (`id_kat` ASC),\
-    # INDEX `fk_mag_idx` (`id_mag` ASC),\
-    # CONSTRAINT `fk_kat`\
-    #   FOREIGN KEY (`id_kat`)\
-    #   REFERENCES `sklep_internetowy`.`Kategorie` (`Id_kat`)\
-    # CONSTRAINT `fk_mag`\
-    #   FOREIGN KEY (`id_mag`)\
-    #   REFERENCES `sklep_internetowy`.`Magazyn` (`id_Magazynu`)"
-    connection.commit()
-    for row in data:
-        sql = "INSERT INTO products VALUES (%s, %s, %s, %s, %s)"
-        data = row
-        cursor.execute(sql, data)
-        connection.commit()
-    connection.close()
-
-
 def sql_insert(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
@@ -44,7 +17,7 @@ def sql_insert(data):
 def delete(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = "DELETE FROM products WHERE Pozycja_towaru=%s;"
+    sql = "DELETE FROM products WHERE ID=%s;"
     cursor.execute(sql, (id,))
     connection.commit()
     connection.close()
@@ -55,11 +28,11 @@ def sql_update(data):
     cursor = connection.cursor()
     sql = '''UPDATE products
              SET
-             Nazwa=%s,
-             Ilość_w_magazynie=%s,
-             Cena_sprzedaży=%s,
-             kat=%s
-             WHERE Pozycja_towaru=%s
+             Name=%s,
+             Quantity=%s,
+             `Selling price`=%s,
+             Category=%s
+             WHERE ID=%s
              '''
     cursor.execute(sql, data)
     connection.commit()
@@ -71,22 +44,17 @@ def view(table_name):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
 
-    sql = '''SELECT * FROM %s ORDER BY Pozycja_towaru''' % table_name
+    sql = '''SELECT * FROM %s ORDER BY "ID"''' % table_name
     cursor.execute(sql)
     rows = cursor.fetchall()
 
     sql = "SELECT column_name FROM information_schema.columns WHERE table_name=%s"
     cursor.execute(sql, data)
     column_names = cursor.fetchall()
-    column_names_final = [tup[0] for tup in column_names]
+    column_names_final = [tup[0].title() for tup in column_names]
 
     connection.close()
     return column_names_final, rows
-
-
-data = ((1, 'Telefon_Samsung_S8', 4, 2900, "MOB"), (2, 'Telefon LG G6/32GB/Szary', 12, 2300, "MOB"),
-        (3, 'Gra Fifa18', 32, 219, "GAM"))
-#create_table(data)
 
 
 class NewItem(QWidget):
