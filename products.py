@@ -28,11 +28,11 @@ def sql_update(data):
     cursor = connection.cursor()
     sql = '''UPDATE products
              SET
-             Name=%s,
-             Quantity=%s,
-             `Selling price`=%s,
-             Category=%s
-             WHERE ID=%s
+             "Name"=%s,
+             "Quantity"=%s,
+             "Selling price"=%s,
+             "Category"=%s
+             WHERE "ID"=%s
              '''
     cursor.execute(sql, data)
     connection.commit()
@@ -185,6 +185,9 @@ class UpdateItem(QWidget):
     def __init__(self, data, row_data):
         super(QWidget, self).__init__()
 
+        self.data = data
+        self.row_data = row_data
+
         self.title = "Update product"
         self.left = 100
         self.top = 100
@@ -200,8 +203,11 @@ class UpdateItem(QWidget):
 
         self.id = row_data
         self.name_label = QLabel("Name")
-        self.name_input = QLineEdit()
-        self.name_input.setText(data[1][row_data][1])
+        self.name_input = QComboBox()
+        self.name_input.addItems(set([item_id[1] for item_id in data[1]]))
+        self.name_input_edit = QLineEdit()
+        self.name_input.setLineEdit(self.name_input_edit)
+
 
         self.layout.addWidget(self.name_label, 1, 0)
         self.layout.addWidget(self.name_input, 1, 1)
@@ -221,8 +227,11 @@ class UpdateItem(QWidget):
         self.layout.addWidget(self.price_sell_input, 3, 1)
 
         self.category_label = QLabel("Category")
-        self.category_input = QLineEdit()
-        self.category_input.setText(data[1][row_data][4])
+        self.category_input = QComboBox()
+        self.category_input.addItems(set([item_id[4] for item_id in data[1]]))
+        self.category_input_edit = QLineEdit()
+        self.category_input.setLineEdit(self.category_input_edit)
+
         self.layout.addWidget(self.category_label, 4, 0)
         self.layout.addWidget(self.category_input, 4, 1)
 
@@ -232,12 +241,25 @@ class UpdateItem(QWidget):
         self.update_item_button.clicked.connect(self.update)
 
         self.cancel_button = QPushButton("Cancel")
+        self.layout.addWidget(self.cancel_button, 5, 1)
+        self.cancel_button.clicked.connect(self.close)
+
+        self.reset_button = QPushButton("Reset to default")
+        self.layout.addWidget(self.reset_button, 5, 2)
+        self.reset_button.clicked.connect(self.reset_to_default)
 
         self.groupbox.setLayout(self.layout)
         windowLayout = QVBoxLayout()
         windowLayout.addWidget(self.groupbox)
         self.setLayout(windowLayout)
         self.show()
+
+    @pyqtSlot()
+    def reset_to_default(self):
+        self.name_input.setCurrentIndex(1)
+        self.quantity_input.setValue(self.data[1][self.row_data][2])
+        self.price_sell_input.setValue(self.data[1][self.row_data][3])
+        self.category_input.setCurrentIndex(1)
 
     @pyqtSlot()
     def update(self):
