@@ -58,9 +58,9 @@ class MyTableWidget(QWidget):
         self.tab2 = QWidget()
 
         self.tabs.addTab(self.tab1, "Products")
-        self.tabs.addTab(self.tab2, "Tab 2")
+        self.tabs.addTab(self.tab2, "Orders")
 
-        self.create_tab2()
+
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
@@ -113,6 +113,27 @@ class MyTableWidget(QWidget):
         self.tab1.setLayout(self.tab1.layout)
         self.tab1.layout.addWidget(self.goods_view)
         self.tab1.setLayout(self.tab1.layout)
+
+
+        self.tab2.layout = QVBoxLayout(self)
+        self.orders_view = QTableWidget()
+        self.orders_view.repaint()
+        self.orders_view.setColumnCount(len(self.data[0]))
+        self.orders_view.setHorizontalHeaderLabels(column_names)
+        self.orders_view.move(0, 0)
+        self.orders_view.itemSelectionChanged.connect(self.change)
+
+        self.orders_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.orders_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+
+        self.refresh_table()
+        self.orders_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tab2.layout.addWidget(self.orders_view)
+
+        self.tab2.setLayout(self.tab2.layout)
+        self.tab2.layout.addWidget(self.orders_view)
+
+        self.tab2.setLayout(self.tab2.layout)
 
     def change(self):
         items = self.goods_view.selectedItems()
@@ -167,23 +188,6 @@ class MyTableWidget(QWidget):
             return
         self.update_item = products.UpdateItem(self.data, self.goods_view.currentRow())
         self.refresh_table()
-
-    def create_tab2(self):
-        self.tab2.layout = QVBoxLayout(self)
-        self.textbox = QLineEdit(self)
-        self.textbox.move(20, 20)
-        self.textbox.resize(280, 40)
-
-        self.textbutton = QPushButton("Text", self)
-        self.textbutton.move(20, 80)
-        self.textbutton.clicked.connect(self.on_click_text_button)
-
-        self.label = QLabel("First Label", self)
-        self.label.move(200, 80)
-        self.tab2.layout.addWidget(self.textbox)
-        self.tab2.layout.addWidget(self.textbutton)
-        self.tab2.layout.addWidget(self.label)
-        self.tab2.setLayout(self.tab2.layout)
 
     @pyqtSlot()
     def on_click_text_button(self):
