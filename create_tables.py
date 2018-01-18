@@ -28,7 +28,7 @@ data = ((1, 'Samsung S8/32GB/Black', 4, 2900, "MOB"), (2, 'LG G6/32GB/Grey', 12,
 def create_ordered_products(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    cursor.execute('''DROP TABLE IF EXISTS ordered_position''')
+    cursor.execute('''DROP TABLE IF EXISTS ordered_position CASCADE''')
     cursor.execute('''CREATE TABLE ordered_position
                      ("ID" SERIAL NOT NULL,
                       "Quantity" INT NOT NULL,
@@ -49,8 +49,8 @@ def create_ordered_products(data):
     connection.close()
 
 
-#data_pos = ((1, 1, 1), (2, 2, 2), (3, 3, 3))
-#create_ordered_products(data_pos)
+data_pos = ((1, 1, 1, 1), (2, 2, 2, 2))
+create_ordered_products(data_pos)
 
 
 def create_orders(data):
@@ -70,5 +70,5 @@ def create_orders(data):
     connection.close()
 
 
-# data_ord = ((1, '2017-11-28', '11:45:45'), (2, '2017-11-28', '12:12:56'))
+data_ord = ((1, '2017-11-28', '11:45:45'), (2, '2017-11-28', '12:12:56'))
 # create_orders(data_ord)
