@@ -23,7 +23,8 @@ def create_products(data):
 data = (
     (1, 'Samsung S8/32GB/Black', 4, 2900, "MOB"),
     (2, 'LG G6/32GB/Grey', 12, 2300, "MOB"),
-    (3, 'Fifa18 PC', 32, 219, "GAM")
+    (3, 'Fifa18 PC', 32, 219, "GAM"),
+    (4, 'Nokia Lumia 900', 12, 700, "MOB"),
 )
 #create_products(data)
 
@@ -50,7 +51,7 @@ data_ord = (
     (2, '2017-11-28 12:12:56', '2017-11-30 21:12:56')
 )
 #(2, '2017-11-28', '12:12:56'), )
-create_orders(data_ord)
+#create_orders(data_ord)
 
 
 def create_ordered_products(data):
@@ -83,9 +84,9 @@ def create_ordered_products(data):
 
 data_pos = (
     (1, 1, 1, 1),
-    (2, 2, 2, 2),
+    (2, 2, 3, 2),
     (3, 5, 1, 2),
-    (4, 7, 2, 2),
+    (4, 7, 4, 2),
     (5, 2, 2, 1)
 )
 #create_ordered_products(data_pos)

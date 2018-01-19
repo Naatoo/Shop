@@ -26,4 +26,37 @@ def create_view_orders():
                     ''')
     connection.commit()
     connection.close()
-create_view_orders()
+
+
+def create_view_orders_items(id_order):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    cursor.execute('''DROP VIEW IF EXISTS orders_items_view''')
+    sql = '''CREATE VIEW orders_items_view AS
+                    SELECT 
+                        products."ID",
+                        products."Name",
+                        (SELECT 
+                                ordered_position."Quantity"
+                                WHERE 
+                                    ordered_position."ID_prod" = products."ID") AS "Quantity",
+                        products."Selling price",
+                        (SELECT 
+                                ordered_position."Quantity"
+                                WHERE 
+                                    ordered_position."ID_prod" = products."ID") * products."Selling price" 
+                                    as "Total price",
+                        products."Category"   
+                    FROM
+                        products, ordered_position
+                    WHERE
+                        products."ID" = ordered_position."ID_prod"
+                        AND 
+                        ordered_position."ID_ord" = %s
+                    ORDER BY "Total price" DESC
+                    '''
+    cursor.execute(sql, id_order)
+    connection.commit()
+    connection.close()
+
+
