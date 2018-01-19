@@ -9,7 +9,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5 import QtWidgets
 
 
-import products
+import products, orders
 
 
 class App(QMainWindow):
@@ -30,20 +30,6 @@ class App(QMainWindow):
         self.table_widget = MyTableWidget(self)
         self.setCentralWidget(self.table_widget)
 
-        mainMenu = self.menuBar()
-        fileMenu = mainMenu.addMenu('File')
-        editMenu = mainMenu.addMenu('Edit')
-        viewMenu = mainMenu.addMenu('View')
-        searchMenu = mainMenu.addMenu('Search')
-        toolsMenu = mainMenu.addMenu('Tools')
-        helpMenu = mainMenu.addMenu('Help')
-        exitButton = QAction(QIcon('exit24.png'), 'Exit', self)
-        exitButton.setShortcut('Ctrl+Q')
-        exitButton.setStatusTip('Exit application')
-        exitButton.triggered.connect(self.close)
-
-        fileMenu.addAction(exitButton)
-
         self.show()
 
 
@@ -59,8 +45,6 @@ class MyTableWidget(QWidget):
 
         self.tabs.addTab(self.tab1, "Products")
         self.tabs.addTab(self.tab2, "Orders")
-
-
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
@@ -106,40 +90,52 @@ class MyTableWidget(QWidget):
         self.goods_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.goods_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
-        self.refresh_table()
+        self.refresh_products()
         self.goods_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tab1.layout.addWidget(self.goods_view)
-
-        self.tab1.setLayout(self.tab1.layout)
-        self.tab1.layout.addWidget(self.goods_view)
         self.tab1.setLayout(self.tab1.layout)
 
-
+        self.orders_column_names = orders.view_column_names("orders_view")
+        self.orders_data = orders.view_data("orders_view")
         self.tab2.layout = QVBoxLayout(self)
         self.orders_view = QTableWidget()
         self.orders_view.repaint()
-        self.orders_view.setColumnCount(len(self.data[0]))
-        self.orders_view.setHorizontalHeaderLabels(column_names)
+        self.orders_view.setColumnCount(len(self.orders_column_names))
+        self.orders_view.setHorizontalHeaderLabels(self.orders_column_names)
         self.orders_view.move(0, 0)
         self.orders_view.itemSelectionChanged.connect(self.change)
 
         self.orders_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.orders_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
-        self.refresh_table()
+        self.refresh_orders()
         self.orders_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tab2.layout.addWidget(self.orders_view)
 
         self.tab2.setLayout(self.tab2.layout)
-        self.tab2.layout.addWidget(self.orders_view)
 
-        self.tab2.setLayout(self.tab2.layout)
+    def refresh_orders(self):
+        self.orders_data = orders.view_data("orders_view")
+        self.orders_view.setRowCount(len(self.orders_data))
+        # self.category = self.dropdownlist_category.currentText()
+        # if self.category == "All products":
+        #     self.goods_view.setRowCount(len(self.rows))
+        # else:
+        #     self.rows_table = [row[4] for row in self.rows].count(self.category)
+        #     self.goods_view.setRowCount(self.rows_table)
+        row_id = 0
+        for row in self.orders_data:
+            for column_id, cell in enumerate(row):
+                self.orders_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+            row_id += 1
+        self.tab2.layout.update()
+
 
     def change(self):
         items = self.goods_view.selectedItems()
         self.row_data = [cell.text() for cell in items]
 
-    def refresh_table(self):
+    def refresh_products(self):
         self.rows = products.view("products")[1]
         self.category = self.dropdownlist_category.currentText()
         if self.category == "All products":
@@ -157,7 +153,7 @@ class MyTableWidget(QWidget):
 
     @pyqtSlot()
     def select_category(self):
-        self.refresh_table()
+        self.refresh_products()
 
     @pyqtSlot()
     def add_item(self):
@@ -168,26 +164,26 @@ class MyTableWidget(QWidget):
                 for column_id, cell in enumerate(row):
                     self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
                 row_id += 1
-        self.refresh_table()
+        self.refresh_products()
 
     @pyqtSlot()
     def delete_item(self):
         if self.goods_view.currentRow() < 0:
             return
-        buttonReply = QMessageBox.question(self, 'Confirmation', "Do you like want to remove " + self.row_data[1],
+        buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove " + self.row_data[1],
                                            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if buttonReply == QMessageBox.No:
             return
         else:
             products.delete(self.row_data[0])
-            self.refresh_table()
+            self.refresh_products()
 
     @pyqtSlot()
     def update_item(self):
         if self.goods_view.currentRow() < 1:
             return
         self.update_item = products.UpdateItem(self.data, self.goods_view.currentRow())
-        self.refresh_table()
+        self.refresh_products()
 
     @pyqtSlot()
     def on_click_text_button(self):

@@ -8,23 +8,22 @@ def create_view_orders():
     cursor.execute('''CREATE VIEW orders_view AS
                     SELECT 
                         "ID",
-                        "Order date",
-                        "Order time",
+                        "Ordered",
+                        "Paid",
                         (SELECT 
                                 SUM("Quantity" * (SELECT 
                                             "Selling price"
                                         FROM
                                             products
                                         WHERE
-                                            products."ID" = ordered_position."ID_prod"))
+                                            ordered_position."ID_prod" = products."ID"))
                             FROM
                                 ordered_position
                             WHERE
-                                orders."ID" = ordered_position."ID") AS "Full price"
+                                ordered_position."ID_ord" = orders."ID") AS "Full price"     
                     FROM
-                        orders;''')
+                        orders
+                    ''')
     connection.commit()
     connection.close()
-
-
 create_view_orders()
