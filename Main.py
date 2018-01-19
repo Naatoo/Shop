@@ -103,13 +103,20 @@ class MyTableWidget(QWidget):
         self.orders_column_names = orders.view_column_names("orders_view")
         self.orders_data = orders.view_data("orders_view")
         self.tab2.layout = QVBoxLayout(self)
+
+        self.delete_button_orders = QPushButton("Delete order", self)
+        self.delete_button_orders.setToolTip("Delete selected order")
+        self.delete_button_orders.move(500, 80)
+        self.delete_button_orders.clicked.connect(self.delete_order)
+        self.tab2.layout.addWidget(self.delete_button_orders)
+
         self.orders_view = QTableWidget()
         self.orders_view.repaint()
         self.orders_view.setColumnCount(len(self.orders_column_names))
         self.orders_view.setHorizontalHeaderLabels(self.orders_column_names)
         self.orders_view.move(0, 0)
         self.orders_view.itemSelectionChanged.connect(self.change_orders)
-        self.orders_view.itemClicked.connect(self.show_info)
+        self.orders_view.itemClicked.connect(self.show_details)
 
         self.orders_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.orders_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -121,7 +128,20 @@ class MyTableWidget(QWidget):
         self.tab2.setLayout(self.tab2.layout)
 
     @pyqtSlot()
-    def show_info(self):
+    def delete_order(self):
+        if self.orders_view.currentRow() < 0:
+            return
+        # buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove " + self.row_data_product[1],
+        #                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        # if buttonReply == QMessageBox.No:
+        #     return
+        # else:
+        print("AAA")
+        orders.delete_order(self.row_data_order[0])
+        self.refresh_orders()
+
+    @pyqtSlot()
+    def show_details(self):
         create_views.create_view_orders_items(self.row_data_order[0])
         self.order = orders.Order(self.row_data_order)
 

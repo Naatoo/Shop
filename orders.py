@@ -32,6 +32,20 @@ def view_column_names(table_name):
     return column_names_final
 
 
+def delete_order(id):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+
+    sql = '''DELETE FROM ordered_position WHERE "ID_ord"=%s;'''
+    cursor.execute(sql, (id,))
+
+    sql = '''DELETE FROM orders WHERE "ID"=%s;'''
+    cursor.execute(sql, (id,))
+
+    connection.commit()
+    connection.close()
+
+
 class Order(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__()

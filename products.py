@@ -17,7 +17,7 @@ def sql_insert(data):
 def delete(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = "DELETE FROM products WHERE ID=%s;"
+    sql = '''DELETE FROM products WHERE "ID"=%s;'''
     cursor.execute(sql, (id,))
     connection.commit()
     connection.close()
