@@ -82,6 +82,33 @@ def create_ordered_products(data):
     connection.close()
 
 
+def create_customers(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    cursor.execute('''DROP TABLE IF EXISTS customers CASCADE''')
+    cursor.execute('''CREATE TABLE customers
+                     ("ID" SERIAL NOT NULL,
+                      "Name" TEXT,
+                      "City" TEXT,
+                      "Street" TEXT,
+                      "House number" TEXT,
+                      "Zip code" CHAR(6));''')
+    connection.commit()
+    for row in data:
+        sql = '''INSERT INTO customers
+              ("Name", "City", "Street", "House number", "Zip code")
+              VALUES (%s, %s, %s, %s, %s)'''
+        cursor.execute(sql, row)
+        connection.commit()
+    connection.close()
+
+
+data_cust = (
+    ("Jan Kowalski", "Bydgoszcz", "Kwiatowa", "13A", "67-232"),
+    ("Adam Nowak", "Katowice", "Mariacka", "2/5", "25-200")
+)
+#create_customers(data_cust)
+
 data_pos = (
     (1, 1, 1, 1),
     (2, 2, 3, 2),

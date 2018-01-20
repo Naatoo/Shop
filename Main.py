@@ -12,7 +12,7 @@ from PyQt5 import QtWidgets
 import products
 import orders
 import create_views
-
+import customers
 
 class App(QMainWindow):
 
@@ -42,11 +42,12 @@ class MyTableWidget(QWidget):
 
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
-
         self.tab2 = QWidget()
+        self.tab3 = QWidget()
 
         self.tabs.addTab(self.tab1, "Products")
         self.tabs.addTab(self.tab2, "Orders")
+        self.tabs.addTab(self.tab3, "Customers")
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
@@ -127,6 +128,58 @@ class MyTableWidget(QWidget):
 
         self.tab2.setLayout(self.tab2.layout)
 
+        # -------------------------------------------------------
+        # -------------------------------------------------------
+        # -------------------------------------------------------
+
+        self.customers_column_names = customers.view_column_names("customers")
+        self.customers_data = customers.view_data("customers")
+        self.tab3.layout = QVBoxLayout(self)
+
+        # self.delete_button_customers = QPushButton("Delete order", self)
+        # self.delete_button_customers.setToolTip("Delete selected order")
+        # self.delete_button_customers.move(500, 80)
+        # self.delete_button_customers.clicked.connect(self.delete_order)
+        # self.tab3.layout.addWidget(self.delete_button_customers)
+
+        self.customers_view = QTableWidget()
+        self.customers_view.repaint()
+        self.customers_view.setColumnCount(len(self.customers_column_names))
+        self.customers_view.setHorizontalHeaderLabels(self.customers_column_names)
+        self.customers_view.move(0, 0)
+        self.customers_view.itemSelectionChanged.connect(self.change_customers)
+        # self.customers_view.itemClicked.connect(self.show_details)
+
+        self.customers_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.customers_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+
+        self.refresh_customers()
+        self.customers_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tab3.layout.addWidget(self.customers_view)
+
+        self.tab3.setLayout(self.tab3.layout)
+
+    def refresh_customers(self):
+        self.customers_data = customers.view_data("customers")
+        self.customers_view.setRowCount(len(self.customers_data))
+        # self.category = self.dropdownlist_category.currentText()
+        # if self.category == "All products":
+        #     self.goods_view.setRowCount(len(self.rows))
+        # else:
+        #     self.rows_table = [row[4] for row in self.rows].count(self.category)
+        #     self.goods_view.setRowCount(self.rows_table)
+        row_id = 0
+        for row in self.customers_data:
+            for column_id, cell in enumerate(row):
+                self.customers_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+            row_id += 1
+        self.tab3.layout.update()
+
+    def change_customers(self):
+        items = self.customers_view.selectedItems()
+        print("aaaa")
+        self.row_data_customers = [cell.text() for cell in items]
+
     @pyqtSlot()
     def delete_order(self):
         if self.orders_view.currentRow() < 0:
@@ -136,7 +189,6 @@ class MyTableWidget(QWidget):
         # if buttonReply == QMessageBox.No:
         #     return
         # else:
-        print("AAA")
         orders.delete_order(self.row_data_order[0])
         self.refresh_orders()
 
@@ -218,12 +270,6 @@ class MyTableWidget(QWidget):
             return
         self.update_item = products.UpdateItem(self.data, self.goods_view.currentRow())
         self.refresh_products()
-
-    @pyqtSlot()
-    def on_click_text_button(self):
-        textboxvalue = self.textbox.text()
-        QMessageBox.question(self, "Message", "You typed: " + textboxvalue, QMessageBox.Ok, QMessageBox.Ok)
-        self.textbox.setText("")
 
 
 if __name__ == "__main__":
