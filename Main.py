@@ -136,6 +136,12 @@ class MyTableWidget(QWidget):
         self.customers_data = customers.view_data("customers")
         self.tab3.layout = QVBoxLayout(self)
 
+        self.add_customers_button = QPushButton("Add new customers", self)
+        self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
+        self.add_customers_button.move(500, 80)
+        self.add_customers_button.clicked.connect(self.add_customer)
+        self.tab3.layout.addWidget(self.add_customers_button)
+
         # self.delete_button_customers = QPushButton("Delete order", self)
         # self.delete_button_customers.setToolTip("Delete selected order")
         # self.delete_button_customers.move(500, 80)
@@ -179,6 +185,18 @@ class MyTableWidget(QWidget):
         items = self.customers_view.selectedItems()
         print("aaaa")
         self.row_data_customers = [cell.text() for cell in items]
+
+    @pyqtSlot()
+    def add_customer(self):
+        self.customers_data = customers.view_data("customers")
+        self.customer = customers.NewCustomer(self.customers_data)
+        # row_id = 0
+        # for row in self.rows:
+        #     if self.category == row[4] or self.category == "All products":
+        #         for column_id, cell in enumerate(row):
+        #             self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+        #         row_id += 1
+        self.refresh_customers()
 
     @pyqtSlot()
     def delete_order(self):
