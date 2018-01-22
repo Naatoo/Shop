@@ -69,7 +69,6 @@ class Order(QWidget):
         self.single_order_view.setColumnCount(len(self.orders_column_names))
         self.single_order_view.setHorizontalHeaderLabels(self.orders_column_names)
         self.single_order_view.move(0, 0)
-     #   self.single_order_view.itemSelectionChanged.connect(self.change)
 
         self.single_order_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.single_order_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -89,12 +88,6 @@ class Order(QWidget):
     def refresh_order(self):
         self.orders_data = view_data("orders_items_view")
         self.single_order_view.setRowCount(len(self.orders_data))
-        # self.category = self.dropdownlist_category.currentText()
-        # if self.category == "All products":
-        #     self.goods_view.setRowCount(len(self.rows))
-        # else:
-        #     self.rows_table = [row[4] for row in self.rows].count(self.category)
-        #     self.goods_view.setRowCount(self.rows_table)
         row_id = 0
         for row in self.orders_data:
             for column_id, cell in enumerate(row):

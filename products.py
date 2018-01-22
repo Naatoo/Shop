@@ -208,7 +208,6 @@ class UpdateItem(QWidget):
         self.name_input_edit = QLineEdit()
         self.name_input.setLineEdit(self.name_input_edit)
 
-
         self.layout.addWidget(self.name_label, 1, 0)
         self.layout.addWidget(self.name_input, 1, 1)
 

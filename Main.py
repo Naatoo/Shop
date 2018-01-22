@@ -11,7 +11,7 @@ from PyQt5 import QtWidgets
 
 import products
 import orders
-import create_views
+import views
 import customers
 
 class App(QMainWindow):
@@ -190,40 +190,26 @@ class MyTableWidget(QWidget):
     def add_customer(self):
         self.customers_data = customers.view_data("customers")
         self.customer = customers.NewCustomer(self.customers_data)
-        # row_id = 0
-        # for row in self.rows:
-        #     if self.category == row[4] or self.category == "All products":
-        #         for column_id, cell in enumerate(row):
-        #             self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-        #         row_id += 1
         self.refresh_customers()
 
     @pyqtSlot()
     def delete_order(self):
         if self.orders_view.currentRow() < 0:
             return
-        # buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove " + self.row_data_product[1],
-        #                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        # if buttonReply == QMessageBox.No:
-        #     return
-        # else:
+
         orders.delete_order(self.row_data_order[0])
         self.refresh_orders()
 
     @pyqtSlot()
     def show_details(self):
-        create_views.create_view_orders_items(self.row_data_order[0])
+        views.create_view_orders_items(self.row_data_order[0])
         self.order = orders.Order(self.row_data_order)
 
     def refresh_orders(self):
         self.orders_data = orders.view_data("orders_view")
         self.orders_view.setRowCount(len(self.orders_data))
         # self.category = self.dropdownlist_category.currentText()
-        # if self.category == "All products":
-        #     self.goods_view.setRowCount(len(self.rows))
-        # else:
-        #     self.rows_table = [row[4] for row in self.rows].count(self.category)
-        #     self.goods_view.setRowCount(self.rows_table)
+
         row_id = 0
         for row in self.orders_data:
             for column_id, cell in enumerate(row):
