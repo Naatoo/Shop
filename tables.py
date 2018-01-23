@@ -27,7 +27,7 @@ data = (
     ('Fifa18 PC', 32, 219, "GAM"),
     ('Nokia Lumia 900', 12, 700, "MOB"),
 )
-create_products(data)
+#create_products(data)
 
 
 def create_orders(data):
@@ -74,6 +74,15 @@ def create_ordered_products(data):
         connection.commit()
     connection.close()
 
+data_pos = (
+    (1, 1, 1),
+    (2, 3, 2),
+    (5, 1, 2),
+    (7, 4, 2),
+    (2, 2, 1)
+)
+#create_ordered_products(data_pos)
+
 
 def create_customers(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
@@ -96,21 +105,42 @@ def create_customers(data):
     connection.close()
 
 
-data_cust = (
+data_customers = (
     ("Jan Kowalski", "Bydgoszcz", "Kwiatowa", "13A", "67-232"),
     ("Adam Nowak", "Katowice", "Mariacka", "2/5", "25-200")
 )
-#reate_customers(data_cust)
+#reate_customers(data_customers)
 
 
-data_pos = (
-    (1, 1, 1),
-    (2, 3, 2),
-    (5, 1, 2),
-    (7, 4, 2),
-    (2, 2, 1)
+def create_vendors(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    cursor.execute('''DROP TABLE IF EXISTS vendors CASCADE''')
+    cursor.execute('''CREATE TABLE vendors
+                     ("ID" SERIAL PRIMARY KEY,
+                      "Name" TEXT,
+                      "City" TEXT,
+                      "Street" TEXT,
+                      "House number" TEXT,
+                      "Zip code" CHAR(6));''')
+    connection.commit()
+    for row in data:
+        sql = '''INSERT INTO vendors
+              ("Name", "City", "Street", "House number", "Zip code")
+              VALUES (%s, %s, %s, %s, %s)'''
+        cursor.execute(sql, row)
+        connection.commit()
+    connection.close()
+
+
+data_vendors = (
+    ("Frapol", "Szczecin", "Ogrodowa", "143", "78-456"),
+    ("Rinus", "Rybnik", "Centralna", "2C", "41-328")
 )
-#create_ordered_products(data_pos)
+create_vendors(data_vendors)
+
+
+
 
 
 

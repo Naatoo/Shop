@@ -35,7 +35,7 @@ def view_column_names(table_name):
 def sql_insert(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''INSERT INTO customers
+    sql = '''INSERT INTO vendors
           ("Name", "City", "Street", "House number", "Zip code")
           VALUES (%s, %s, %s, %s, %s)'''
     cursor.execute(sql, data)
@@ -47,18 +47,18 @@ def delete_order(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
 
-    sql = '''DELETE FROM customers WHERE "ID"=%s;'''
+    sql = '''DELETE FROM vendors WHERE "ID"=%s;'''
     cursor.execute(sql, (id,))
 
     connection.commit()
     connection.close()
 
 
-class NewCustomer(QWidget):
+class NewVendor(QWidget):
     def __init__(self, data):
         super(QWidget, self).__init__()
 
-        self.title = "Add new customer"
+        self.title = "Add new vendor"
         self.left = 100
         self.top = 100
         self.width = 400
@@ -73,7 +73,7 @@ class NewCustomer(QWidget):
 
         self.default_values = []
 
-        self.id_label = QLabel("Customer id")
+        self.id_label = QLabel("Vendor id")
         self.id_input = QSpinBox()
         self.id_input.setMaximum(100000)
 
@@ -135,7 +135,7 @@ class NewCustomer(QWidget):
         self.layout.addWidget(self.zipcode_label, 6, 0)
         self.layout.addWidget(self.zipcode_input, 6, 1)
 
-        self.add_customer_button = QPushButton("Add customer")
+        self.add_customer_button = QPushButton("Add Vendor")
         self.layout.addWidget(self.add_customer_button, 7, 0)
         self.add_customer_button.clicked.connect(self.add)
 
@@ -164,7 +164,7 @@ class NewCustomer(QWidget):
 
     @pyqtSlot()
     def add(self):
-        data = view_data("customers")
+        data = view_data("vendors")
 
         sql_insert([self.name_input_edit.text(),
                     self.city_input_edit.text(), self.street_input_edit.text(),
