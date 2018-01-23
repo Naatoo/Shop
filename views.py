@@ -8,6 +8,12 @@ def create_view_orders():
     cursor.execute('''CREATE VIEW orders_view AS
                     SELECT 
                         "ID",
+                        (SELECT 
+                                "Name"
+                                FROM
+                                    customers 
+                                WHERE
+                                    orders."ID_cust" = customers."ID") AS "Customer",
                         "Ordered",
                         "Paid",
                         (SELECT 
@@ -45,7 +51,7 @@ def create_view_orders_items(id_order):
                                 ordered_position."Quantity"
                                 WHERE 
                                     ordered_position."ID_prod" = products."ID") * products."Selling price" 
-                                    as "Total price",
+                                    AS "Total price",
                         products."Category"   
                     FROM
                         products, ordered_position
@@ -60,4 +66,4 @@ def create_view_orders_items(id_order):
     connection.close()
 
 
-#create_view_orders()
+create_view_orders()
