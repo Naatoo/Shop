@@ -66,4 +66,4 @@ def create_view_orders_items(id_order):
     connection.close()
 
 
-create_view_orders()
+#create_view_orders()

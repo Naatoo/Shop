@@ -14,6 +14,7 @@ import orders
 import views
 import customers
 
+
 class App(QMainWindow):
 
     def __init__(self):
