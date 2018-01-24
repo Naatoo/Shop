@@ -55,9 +55,10 @@ def delete_order(id):
 
 
 class NewCustomer(QWidget):
-    def __init__(self, data):
+    def __init__(self):
         super(QWidget, self).__init__()
 
+        data = view_data("customers")
         self.title = "Add new customer"
         self.left = 100
         self.top = 100

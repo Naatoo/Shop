@@ -109,6 +109,11 @@ class MyTableWidget(QWidget):
         self.orders_data = orders.view_data("orders_view")
         self.tab2.layout = QVBoxLayout(self)
 
+        self.add_order_button = QPushButton("Add new order", self)
+        self.add_order_button.move(500, 80)
+        self.add_order_button.clicked.connect(self.add_order)
+        self.tab2.layout.addWidget(self.add_order_button)
+
         self.delete_button_orders = QPushButton("Delete order", self)
         self.delete_button_orders.setToolTip("Delete selected order")
         self.delete_button_orders.move(500, 80)
@@ -251,8 +256,7 @@ class MyTableWidget(QWidget):
 
     @pyqtSlot()
     def add_customer(self):
-        self.customers_data = customers.view_data("customers")
-        self.customer = customers.NewCustomer(self.customers_data)
+        self.customer = customers.NewCustomer()
         self.refresh_customers()
 
     # @pyqtSlot()
@@ -263,6 +267,11 @@ class MyTableWidget(QWidget):
     #     self.refresh_customers()
 
         # -------------------------------------------------------
+
+    @pyqtSlot()
+    def add_order(self):
+        self.orders = orders.NewOrder()
+        self.refresh_orders()
 
     @pyqtSlot()
     def delete_order(self):
