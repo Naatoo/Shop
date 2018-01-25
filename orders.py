@@ -157,55 +157,6 @@ class NewOrder(QWidget):
         self.add_customers_button.clicked.connect(self.add_customer)
         self.layout.addWidget(self.add_customers_button)
 
-        # self.id_input.setValue(self.id_default)
-        # self.layout.addWidget(self.id_label, 0, 0)
-        # self.layout.addWidget(self.id_input, 0, 1)
-        #
-        # self.name_label = QLabel("Name")
-        # self.name_input = QComboBox()
-        # self.name_input.addItems(set([item_id[1] for item_id in data]))
-        # self.name_input_edit = QLineEdit()
-        #
-        # self.name_input.setLineEdit(self.name_input_edit)
-        # self.layout.addWidget(self.name_label, 1, 0)
-        # self.layout.addWidget(self.name_input, 1, 1)
-        #
-        # self.city_label = QLabel("City")
-        # self.city_input = QComboBox()
-        # self.city_input.addItems(set([item_id[2] for item_id in data]))
-        # self.city_input_edit = QLineEdit()
-        #
-        # self.city_input.setLineEdit(self.city_input_edit)
-        # self.layout.addWidget(self.city_label, 2, 0)
-        # self.layout.addWidget(self.city_input, 2, 1)
-        #
-        # self.street_label = QLabel("Street")
-        # self.street_input = QComboBox()
-        # self.street_input.addItems(set([item_id[3] for item_id in data]))
-        # self.street_input_edit = QLineEdit()
-        #
-        # self.street_input.setLineEdit(self.street_input_edit)
-        # self.layout.addWidget(self.street_label, 4, 0)
-        # self.layout.addWidget(self.street_input, 4, 1)
-        #
-        # self.house_label = QLabel("House Number")
-        # self.house_input = QLineEdit()
-        # self.layout.addWidget(self.house_label, 5, 0)cnumer
-        # self.layout.addWidget(self.house_input, 5, 1)
-        #
-        # self.zipcode_label = QLabel("Zip Code")
-        # self.zipcode_input = QComboBox()
-        # self.zipcode_input.addItems(set([item_id[5] for item_id in data]))
-        # self.zipcode_input_edit = QLineEdit()
-        #
-        # self.zipcode_input.setLineEdit(self.zipcode_input_edit)
-        # self.layout.addWidget(self.zipcode_label, 6, 0)
-        # self.layout.addWidget(self.zipcode_input, 6, 1)
-        #
-        # self.add_customer_button = QPushButton("Add customer")
-        # self.layout.addWidget(self.add_customer_button, 7, 0)
-        # # self.add_customer_button.clicked.connect(self.add)
-
         self.cancel_button = QPushButton("Cancel")
         self.layout.addWidget(self.cancel_button, 7, 1)
         self.cancel_button.clicked.connect(self.close)
@@ -234,11 +185,3 @@ class NewOrder(QWidget):
         self.house_input.setText("1")
         self.zipcode_input.setCurrentIndex(1)
 
-    # @pyqtSlot()
-    # def add(self):
-    #     data = view_data("customers")
-    #
-    #     sql_insert([self.name_input_edit.text(),
-    #                 self.city_input_edit.text(), self.street_input_edit.text(),
-    #                 self.house_input.text(), self.zipcode_input_edit.text()])
-    #     self.close()

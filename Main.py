@@ -151,12 +151,6 @@ class MyTableWidget(QWidget):
         self.add_customers_button.clicked.connect(self.add_customer)
         self.tab3.layout.addWidget(self.add_customers_button)
 
-        # self.delete_button_customers = QPushButton("Delete customer", self)
-        # self.delete_button_customers.setToolTip("Delete selected customer")
-        # self.delete_button_customers.move(500, 80)
-        # self.delete_button_customers.clicked.connect(self.delete_customer)
-        # self.tab3.layout.addWidget(self.delete_button_customers)
-
         self.customers_view = QTableWidget()
         self.customers_view.repaint()
         self.customers_view.setColumnCount(len(self.customers_column_names))
@@ -258,15 +252,6 @@ class MyTableWidget(QWidget):
     def add_customer(self):
         self.customer = customers.NewCustomer()
         self.refresh_customers()
-
-    # @pyqtSlot()
-    # def delete_customer(self):
-    #     if self.customers_view.currentRow() < 0:
-    #         return
-    #     customers.delete_order(self.row_data_customers[0])
-    #     self.refresh_customers()
-
-        # -------------------------------------------------------
 
     @pyqtSlot()
     def add_order(self):
