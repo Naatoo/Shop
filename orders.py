@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets
 
 import psycopg2
 from customers import NewCustomer
+from customers import CustomersTable
 
 def view_data(table_name):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
@@ -164,6 +165,9 @@ class NewOrder(QWidget):
         self.reset_button = QPushButton("Reset to default")
         self.layout.addWidget(self.reset_button, 7, 2)
         self.reset_button.clicked.connect(self.reset_to_default)
+
+        self.customers_view = CustomersTable()
+        self.layout.addWidget(self.customers_view)
 
         self.groupbox.setLayout(self.layout)
         windowLayout = QVBoxLayout()

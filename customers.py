@@ -54,6 +54,53 @@ def delete_order(id):
     connection.close()
 
 
+class CustomersTable(QTableWidget):
+    def __init__(self):
+        super(QTableWidget, self).__init__()
+
+        self.customers_column_names = view_column_names("customers")
+        self.customers_data = view_data("customers")
+        print("a")
+        # self.add_customers_button = QPushButton("Add new customers", self)
+        # self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
+        # self.add_customers_button.move(500, 80)
+        # self.add_customers_button.clicked.connect(self.add_customer)
+        # self.tab3.layout.addWidget(self.add_customers_button)
+
+   #     self.customers_view = QTableWidget()
+        self.repaint()
+        self.setColumnCount(len(self.customers_column_names))
+        self.setHorizontalHeaderLabels(self.customers_column_names)
+        self.move(0, 0)
+        self.itemSelectionChanged.connect(self.change_customers)
+        # self.customers_view.itemClicked.connect(self.show_details)
+
+        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+
+        self.refresh_customers()
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+
+    def refresh_customers(self):
+        self.customers_data = view_data("customers")
+        print("aaa")
+        self.setRowCount(len(self.customers_data))
+        for row_id, row in enumerate(self.customers_data):
+            for column_id, cell in enumerate(row):
+                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+        # self.tab3.layout.update()
+
+    def change_customers(self):
+        items = self.selectedItems()
+        self.row_data_customers = [cell.text() for cell in items]
+        print(self.row_data_customers[0])
+
+    @pyqtSlot()
+    def add_customer(self):
+        self.customer = NewCustomer()
+        self.refresh_customers()
+
+
 class NewCustomer(QWidget):
     def __init__(self):
         super(QWidget, self).__init__()

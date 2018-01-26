@@ -74,6 +74,7 @@ def create_ordered_products(data):
         connection.commit()
     connection.close()
 
+
 data_pos = (
     (1, 1, 1),
     (2, 3, 2),
