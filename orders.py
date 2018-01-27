@@ -122,15 +122,15 @@ class NewOrder(QWidget):
         self.title = "Add new order"
         self.left = 100
         self.top = 100
-        self.width = 400
-        self.height = 300
+        self.width = 800
+        self.height = 600
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
         self.groupbox= QGroupBox()
         self.layout = QGridLayout()
-        self.layout.setRowStretch(1, 6)
-        self.layout.setColumnStretch(1, 2)
+        # self.layout.setRowStretch(1, 6)
+        # self.layout.setColumnStretch(1, 2)
 
         self.default_values = []
 
@@ -146,28 +146,29 @@ class NewOrder(QWidget):
         self.id_default = max(self.orders_id) + 1
         print(self.id_default)
 
-        self.customer_name_label = QLabel("Customer")
+   #     self.customer_name_label = QLabel("Customer")
         self.customer_name_input = QComboBox()
         self.customer_name_input.addItems(self.customers)
-        self.layout.addWidget(self.customer_name_label, 1, 0)
-        self.layout.addWidget(self.customer_name_input, 1, 1)
+#        self.layout.addWidget(self.customer_name_label, 1, 0)
+        self.layout.addWidget(self.customer_name_input, 1, 0)
 
         self.add_customers_button = QPushButton("Add new customers", self)
         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
         self.add_customers_button.move(500, 80)
         self.add_customers_button.clicked.connect(self.add_customer)
-        self.layout.addWidget(self.add_customers_button)
+        self.layout.addWidget(self.add_customers_button, 2, 0)
 
-        self.cancel_button = QPushButton("Cancel")
-        self.layout.addWidget(self.cancel_button, 7, 1)
-        self.cancel_button.clicked.connect(self.close)
-
-        self.reset_button = QPushButton("Reset to default")
-        self.layout.addWidget(self.reset_button, 7, 2)
-        self.reset_button.clicked.connect(self.reset_to_default)
+  #      self.layout.setColumnStretch(3, 2)
+        # self.cancel_button = QPushButton("Cancel")
+        # self.layout.addWidget(self.cancel_button, 7, 1)
+        # self.cancel_button.clicked.connect(self.close)
+        #
+        # self.reset_button = QPushButton("Reset to default")
+        # self.layout.addWidget(self.reset_button, 7, 2)
+        # self.reset_button.clicked.connect(self.reset_to_default)
 
         self.customers_view = CustomersTable()
-        self.layout.addWidget(self.customers_view)
+        self.layout.addWidget(self.customers_view, 3, 0)
 
         self.groupbox.setLayout(self.layout)
         windowLayout = QVBoxLayout()
