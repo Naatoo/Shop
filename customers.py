@@ -61,6 +61,8 @@ class CustomersTable(QTableWidget):
         self.customers_column_names = view_column_names("customers")
         self.customers_data = view_data("customers")
         print("a")
+
+
         # self.add_customers_button = QPushButton("Add new customers", self)
         # self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
         # self.add_customers_button.move(500, 80)
@@ -80,6 +82,7 @@ class CustomersTable(QTableWidget):
 
         self.refresh_customers()
         self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.change_customers()
 
     def refresh_customers(self):
         self.customers_data = view_data("customers")
@@ -93,7 +96,7 @@ class CustomersTable(QTableWidget):
     def change_customers(self):
         items = self.selectedItems()
         self.row_data_customers = [cell.text() for cell in items]
-        print(self.row_data_customers[0])
+   #     print(self.row_data_customers[0])
 
     @pyqtSlot()
     def add_customer(self):
@@ -218,3 +221,40 @@ class NewCustomer(QWidget):
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
+
+
+class CustomersWindow(QWidget):
+    def __init__(self):
+        super(QWidget, self).__init__()
+
+        self.title = "Customers"
+        self.left = 100
+        self.top = 100
+        self.width = 800
+        self.height = 600
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+
+        self.groupbox = QGroupBox()
+        self.layout = QGridLayout()
+
+        self.layout = QVBoxLayout(self)
+
+        self.customers_view = CustomersTable()
+        #    print(self.customers_view.row_data_customers)
+        self.add_customers_button = QPushButton("Add new customers", self)
+        self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
+        self.add_customers_button.move(500, 80)
+        #      self.add_customers_button.clicked.connect(self.add_customer)
+        self.layout.addWidget(self.add_customers_button)
+
+        self.layout.addWidget(self.customers_view)
+
+        self.setLayout(self.layout)
+        self.layout.update()
+
+        self.groupbox.setLayout(self.layout)
+        windowLayout = QVBoxLayout()
+        windowLayout.addWidget(self.groupbox)
+        self.setLayout(windowLayout)
+        self.show()

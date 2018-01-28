@@ -43,11 +43,13 @@ class MyTableWidget(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.tabs = QTabWidget()
+        self.tab0 = QWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
         self.tab4 = QWidget()
 
+        self.tabs.addTab(self.tab0, "New Order")
         self.tabs.addTab(self.tab1, "Products")
         self.tabs.addTab(self.tab2, "Orders")
         self.tabs.addTab(self.tab3, "Customers")
@@ -55,6 +57,55 @@ class MyTableWidget(QWidget):
 
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+        self.tab0.layout = QVBoxLayout(self)
+        self.default_values = []
+
+        self.id_label = QLabel("Customer id")
+        self.id_input = QSpinBox()
+        self.id_input.setMaximum(100000)
+
+        # Default values
+        self.customers, self.orders_id, self.products = orders.view_new_order()
+        print(self.customers)
+        print(self.orders_id)
+        print(self.products)
+        self.id_default = max(self.orders_id) + 1
+        print(self.id_default)
+
+        #     self.customer_name_label = QLabel("Customer")
+        self.customer_name_input = QComboBox()
+        self.customer_name_input.addItems(self.customers)
+        #        self.layout.addWidget(self.customer_name_label, 1, 0)
+        self.tab0.layout.addWidget(self.customer_name_input)
+
+        self.choose_customer_button = QPushButton("Choose customer", self)
+        self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
+        self.choose_customer_button.move(500, 80)
+        self.choose_customer_button.clicked.connect(self.choose_customer)
+        self.tab0.layout.addWidget(self.choose_customer_button)
+
+        self.refresh_customer_button = QPushButton("Refresh customer", self)
+        self.refresh_customer_button.setToolTip("Add a customer which is not in the list yet")
+        self.refresh_customer_button.move(500, 80)
+        self.refresh_customer_button.clicked.connect(self.refresh_customer)
+        self.tab0.layout.addWidget(self.refresh_customer_button)
+
+        #      self.layout.setColumnStretch(3, 2)
+        # self.cancel_button = QPushButton("Cancel")
+        # self.layout.addWidget(self.cancel_button, 7, 1)
+        # self.cancel_button.clicked.connect(self.close)
+        #
+        # self.reset_button = QPushButton("Reset to default")
+        # self.layout.addWidget(self.reset_button, 7, 2)
+        # self.reset_button.clicked.connect(self.reset_to_default)
+
+        self.customers_view = customers.CustomersTable()
+        self.tab0.layout.addWidget(self.customers_view)
+        self.tab0.setLayout(self.tab0.layout)
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         self.tab1.layout = QVBoxLayout(self)
 
@@ -196,6 +247,17 @@ class MyTableWidget(QWidget):
         self.tab4.setLayout(self.tab4.layout)
 
         # -------------------------------------------------------
+
+    @pyqtSlot()
+    def choose_customer(self):
+        self.customer = customers.CustomersWindow()
+  #      print(self.customer.customers_view.row_data_customers[0])
+    #    self.customer.refresh_customers()
+
+    @pyqtSlot()
+    def refresh_customer(self):
+        print(self.customer.customers_view.row_data_customers[0])
+    #    self.customer.refresh_customers()
 
     def refresh_vendors(self):
         self.vendors_data = vendors.view_data("vendors")
