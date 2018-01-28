@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout
+from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import pyqtSlot
+from PyQt5 import QtWidgets
 
 import psycopg2
 
@@ -268,3 +269,51 @@ class UpdateItem(QWidget):
         sql_update([self.name_input.text(),
                     self.quantity_input.text(), price, self.category_input.text(), self.id])
         self.close()
+
+
+class ProductsTemp(QTableWidget):
+    def __init__(self):
+        super(QTableWidget, self).__init__()
+
+        self.data = view("temp_orders_items_view")
+        column_names = self.data[0]
+        self.rows = self.data[1]
+        print("a")
+
+        self.repaint()
+        self.setColumnCount(len(self.data[0]))
+        self.setHorizontalHeaderLabels(column_names)
+        self.move(0, 0)
+        self.itemSelectionChanged.connect(self.change_products)
+
+        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+
+        self.refresh_products()
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.change_products()
+
+
+    def change_products(self):
+        items = self.selectedItems()
+        self.row_data_product = [cell.text() for cell in items]
+
+    def refresh_products(self):
+        self.rows = view("temp_orders_items_view")[1]
+        # self.category = self.dropdownlist_category.currentText()
+        # if self.category == "All products":
+        self.setRowCount(len(self.rows) + 1)
+        # else:
+        #     self.rows_table = [row[4] for row in self.rows].count(self.category)
+        #     self.setRowCount(self.rows_table)
+        row_id = 0
+        for row in self.rows:
+            # if self.category == row[4] or self.category == "All products":
+            for column_id, cell in enumerate(row):
+                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+            row_id += 1
+        comboBox = QtWidgets.QComboBox()
+        for name in [row[1] for row in view("products")[1]]:
+            comboBox.addItem(name)
+        self.setCellWidget(row_id, 1, comboBox)
+

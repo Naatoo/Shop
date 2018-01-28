@@ -14,6 +14,7 @@ import orders
 import views
 import customers
 import vendors
+import tables
 
 
 class App(QMainWindow):
@@ -69,17 +70,10 @@ class MyTableWidget(QWidget):
 
         # Default values
         self.customers, self.orders_id, self.products = orders.view_new_order()
-        print(self.customers)
-        print(self.orders_id)
-        print(self.products)
         self.id_default = max(self.orders_id) + 1
-        print(self.id_default)
 
-        #     self.customer_name_label = QLabel("Customer")
-        self.customer_name_input = QComboBox()
-        self.customer_name_input.addItems(self.customers)
-        #        self.layout.addWidget(self.customer_name_label, 1, 0)
-        self.tab0.layout.addWidget(self.customer_name_input)
+        tables.temp_create_ordered_products()
+        tables.temp_create_orders()
 
         self.choose_customer_button = QPushButton("Choose customer", self)
         self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
@@ -93,6 +87,12 @@ class MyTableWidget(QWidget):
         self.refresh_customer_button.clicked.connect(self.refresh_customer)
         self.tab0.layout.addWidget(self.refresh_customer_button)
 
+        self.orders_data = orders.view_data("orders_view")
+        print(self.orders_data)
+        views.temp_create_view_orders_items()
+        self.temp_products = products.ProductsTemp()
+        self.tab0.layout.addWidget(self.temp_products)
+
         #      self.layout.setColumnStretch(3, 2)
         # self.cancel_button = QPushButton("Cancel")
         # self.layout.addWidget(self.cancel_button, 7, 1)
@@ -102,8 +102,7 @@ class MyTableWidget(QWidget):
         # self.layout.addWidget(self.reset_button, 7, 2)
         # self.reset_button.clicked.connect(self.reset_to_default)
 
-        self.customers_view = customers.CustomersTable()
-        self.tab0.layout.addWidget(self.customers_view)
+
         self.tab0.setLayout(self.tab0.layout)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
