@@ -278,7 +278,6 @@ class ProductsTemp(QTableWidget):
         self.data = view("temp_orders_items_view")
         column_names = self.data[0]
         self.rows = self.data[1]
-        print("a")
 
         self.repaint()
         self.setColumnCount(len(self.data[0]))
@@ -300,15 +299,10 @@ class ProductsTemp(QTableWidget):
 
     def refresh_products(self):
         self.rows = view("temp_orders_items_view")[1]
-        # self.category = self.dropdownlist_category.currentText()
-        # if self.category == "All products":
         self.setRowCount(len(self.rows) + 1)
-        # else:
-        #     self.rows_table = [row[4] for row in self.rows].count(self.category)
-        #     self.setRowCount(self.rows_table)
+
         row_id = 0
         for row in self.rows:
-            # if self.category == row[4] or self.category == "All products":
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
             row_id += 1

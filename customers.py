@@ -60,16 +60,7 @@ class CustomersTable(QTableWidget):
 
         self.customers_column_names = view_column_names("customers")
         self.customers_data = view_data("customers")
-        print("a")
 
-
-        # self.add_customers_button = QPushButton("Add new customers", self)
-        # self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
-        # self.add_customers_button.move(500, 80)
-        # self.add_customers_button.clicked.connect(self.add_customer)
-        # self.tab3.layout.addWidget(self.add_customers_button)
-
-   #     self.customers_view = QTableWidget()
         self.repaint()
         self.setColumnCount(len(self.customers_column_names))
         self.setHorizontalHeaderLabels(self.customers_column_names)
@@ -86,7 +77,6 @@ class CustomersTable(QTableWidget):
 
     def refresh_customers(self):
         self.customers_data = view_data("customers")
-        print("aaa")
         self.setRowCount(len(self.customers_data))
         for row_id, row in enumerate(self.customers_data):
             for column_id, cell in enumerate(row):
@@ -241,7 +231,6 @@ class CustomersWindow(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.customers_view = CustomersTable()
-        #    print(self.customers_view.row_data_customers)
         self.add_customers_button = QPushButton("Add new customers", self)
         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
         self.add_customers_button.move(500, 80)

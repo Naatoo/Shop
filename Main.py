@@ -93,16 +93,6 @@ class MyTableWidget(QWidget):
         self.temp_products = products.ProductsTemp()
         self.tab0.layout.addWidget(self.temp_products)
 
-        #      self.layout.setColumnStretch(3, 2)
-        # self.cancel_button = QPushButton("Cancel")
-        # self.layout.addWidget(self.cancel_button, 7, 1)
-        # self.cancel_button.clicked.connect(self.close)
-        #
-        # self.reset_button = QPushButton("Reset to default")
-        # self.layout.addWidget(self.reset_button, 7, 2)
-        # self.reset_button.clicked.connect(self.reset_to_default)
-
-
         self.tab0.setLayout(self.tab0.layout)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -191,8 +181,6 @@ class MyTableWidget(QWidget):
         # -------------------------------------------------------
         # -------------------------------------------------------
 
-        # self.customers_column_names = customers.view_column_names("customers")
-        # self.customers_data = customers.view_data("customers")
         self.tab3.layout = QVBoxLayout(self)
 
         self.customers_view = customers.CustomersTable()
@@ -200,7 +188,6 @@ class MyTableWidget(QWidget):
         self.add_customers_button = QPushButton("Add new customers", self)
         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
         self.add_customers_button.move(500, 80)
-  #      self.add_customers_button.clicked.connect(self.add_customer)
         self.tab3.layout.addWidget(self.add_customers_button)
 
         self.tab3.layout.addWidget(self.customers_view)
@@ -285,25 +272,6 @@ class MyTableWidget(QWidget):
         self.refresh_vendors()
 
         # -------------------------------------------------------
-
-    # def refresh_customers(self):
-    #     self.customers_data = customers.view_data("customers")
-    #     self.customers_view.setRowCount(len(self.customers_data))
-    #     for row_id, row in enumerate(self.customers_data):
-    #         for column_id, cell in enumerate(row):
-    #             self.customers_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-    #     self.tab3.layout.update()
-    #
-    # def change_customers(self):
-    #     items = self.customers_view.selectedItems()
-    #     self.row_data_customers = [cell.text() for cell in items]
-    #     print(self.row_data_customers[0])
-    #
-    # @pyqtSlot()
-    # def add_customer(self):
-    #     self.customer = customers.NewCustomer()
-    #     self.refresh_customers()
-
     @pyqtSlot()
     def add_order(self):
         self.orders = orders.NewOrder()
