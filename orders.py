@@ -6,31 +6,7 @@ from PyQt5 import QtWidgets
 import psycopg2
 from customers import NewCustomer
 from customers import CustomersTable
-
-def view_data(table_name):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-
-    sql = '''SELECT * FROM %s ORDER BY "ID"''' % table_name
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-
-    connection.close()
-    return rows
-
-
-def view_column_names(table_name):
-    data = (table_name,)
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-
-    sql = "SELECT column_name FROM information_schema.columns WHERE table_name=%s"
-    cursor.execute(sql, data)
-    column_names = cursor.fetchall()
-    column_names_final = [tup[0].title() for tup in column_names]
-
-    connection.close()
-    return column_names_final
+from queries import view_data, view_column_names
 
 
 def delete_order(id):
@@ -54,15 +30,15 @@ def view_new_order():
     cursor.execute(sql)
     customers = cursor.fetchall()
 
-    sql = '''SELECT "ID" FROM orders'''
+    sql = '''SELECT max("ID") FROM orders'''
     cursor.execute(sql)
-    orders_id = cursor.fetchall()
+    orders_id = cursor.fetchone()
 
     sql = '''SELECT * FROM products'''
     cursor.execute(sql)
     products = cursor.fetchall()
 
-    return [name[0] for name in customers],  [id[0] for id in orders_id], products
+    return [name[0] for name in customers],  orders_id[0], products
 
 
 class Order(QWidget):

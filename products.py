@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
-from PyQt5.QtCore import pyqtSlot
-from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5 import QtWidgets, Qt
 
 import psycopg2
+from queries import view_column_names, view_data
 
 
 def sql_insert(data):
@@ -56,6 +57,64 @@ def view(table_name):
 
     connection.close()
     return column_names_final, rows
+
+
+class ProductsTable(QTableWidget):
+    def __init__(self):
+        super(QTableWidget, self).__init__()
+
+        self.products_column_names = view_column_names("products")
+        self.products_data = view_data("products")
+
+        self.repaint()
+        self.setColumnCount(len(self.products_column_names))
+        self.setHorizontalHeaderLabels(self.products_column_names)
+        self.move(0, 0)
+        self.itemSelectionChanged.connect(self.change_products)
+        # self.products_view.itemClicked.connect(self.show_details)
+        self.refresh_products()
+        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.change_products()
+
+    def refresh_products(self):
+        self.products_data = view_data("products")
+        self.setRowCount(len(self.products_data))
+        for row_id, row in enumerate(self.products_data):
+            for column_id, cell in enumerate(row):
+                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+        # self.tab3.layout.update()
+
+
+    def change_products(self):
+        items = self.selectedItems()
+        self.row_data_products = [cell.text() for cell in items]
+
+
+class SelectItem(QWidget):
+    def __init__(self):
+        super(QWidget, self).__init__()
+        self.title = "Select item"
+        self.left = 100
+        self.top = 100
+        self.width = 800
+        self.height = 600
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+
+        self.groupbox= QGroupBox()
+        self.layout = QGridLayout()
+
+        self.products_table = ProductsTable()
+        self.layout.addWidget(self.products_table)
+
+        self.groupbox.setLayout(self.layout)
+        windowLayout = QVBoxLayout()
+        windowLayout.addWidget(self.groupbox)
+        self.setLayout(windowLayout)
+        self.setWindowModality(Qt.Qt.ApplicationModal)
 
 
 class NewItem(QWidget):
@@ -291,7 +350,6 @@ class ProductsTemp(QTableWidget):
         self.refresh_products()
         self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.change_products()
-
 
     def change_products(self):
         items = self.selectedItems()

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
 from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox, QStyleFactory
 from PyQt5.QtCore import pyqtSlot, QObject
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QCloseEvent
 from PyQt5 import QtWidgets
 
 
@@ -64,13 +64,8 @@ class MyTableWidget(QWidget):
         self.tab0.layout = QVBoxLayout(self)
         self.default_values = []
 
-        self.id_label = QLabel("Customer id")
-        self.id_input = QSpinBox()
-        self.id_input.setMaximum(100000)
-
         # Default values
-        self.customers, self.orders_id, self.products = orders.view_new_order()
-        self.id_default = max(self.orders_id) + 1
+        self.customers, self.id, self.products = orders.view_new_order()
 
         tables.temp_create_ordered_products()
         tables.temp_create_orders()
@@ -86,6 +81,12 @@ class MyTableWidget(QWidget):
         self.refresh_customer_button.move(500, 80)
         self.refresh_customer_button.clicked.connect(self.refresh_customer)
         self.tab0.layout.addWidget(self.refresh_customer_button)
+
+        self.add_button = QPushButton("Add product", self)
+        self.add_button.setToolTip("Add new product to the order")
+        self.add_button.move(500, 80)
+        self.add_button.clicked.connect(self.add_item_to_order)
+        self.tab0.layout.addWidget(self.add_button)
 
         self.orders_data = orders.view_data("orders_view")
         print(self.orders_data)
@@ -127,18 +128,9 @@ class MyTableWidget(QWidget):
         self.dropdownlist_category.activated.connect(self.select_category)
         self.tab1.layout.addWidget(self.dropdownlist_category)
 
-        self.goods_view = QTableWidget()
-        self.goods_view.repaint()
-        self.goods_view.setColumnCount(len(self.data[0]))
-        self.goods_view.setHorizontalHeaderLabels(column_names)
-        self.goods_view.move(0, 0)
-        self.goods_view.itemSelectionChanged.connect(self.change_products)
-
-        self.goods_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.goods_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.goods_view = products.ProductsTable()
 
         self.refresh_products()
-        self.goods_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tab1.layout.addWidget(self.goods_view)
         self.tab1.setLayout(self.tab1.layout)
 
@@ -172,7 +164,6 @@ class MyTableWidget(QWidget):
         self.orders_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
         self.refresh_orders()
-        self.orders_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tab2.layout.addWidget(self.orders_view)
 
         self.tab2.setLayout(self.tab2.layout)
@@ -302,6 +293,12 @@ class MyTableWidget(QWidget):
         self.row_data_order = [cell.text() for cell in items]
 
         # -------------------------------------------------------
+
+    @pyqtSlot()
+    def add_item_to_order(self):
+        self.selected_product = products.SelectItem()
+        self.selected_product.show()
+        print("adssa")
 
     def change_products(self):
         items = self.goods_view.selectedItems()
