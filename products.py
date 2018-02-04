@@ -59,6 +59,18 @@ def view(table_name):
     return column_names_final, rows
 
 
+def temp_insert(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''INSERT INTO temp 
+             ("Item ID", "Name", "Quantity", "Selling Price", "Category")
+             VALUES 
+             (%s, %s, %s, %s, %s)'''
+    cursor.execute(sql, data)
+    connection.commit()
+    connection.close()
+
+
 class ProductsTable(QTableWidget):
     def __init__(self):
         super(QTableWidget, self).__init__()
@@ -334,7 +346,7 @@ class ProductsTemp(QTableWidget):
     def __init__(self):
         super(QTableWidget, self).__init__()
 
-        self.data = view("temp_orders_items_view")
+        self.data = view("temp")
         column_names = self.data[0]
         self.rows = self.data[1]
 
@@ -356,7 +368,8 @@ class ProductsTemp(QTableWidget):
         self.row_data_product = [cell.text() for cell in items]
 
     def refresh_products(self):
-        self.rows = view("temp_orders_items_view")[1]
+        self.rows = view("temp")[1]
+        print(self.rows)
         self.setRowCount(len(self.rows) + 1)
 
         row_id = 0
@@ -364,8 +377,8 @@ class ProductsTemp(QTableWidget):
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
             row_id += 1
-        comboBox = QtWidgets.QComboBox()
-        for name in [row[1] for row in view("products")[1]]:
-            comboBox.addItem(name)
-        self.setCellWidget(row_id, 1, comboBox)
+        # comboBox = QtWidgets.QComboBox()
+        # for name in [row[1] for row in view("products")[1]]:
+        #     comboBox.addItem(name)
+        # self.setCellWidget(row_id, 1, comboBox)
 

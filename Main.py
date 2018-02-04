@@ -67,9 +67,7 @@ class MyTableWidget(QWidget):
         # Default values
         self.customers, self.id, self.products = orders.view_new_order()
 
-        tables.temp_create_ordered_products()
-        tables.temp_create_orders()
-
+        tables.temp()
         self.choose_customer_button = QPushButton("Choose customer", self)
         self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
         self.choose_customer_button.move(500, 80)
@@ -90,7 +88,7 @@ class MyTableWidget(QWidget):
 
         self.orders_data = orders.view_data("orders_view")
         print(self.orders_data)
-        views.temp_create_view_orders_items()
+   #     views.temp_create_view_orders_items()
         self.temp_products = products.ProductsTemp()
         self.tab0.layout.addWidget(self.temp_products)
 
@@ -296,9 +294,14 @@ class MyTableWidget(QWidget):
 
     @pyqtSlot()
     def add_item_to_order(self):
+        try:
+            print(self.selected_product.products_table.row_data_products)
+            products.temp_insert(self.selected_product.products_table.row_data_products)
+        except AttributeError:
+            pass
+        self.temp_products.refresh_products()
         self.selected_product = products.SelectItem()
         self.selected_product.show()
-        print("adssa")
 
     def change_products(self):
         items = self.goods_view.selectedItems()
@@ -327,6 +330,7 @@ class MyTableWidget(QWidget):
     @pyqtSlot()
     def add_item(self):
         self.item = products.NewItem(self.data)
+
         row_id = 0
         for row in self.rows:
             if self.category == row[4] or self.category == "All products":

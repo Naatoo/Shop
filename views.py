@@ -66,35 +66,35 @@ def create_view_orders_items(id_order):
     connection.close()
 
 
-def temp_create_view_orders_items():
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-    cursor.execute('''DROP VIEW IF EXISTS temp_orders_items_view''')
-    sql = '''CREATE VIEW temp_orders_items_view AS
-                    SELECT 
-                        products."ID",
-                        products."Name",
-                        (SELECT 
-                                temp_ordered_position."Quantity"
-
-                                WHERE 
-                                    temp_ordered_position."ID_prod" = products."ID") AS "Quantity",
-                        products."Selling price",
-                        (SELECT 
-                                temp_ordered_position."Quantity"
-
-                                WHERE 
-                                    temp_ordered_position."ID_prod" = products."ID") * products."Selling price" 
-                                    AS "Total price",
-                        products."Category"   
-                    FROM
-                        products, temp_ordered_position
-                    WHERE
-                        products."ID" = temp_ordered_position."ID_prod"
-                    ORDER BY "Total price" DESC
-                    '''
-    cursor.execute(sql)
-    connection.commit()
-    connection.close()
+# def temp_create_view_orders_items():
+#     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+#     cursor = connection.cursor()
+#     cursor.execute('''DROP VIEW IF EXISTS temp_orders_items_view''')
+#     sql = '''CREATE VIEW temp_orders_items_view AS
+#                     SELECT
+#                         products."ID",
+#                         products."Name",
+#                         (SELECT
+#                                 temp_ordered_position."Quantity"
+#
+#                                 WHERE
+#                                     temp_ordered_position."ID_prod" = products."ID") AS "Quantity",
+#                         products."Selling price",
+#                         (SELECT
+#                                 temp_ordered_position."Quantity"
+#
+#                                 WHERE
+#                                     temp_ordered_position."ID_prod" = products."ID") * products."Selling price"
+#                                     AS "Total price",
+#                         products."Category"
+#                     FROM
+#                         products, temp_ordered_position
+#                     WHERE
+#                         products."ID" = temp_ordered_position."ID_prod"
+#                     ORDER BY "Total price" DESC
+#                     '''
+#     cursor.execute(sql)
+#     connection.commit()
+#     connection.close()
 
 #create_view_orders()

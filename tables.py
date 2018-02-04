@@ -110,7 +110,7 @@ data_customers = (
     ("Jan Kowalski", "Bydgoszcz", "Kwiatowa", "13A", "67-232"),
     ("Adam Nowak", "Katowice", "Mariacka", "2/5", "25-200")
 )
-#reate_customers(data_customers)
+#create_customers(data_customers)
 
 
 def create_vendors(data):
@@ -138,31 +138,35 @@ data_vendors = (
     ("Frapol", "Szczecin", "Ogrodowa", "143", "78-456"),
     ("Rinus", "Rybnik", "Centralna", "2C", "41-328")
 )
-create_vendors(data_vendors)
+#create_vendors(data_vendors)
 
 
-def temp_create_orders():
+# def temp_create_orders():
+#     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+#     cursor = connection.cursor()
+#     cursor.execute('''DROP TABLE IF EXISTS temp_orders CASCADE''')
+#     cursor.execute('''CREATE TABLE temp_orders
+#                      ("ID" SERIAL PRIMARY KEY NOT NULL,
+#                       "Ordered" TIMESTAMP NOT NULL,
+#                       "Paid" TIMESTAMP NULL,
+#                       "ID_cust" INT NOT NULL REFERENCES customers ("ID"));''')
+#     connection.commit()
+#     connection.close()
+
+
+def temp():
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    cursor.execute('''DROP TABLE IF EXISTS temp_orders CASCADE''')
-    cursor.execute('''CREATE TABLE temp_orders
+    cursor.execute('''DROP TABLE IF EXISTS temp CASCADE''')
+    cursor.execute('''CREATE TABLE temp
                      ("ID" SERIAL PRIMARY KEY NOT NULL,
-                      "Ordered" TIMESTAMP NOT NULL,
-                      "Paid" TIMESTAMP NULL,
-                      "ID_cust" INT NOT NULL REFERENCES customers ("ID"));''')
-    connection.commit()
-    connection.close()
-
-
-def temp_create_ordered_products():
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-    cursor.execute('''DROP TABLE IF EXISTS temp_ordered_position CASCADE''')
-    cursor.execute('''CREATE TABLE temp_ordered_position
-                     ("ID" SERIAL PRIMARY KEY NOT NULL,
+                      "Item ID" INT NOT NULL,
+                      "Name" TEXT,
                       "Quantity" INT NOT NULL,
-                      "ID_prod" INT NOT NULL REFERENCES products ("ID"),
-                      "ID_ord" INT NOT NULL REFERENCES orders ("ID"));''')
+                      "Selling Price" FLOAT NOT NULL,
+                      "Category" CHAR(3))''')
     connection.commit()
     connection.close()
+
+
 
