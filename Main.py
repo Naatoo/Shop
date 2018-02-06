@@ -86,10 +86,25 @@ class MyTableWidget(QWidget):
         self.add_button.clicked.connect(self.add_item_to_order)
         self.tab0.layout.addWidget(self.add_button)
 
+        self.temp_products = products.ProductsTemp()
+
+        self.refresh_button = QPushButton("Refresh table", self)
+        self.refresh_button.move(500, 80)
+        self.refresh_button.clicked.connect(self.temp_products.refresh_products)
+        self.tab0.layout.addWidget(self.refresh_button)
+
+        self.delete_button = QPushButton("Delete product", self)
+        self.delete_button.setToolTip("Delete selected product from this order")
+        self.delete_button.move(500, 80)
+        self.delete_button.clicked.connect(self.temp_products.delete)
+        self.tab0.layout.addWidget(self.delete_button)
+
         self.orders_data = orders.view_data("orders_view")
         print(self.orders_data)
    #     views.temp_create_view_orders_items()
-        self.temp_products = products.ProductsTemp()
+
+
+     #   self.temp_products.doubleClicked.connect(self.asd)
         self.tab0.layout.addWidget(self.temp_products)
 
         self.tab0.setLayout(self.tab0.layout)
@@ -223,6 +238,7 @@ class MyTableWidget(QWidget):
 
         # -------------------------------------------------------
 
+
     @pyqtSlot()
     def choose_customer(self):
         self.customer = customers.CustomersWindow()
@@ -286,6 +302,7 @@ class MyTableWidget(QWidget):
                 self.orders_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
         self.tab2.layout.update()
 
+
     def change_orders(self):
         items = self.orders_view.selectedItems()
         self.row_data_order = [cell.text() for cell in items]
@@ -294,12 +311,6 @@ class MyTableWidget(QWidget):
 
     @pyqtSlot()
     def add_item_to_order(self):
-        try:
-            print(self.selected_product.products_table.row_data_products)
-            products.temp_insert(self.selected_product.products_table.row_data_products)
-        except AttributeError:
-            pass
-        self.temp_products.refresh_products()
         self.selected_product = products.SelectItem()
         self.selected_product.show()
 

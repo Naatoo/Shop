@@ -25,6 +25,15 @@ def delete(id):
     connection.close()
 
 
+def delete_from_current_order(id):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''DELETE FROM temp WHERE "ID"=%s;'''
+    cursor.execute(sql, (id,))
+    connection.commit()
+    connection.close()
+
+
 def sql_update(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
@@ -71,6 +80,46 @@ def temp_insert(data):
     connection.close()
 
 
+class SelectItem(QWidget):
+    def __init__(self):
+        super(QWidget, self).__init__()
+        self.title = "Select item"
+        self.left = 100
+        self.top = 100
+        self.width = 800
+        self.height = 600
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+
+        self.groupbox= QGroupBox()
+        self.layout = QGridLayout()
+
+        self.add_button = QPushButton("Add product", self)
+        self.add_button.setToolTip("Add this item to an order")
+        self.add_button.move(500, 80)
+        self.add_button.clicked.connect(self.add)
+        self.layout.addWidget(self.add_button)
+
+        self.cancel_button = QPushButton("Cancel")
+        self.layout.addWidget(self.cancel_button)
+        self.cancel_button.clicked.connect(self.close)
+        self.layout.addWidget(self.cancel_button)
+
+        self.products_table = ProductsTable()
+        self.layout.addWidget(self.products_table)
+    #    print("asdaddaasdasdadasdasd")
+        self.groupbox.setLayout(self.layout)
+        windowLayout = QVBoxLayout()
+        windowLayout.addWidget(self.groupbox)
+        self.setLayout(windowLayout)
+        self.setWindowModality(Qt.Qt.ApplicationModal)
+        self.products_table.itemDoubleClicked.connect(self.add)
+
+    def add(self):
+        temp_insert(self.products_table.row_data_products)
+        self.close()
+
+
 class ProductsTable(QTableWidget):
     def __init__(self):
         super(QTableWidget, self).__init__()
@@ -91,6 +140,10 @@ class ProductsTable(QTableWidget):
         self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.change_products()
 
+
+    def asdad(self):
+        print("ppppppp")
+
     def refresh_products(self):
         self.products_data = view_data("products")
         self.setRowCount(len(self.products_data))
@@ -99,34 +152,58 @@ class ProductsTable(QTableWidget):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
         # self.tab3.layout.update()
 
-
     def change_products(self):
         items = self.selectedItems()
         self.row_data_products = [cell.text() for cell in items]
+        print(self.row_data_products)
 
 
-class SelectItem(QWidget):
+class ProductsTemp(QTableWidget):
     def __init__(self):
-        super(QWidget, self).__init__()
-        self.title = "Select item"
-        self.left = 100
-        self.top = 100
-        self.width = 800
-        self.height = 600
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        super(QTableWidget, self).__init__()
 
-        self.groupbox= QGroupBox()
-        self.layout = QGridLayout()
+        self.data = view("temp")
+        column_names = self.data[0]
+        self.rows = self.data[1]
 
-        self.products_table = ProductsTable()
-        self.layout.addWidget(self.products_table)
+        self.repaint()
+        self.setColumnCount(len(self.data[0]))
+        self.setHorizontalHeaderLabels(column_names)
+        self.move(0, 0)
+        self.itemSelectionChanged.connect(self.change_products)
 
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
-        self.setWindowModality(Qt.Qt.ApplicationModal)
+        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+
+        self.refresh_products()
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.change_products()
+
+    def change_products(self):
+        items = self.selectedItems()
+        self.row_data_product = [cell.text() for cell in items]
+        print(self.row_data_product, "adads")
+
+    def refresh_products(self):
+        self.rows = view("temp")[1]
+        print(self.rows)
+        print(self.rows)
+        self.setRowCount(len(self.rows) + 1)
+
+        row_id = 0
+        for row in self.rows:
+            for column_id, cell in enumerate(row):
+                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+            row_id += 1
+            # comboBox = QtWidgets.QComboBox()
+            # for name in [row[1] for row in view("products")[1]]:
+            #     comboBox.addItem(name)
+            # self.setCellWidget(row_id, 1, comboBox)
+
+    def delete(self):
+        delete_from_current_order(self.row_data_product[0])
+        self.refresh_products()
+
 
 
 class NewItem(QWidget):
@@ -342,43 +419,5 @@ class UpdateItem(QWidget):
         self.close()
 
 
-class ProductsTemp(QTableWidget):
-    def __init__(self):
-        super(QTableWidget, self).__init__()
 
-        self.data = view("temp")
-        column_names = self.data[0]
-        self.rows = self.data[1]
-
-        self.repaint()
-        self.setColumnCount(len(self.data[0]))
-        self.setHorizontalHeaderLabels(column_names)
-        self.move(0, 0)
-        self.itemSelectionChanged.connect(self.change_products)
-
-        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-
-        self.refresh_products()
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.change_products()
-
-    def change_products(self):
-        items = self.selectedItems()
-        self.row_data_product = [cell.text() for cell in items]
-
-    def refresh_products(self):
-        self.rows = view("temp")[1]
-        print(self.rows)
-        self.setRowCount(len(self.rows) + 1)
-
-        row_id = 0
-        for row in self.rows:
-            for column_id, cell in enumerate(row):
-                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-            row_id += 1
-        # comboBox = QtWidgets.QComboBox()
-        # for name in [row[1] for row in view("products")[1]]:
-        #     comboBox.addItem(name)
-        # self.setCellWidget(row_id, 1, comboBox)
 
