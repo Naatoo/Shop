@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, Q
 from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
 from PyQt5 import QtWidgets, Qt
+from PyQt5 import QtGui
 
 import psycopg2
 from queries import view_column_names, view_data
@@ -107,7 +108,6 @@ class SelectItem(QWidget):
 
         self.products_table = ProductsTable()
         self.layout.addWidget(self.products_table)
-    #    print("asdaddaasdasdadasdasd")
         self.groupbox.setLayout(self.layout)
         windowLayout = QVBoxLayout()
         windowLayout.addWidget(self.groupbox)
@@ -134,15 +134,11 @@ class ProductsTable(QTableWidget):
         self.itemSelectionChanged.connect(self.change_products)
         # self.products_view.itemClicked.connect(self.show_details)
         self.refresh_products()
-        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+  #      self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+   #     self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.change_products()
-
-
-    def asdad(self):
-        print("ppppppp")
 
     def refresh_products(self):
         self.products_data = view_data("products")
@@ -150,6 +146,7 @@ class ProductsTable(QTableWidget):
         for row_id, row in enumerate(self.products_data):
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
         # self.tab3.layout.update()
 
     def change_products(self):
@@ -195,15 +192,10 @@ class ProductsTemp(QTableWidget):
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
             row_id += 1
-            # comboBox = QtWidgets.QComboBox()
-            # for name in [row[1] for row in view("products")[1]]:
-            #     comboBox.addItem(name)
-            # self.setCellWidget(row_id, 1, comboBox)
 
     def delete(self):
         delete_from_current_order(self.row_data_product[0])
         self.refresh_products()
-
 
 
 class NewItem(QWidget):

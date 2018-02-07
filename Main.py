@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
 from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox, QStyleFactory
 from PyQt5.QtCore import pyqtSlot, QObject
-from PyQt5.QtGui import QIcon, QCloseEvent
 from PyQt5 import QtWidgets
 
 
@@ -74,11 +73,11 @@ class MyTableWidget(QWidget):
         self.choose_customer_button.clicked.connect(self.choose_customer)
         self.tab0.layout.addWidget(self.choose_customer_button)
 
-        self.refresh_customer_button = QPushButton("Refresh customer", self)
-        self.refresh_customer_button.setToolTip("Add a customer which is not in the list yet")
-        self.refresh_customer_button.move(500, 80)
-        self.refresh_customer_button.clicked.connect(self.refresh_customer)
-        self.tab0.layout.addWidget(self.refresh_customer_button)
+        # self.refresh_customer_button = QPushButton("Refresh customer", self)
+        # self.refresh_customer_button.setToolTip("Add a customer which is not in the list yet")
+        # self.refresh_customer_button.move(500, 80)
+        # self.refresh_customer_button.clicked.connect(self.refresh_customer)
+        # self.tab0.layout.addWidget(self.refresh_customer_button)
 
         self.add_button = QPushButton("Add product", self)
         self.add_button.setToolTip("Add new product to the order")
@@ -100,11 +99,6 @@ class MyTableWidget(QWidget):
         self.tab0.layout.addWidget(self.delete_button)
 
         self.orders_data = orders.view_data("orders_view")
-        print(self.orders_data)
-   #     views.temp_create_view_orders_items()
-
-
-     #   self.temp_products.doubleClicked.connect(self.asd)
         self.tab0.layout.addWidget(self.temp_products)
 
         self.tab0.setLayout(self.tab0.layout)
@@ -188,7 +182,6 @@ class MyTableWidget(QWidget):
         self.tab3.layout = QVBoxLayout(self)
 
         self.customers_view = customers.CustomersTable()
-    #    print(self.customers_view.row_data_customers)
         self.add_customers_button = QPushButton("Add new customers", self)
         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
         self.add_customers_button.move(500, 80)
@@ -238,17 +231,10 @@ class MyTableWidget(QWidget):
 
         # -------------------------------------------------------
 
-
     @pyqtSlot()
     def choose_customer(self):
         self.customer = customers.CustomersWindow()
-  #      print(self.customer.customers_view.row_data_customers[0])
-    #    self.customer.refresh_customers()
 
-    @pyqtSlot()
-    def refresh_customer(self):
-        print(self.customer.customers_view.row_data_customers[0])
-    #    self.customer.refresh_customers()
 
     def refresh_vendors(self):
         self.vendors_data = vendors.view_data("vendors")

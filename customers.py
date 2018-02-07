@@ -231,13 +231,14 @@ class CustomersWindow(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.customers_view = CustomersTable()
-        self.add_customers_button = QPushButton("Add new customers", self)
-        self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
-        self.add_customers_button.move(500, 80)
-        #      self.add_customers_button.clicked.connect(self.add_customer)
-        self.layout.addWidget(self.add_customers_button)
-
+        self.customers_view.itemDoubleClicked.connect(self.choose_and_close)
         self.layout.addWidget(self.customers_view)
+
+        self.choose_customer_button = QPushButton("Choose customer", self)
+        self.choose_customer_button.setToolTip("Choose the customer of this order")
+        self.choose_customer_button.move(500, 80)
+        self.choose_customer_button.clicked.connect(self.choose_and_close)
+        self.layout.addWidget(self.choose_customer_button)
 
         self.setLayout(self.layout)
         self.layout.update()
@@ -247,3 +248,8 @@ class CustomersWindow(QWidget):
         windowLayout.addWidget(self.groupbox)
         self.setLayout(windowLayout)
         self.show()
+
+
+    def choose_and_close(self):
+        print(self.customers_view.row_data_customers)
+        self.close()
