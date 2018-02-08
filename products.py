@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QRegExp
 from PyQt5 import QtWidgets, Qt
-from PyQt5 import QtGui
+from PyQt5.QtGui import QRegExpValidator, QDoubleValidator
 
 import psycopg2
 from queries import view_column_names, view_data
@@ -122,7 +122,10 @@ class SelectItem(QWidget):
         self.layout.addWidget(self.cancel_button)
 
         self.products_table = ProductsTable()
+        self.a = QTableWidget()
+
         self.layout.addWidget(self.products_table)
+        self.layout.addWidget(self.a)
         self.groupbox.setLayout(self.layout)
         windowLayout = QVBoxLayout()
         windowLayout.addWidget(self.groupbox)
@@ -194,11 +197,24 @@ class ProductsTemp(QTableWidget):
     def refresh_products(self):
         self.rows = [row[1:] for row in view("temp")[1]]
         self.setRowCount(len(self.rows))
-        row_id = 0
-        for row in self.rows:
+        for row_id, row in enumerate(self.rows):
             for column_id, cell in enumerate(row):
-                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-            row_id += 1
+                if column_id not in (2, 3):
+                    self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                else:
+                    editable = QDoubleSpinBox()
+                    editable.setSingleStep(1)
+                    if column_id == 2:
+                        editable.setMinimum(1)
+                        editable.setMaximum(cell)
+                        editable.setDecimals(0)
+                        editable.setValue(1)
+                    if column_id == 3:
+                        editable.setMinimum(0.01)
+                        editable.setMaximum(100000)
+                        editable.setDecimals(2)
+                        editable.setValue(cell)
+                    self.setCellWidget(row_id, column_id, editable)
 
     def delete(self):
         if self.rows and self.row_data_product:
