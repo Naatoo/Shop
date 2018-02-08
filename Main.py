@@ -288,7 +288,6 @@ class MyTableWidget(QWidget):
                 self.orders_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
         self.tab2.layout.update()
 
-
     def change_orders(self):
         items = self.orders_view.selectedItems()
         self.row_data_order = [cell.text() for cell in items]

@@ -26,13 +26,28 @@ def delete(id):
     connection.close()
 
 
-def delete_from_current_order(id):
+def delete_from_current_order(name):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''DELETE FROM temp WHERE "ID"=%s;'''
-    cursor.execute(sql, (id,))
+    sql = '''DELETE FROM temp WHERE "Name"=%s;'''
+    cursor.execute(sql, (name,))
     connection.commit()
     connection.close()
+
+
+def give_name_to_select(name):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''SELECT "Name"
+             FROM temp
+             WHERE "ID" > (SELECT "ID"
+                           FROM temp
+                           WHERE "Name"=%s)'''
+    cursor.execute(sql, (name,))
+    name = cursor.fetchall()
+    connection.commit()
+    connection.close()
+    return name[0]
 
 
 def sql_update(data):
@@ -132,12 +147,10 @@ class ProductsTable(QTableWidget):
         self.setHorizontalHeaderLabels(self.products_column_names)
         self.move(0, 0)
         self.itemSelectionChanged.connect(self.change_products)
-        # self.products_view.itemClicked.connect(self.show_details)
         self.refresh_products()
-  #      self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
-   #     self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.change_products()
 
     def refresh_products(self):
@@ -147,12 +160,10 @@ class ProductsTable(QTableWidget):
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
-        # self.tab3.layout.update()
 
     def change_products(self):
         items = self.selectedItems()
         self.row_data_products = [cell.text() for cell in items]
-        print(self.row_data_products)
 
 
 class ProductsTemp(QTableWidget):
@@ -160,11 +171,11 @@ class ProductsTemp(QTableWidget):
         super(QTableWidget, self).__init__()
 
         self.data = view("temp")
-        column_names = self.data[0]
+        column_names = self.data[0][1:]
         self.rows = self.data[1]
 
         self.repaint()
-        self.setColumnCount(len(self.data[0]))
+        self.setColumnCount(len(self.data[0]) - 1)
         self.setHorizontalHeaderLabels(column_names)
         self.move(0, 0)
         self.itemSelectionChanged.connect(self.change_products)
@@ -179,14 +190,10 @@ class ProductsTemp(QTableWidget):
     def change_products(self):
         items = self.selectedItems()
         self.row_data_product = [cell.text() for cell in items]
-        print(self.row_data_product, "adads")
 
     def refresh_products(self):
-        self.rows = view("temp")[1]
-        print(self.rows)
-        print(self.rows)
-        self.setRowCount(len(self.rows) + 1)
-
+        self.rows = [row[1:] for row in view("temp")[1]]
+        self.setRowCount(len(self.rows))
         row_id = 0
         for row in self.rows:
             for column_id, cell in enumerate(row):
@@ -194,8 +201,21 @@ class ProductsTemp(QTableWidget):
             row_id += 1
 
     def delete(self):
-        delete_from_current_order(self.row_data_product[0])
-        self.refresh_products()
+        if self.rows and self.row_data_product:
+            name_deleted_item = self.row_data_product[1]
+            if name_deleted_item not in self.rows[-1]:
+                default_name = give_name_to_select(name_deleted_item)[0]
+                for row in self.rows:
+                    if default_name in row:
+                        self.row_data_product = row
+                        break
+            else:
+                if len(self.rows) > 1:
+                    self.row_data_product = self.rows[-2]
+            delete_from_current_order(name_deleted_item)
+            self.refresh_products()
+        else:
+            pass
 
 
 class NewItem(QWidget):
