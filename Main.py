@@ -58,6 +58,9 @@ class MyTableWidget(QWidget):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
+        views.create_view_orders()
+
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         self.tab0.layout = QVBoxLayout(self)
@@ -100,6 +103,12 @@ class MyTableWidget(QWidget):
 
         self.orders_data = orders.view_data("orders_view")
         self.tab0.layout.addWidget(self.temp_products)
+
+        self.finish_order_button = QPushButton("Finish order", self)
+        self.finish_order_button.setToolTip("Finish this order")
+     #   self.finish_order_button.move(500, 80)
+        self.finish_order_button.clicked.connect(self.finish_order)
+        self.tab0.layout.addWidget(self.finish_order_button)
 
         self.tab0.setLayout(self.tab0.layout)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -288,8 +297,10 @@ class MyTableWidget(QWidget):
                 self.orders_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
         self.tab2.layout.update()
 
+
     def change_orders(self):
         items = self.orders_view.selectedItems()
+        free_order_id = []
         self.row_data_order = [cell.text() for cell in items]
 
         # -------------------------------------------------------
@@ -318,6 +329,20 @@ class MyTableWidget(QWidget):
                     self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
                 row_id += 1
         self.tab1.layout.update()
+
+    def finish_order(self):
+        data = products.give_items_for_new_order()
+        print(data)
+        free_order_id = max([val[0] for val in self.orders_data]) + 1
+        final_order_data = []
+        for row in data:
+            final_row = list(row)
+            final_row.append(free_order_id)
+            final_order_data.append(final_row)
+        print(final_order_data)
+        orders.insert_ordered_position(final_order_data)
+
+    # ------------------------------------------------
 
     @pyqtSlot()
     def select_category(self):

@@ -41,6 +41,18 @@ def view_new_order():
     return [name[0] for name in customers],  orders_id[0], products
 
 
+def insert_ordered_position(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''INSERT INTO ordered_position
+          ("ID_prod", "Quantity", "Selling price",  "ID_ord")
+          VALUES (%s, %s, %s, %s)'''
+    for row in data:
+        cursor.execute(sql, row)
+        connection.commit()
+    connection.close()
+
+
 class Order(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__()
@@ -117,8 +129,8 @@ class NewOrder(QWidget):
         print(self.customers)
         print(self.orders_id)
         print(self.products)
-        self.id_default = max(self.orders_id) + 1
-        print(self.id_default)
+#        self.id_default = max(self.orders_id) + 1
+ #       print(self.id_default)
 
         self.customer_name_input = QComboBox()
         self.customer_name_input.addItems(self.customers)
@@ -147,7 +159,7 @@ class NewOrder(QWidget):
 
     @pyqtSlot()
     def reset_to_default(self):
-        self.id_input.setValue(self.id_default)
+   #     self.id_input.setValue(self.id_default)
         self.name_input.setCurrentIndex(0)
         self.city_input.setCurrentIndex(0)
         self.street_input.setCurrentIndex(0)

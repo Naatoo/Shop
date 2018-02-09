@@ -63,12 +63,13 @@ def create_ordered_products(data):
     cursor.execute('''CREATE TABLE ordered_position
                      ("ID" SERIAL PRIMARY KEY NOT NULL,
                       "Quantity" INT NOT NULL,
+                      "Selling price" FLOAT NOT NULL,
                       "ID_prod" INT NOT NULL REFERENCES products ("ID"),
                       "ID_ord" INT NOT NULL REFERENCES orders ("ID"));''')
     connection.commit()
     for row in data:
-        sql = '''INSERT INTO ordered_position ("Quantity", "ID_prod", "ID_ord")
-                 VALUES (%s, %s, %s)'''
+        sql = '''INSERT INTO ordered_position ("Quantity", "Selling price", "ID_prod", "ID_ord")
+                 VALUES (%s, %s, %s, %s)'''
         data = row
         cursor.execute(sql, data)
         connection.commit()
@@ -76,11 +77,11 @@ def create_ordered_products(data):
 
 
 data_pos = (
-    (1, 1, 1),
-    (2, 3, 2),
-    (5, 1, 2),
-    (7, 4, 2),
-    (2, 2, 1)
+    (1, 2900, 1, 1),
+    (2, 219, 3, 2),
+    (5, 2900, 1, 2),
+    (7, 700, 4, 2),
+    (2, 2300, 2, 1)
 )
 #create_ordered_products(data_pos)
 

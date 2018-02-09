@@ -50,6 +50,17 @@ def give_name_to_select(name):
     return name[0]
 
 
+def give_items_for_new_order():
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''SELECT "Item ID", "Quantity", "Selling Price" FROM temp'''
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    connection.commit()
+    connection.close()
+    return data
+
+
 def sql_update(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
@@ -122,10 +133,8 @@ class SelectItem(QWidget):
         self.layout.addWidget(self.cancel_button)
 
         self.products_table = ProductsTable()
-        self.a = QTableWidget()
 
         self.layout.addWidget(self.products_table)
-        self.layout.addWidget(self.a)
         self.groupbox.setLayout(self.layout)
         windowLayout = QVBoxLayout()
         windowLayout.addWidget(self.groupbox)
