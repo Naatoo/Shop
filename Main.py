@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
 from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox, QStyleFactory
 from PyQt5.QtCore import pyqtSlot, QObject
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from datetime import datetime
 
 
@@ -30,15 +30,15 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        self.statusBar().showMessage("v0.1")
+        self.statusBar().showMessage("v0.2")
 
-        self.table_widget = MyTableWidget(self)
+        self.table_widget = MainWidget(self)
         self.setCentralWidget(self.table_widget)
 
         self.show()
 
 
-class MyTableWidget(QWidget):
+class MainWidget(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
@@ -92,11 +92,6 @@ class MyTableWidget(QWidget):
         self.tab0.layout.addWidget(self.add_button)
 
         self.temp_products = products.ProductsTemp()
-
-        self.refresh_button = QPushButton("Refresh table", self)
-        self.refresh_button.move(500, 80)
-        self.refresh_button.clicked.connect(self.temp_products.refresh_products)
-        self.tab0.layout.addWidget(self.refresh_button)
 
         self.delete_button = QPushButton("Delete product", self)
         self.delete_button.setToolTip("Delete selected product from this order")
@@ -160,11 +155,6 @@ class MyTableWidget(QWidget):
         self.orders_data = orders.view_data("orders_view")
         self.tab2.layout = QVBoxLayout(self)
 
-        self.add_order_button = QPushButton("Add new order", self)
-        self.add_order_button.move(500, 80)
-        self.add_order_button.clicked.connect(self.add_order)
-        self.tab2.layout.addWidget(self.add_order_button)
-
         self.delete_button_orders = QPushButton("Delete order", self)
         self.delete_button_orders.setToolTip("Delete selected order")
         self.delete_button_orders.move(500, 80)
@@ -177,7 +167,7 @@ class MyTableWidget(QWidget):
         self.orders_view.setHorizontalHeaderLabels(self.orders_column_names)
         self.orders_view.move(0, 0)
         self.orders_view.itemSelectionChanged.connect(self.change_orders)
-        self.orders_view.itemClicked.connect(self.show_details)
+        self.orders_view.itemDoubleClicked.connect(self.show_details)
 
         self.orders_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.orders_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -196,6 +186,7 @@ class MyTableWidget(QWidget):
         self.customers_view = customers.CustomersTable()
         self.add_customers_button = QPushButton("Add new customers", self)
         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
+        self.add_customers_button.clicked.connect(self.add_customer)
         self.add_customers_button.move(500, 80)
         self.tab3.layout.addWidget(self.add_customers_button)
 
@@ -246,20 +237,34 @@ class MyTableWidget(QWidget):
 
     @pyqtSlot()
     def choose_customer(self):
-        try:
-            print(123)
-            self.label_chosen_customer.setText(self.customer.customers_view.row_data_customers[1])
-            self.tab0.layout.update()
-        except AttributeError:
-            pass
+        self.customer_choice_window = customers.CustomersWindow(parent=self)
+        width = 850
+        height = 600
+        self.customer_choice_window.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
-        self.customer = customers.CustomersWindow()
+    def refresh_chosen_customer(self):
+        self.customers_view.refresh_customers()
+        self.label_chosen_customer.setText(self.customer_choice_window.customers_view.row_data_customers[1])
 
+    @pyqtSlot()
+    def add_customer(self):
+        self.customer = customers.NewCustomer(parent=self)
+        width = 400
+        height = 300
+        self.customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+
+    def refresh_customers(self):
+        self.customers_view.refresh_customers()
 
     @pyqtSlot()
     def add_item_to_order(self):
-        self.selected_product = products.SelectItem()
-        self.selected_product.show()
+        self.selected_product = products.SelectItem(parent=self)
+        width = 850
+        height = 600
+        self.selected_product.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+
+    def refresh_products_in_order(self):
+        self.temp_products.refresh_products()
 
     def change_products(self):
         items = self.goods_view.selectedItems()
@@ -279,7 +284,6 @@ class MyTableWidget(QWidget):
                 for column_id, cell in enumerate(row):
                     self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
                 row_id += 1
-        self.tab1.layout.update()
 
     def finish_order(self):
         data = products.give_items_for_new_order()
@@ -292,8 +296,10 @@ class MyTableWidget(QWidget):
             final_order_data.append(final_row)
         print(final_order_data)
         now_datetime = str(datetime.now())[:-7]
-        orders.insert_order([now_datetime, None, self.customer.chosen_customer_id])
+        orders.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
         orders.insert_ordered_position(final_order_data)
+        self.refresh_orders()
+
 
     # ------------------------------------------------
 
@@ -308,12 +314,14 @@ class MyTableWidget(QWidget):
     def change_vendors(self):
         items = self.vendors_view.selectedItems()
         self.row_data_vendors = [cell.text() for cell in items]
-        print(self.row_data_vendors[0])
 
     @pyqtSlot()
     def add_vendor(self):
         self.vendors_data = vendors.view_data("vendors")
-        self.vendor = vendors.NewVendor(self.vendors_data)
+        self.vendor = vendors.NewVendor(self.vendors_data, parent=self)
+        width = 400
+        height = 300
+        self.vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
         self.refresh_vendors()
 
     @pyqtSlot()
@@ -323,11 +331,8 @@ class MyTableWidget(QWidget):
         vendors.delete_order(self.row_data_vendors[0])
         self.refresh_vendors()
 
+
         # -------------------------------------------------------
-    @pyqtSlot()
-    def add_order(self):
-        self.orders = orders.NewOrder()
-        self.refresh_orders()
 
     @pyqtSlot()
     def delete_order(self):
@@ -339,7 +344,10 @@ class MyTableWidget(QWidget):
     @pyqtSlot()
     def show_details(self):
         views.create_view_orders_items(self.row_data_order[0])
-        self.order = orders.Order(self.row_data_order)
+        self.order = orders.Order(parent=self)
+        width = 850
+        height = 600
+        self.order.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     def refresh_orders(self):
         self.orders_data = orders.view_data("orders_view")
@@ -363,38 +371,36 @@ class MyTableWidget(QWidget):
 
     @pyqtSlot()
     def add_item(self):
-        self.item = products.NewItem(self.data)
-
-        row_id = 0
-        for row in self.rows:
-            if self.category == row[4] or self.category == "All products":
-                for column_id, cell in enumerate(row):
-                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-                row_id += 1
-        self.refresh_products()
+        self.item = products.NewItem(self.data, parent=self)
+        width = 400
+        height = 300
+        self.item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     @pyqtSlot()
     def delete_item(self):
         if self.goods_view.currentRow() < 0:
             return
-        buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove " + self.row_data_product[1],
+        buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove "
+                                           + self.goods_view.row_data_products[1],
                                            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if buttonReply == QMessageBox.No:
             return
         else:
-            products.delete(self.row_data_product[0])
+            products.delete(self.goods_view.row_data_products[0])
             self.refresh_products()
 
     @pyqtSlot()
     def update_item(self):
         if self.goods_view.currentRow() < 1:
             return
-        self.update_item = products.UpdateItem(self.data, self.goods_view.currentRow())
-        self.refresh_products()
+        self.update_item = products.UpdateItem(self.data, self.goods_view.currentRow(), parent=self)
+        width = 400
+        height = 300
+        self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle(QStyleFactory.create("Fusion"))
+  #  app.setStyle(QStyleFactory.create("Fusion"))
     shop = App()
     sys.exit(app.exec_())

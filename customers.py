@@ -60,7 +60,6 @@ class CustomersTable(QTableWidget):
 
         self.customers_column_names = view_column_names("customers")
         self.customers_data = view_data("customers")
-
         self.repaint()
         self.setColumnCount(len(self.customers_column_names))
         self.setHorizontalHeaderLabels(self.customers_column_names)
@@ -70,7 +69,6 @@ class CustomersTable(QTableWidget):
 
         self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-
         self.refresh_customers()
         self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.change_customers()
@@ -96,18 +94,12 @@ class CustomersTable(QTableWidget):
 
 
 class NewCustomer(QWidget):
-    def __init__(self):
-        super(QWidget, self).__init__()
+    def __init__(self, parent=None):
+        super(QWidget, self).__init__(parent)
 
         data = view_data("customers")
-        self.title = "Add new customer"
-        self.left = 100
-        self.top = 100
-        self.width = 400
-        self.height = 300
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
 
+        self.setAutoFillBackground(True)
         self.groupbox= QGroupBox()
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
@@ -212,19 +204,12 @@ class NewCustomer(QWidget):
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
+        self.parent().refresh_customers()
 
 
 class CustomersWindow(QWidget):
-    def __init__(self):
-        super(QWidget, self).__init__()
-
-        self.title = "Customers"
-        self.left = 100
-        self.top = 100
-        self.width = 800
-        self.height = 600
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+    def __init__(self, parent=None):
+        super(QWidget, self).__init__(parent)
 
         self.groupbox = QGroupBox()
         self.layout = QGridLayout()
@@ -250,7 +235,7 @@ class CustomersWindow(QWidget):
         self.setLayout(windowLayout)
         self.show()
 
-
     def choose_and_close(self):
         self.chosen_customer_id = self.customers_view.row_data_customers[0]
         self.close()
+        self.parent().refresh_chosen_customer()

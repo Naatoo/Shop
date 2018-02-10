@@ -108,16 +108,10 @@ def temp_insert(data):
 
 
 class SelectItem(QWidget):
-    def __init__(self):
-        super(QWidget, self).__init__()
-        self.title = "Select item"
-        self.left = 100
-        self.top = 100
-        self.width = 800
-        self.height = 600
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+    def __init__(self, parent=None):
+        super(QWidget, self).__init__(parent)
 
+        self.setAutoFillBackground(True)
         self.groupbox= QGroupBox()
         self.layout = QGridLayout()
 
@@ -141,16 +135,17 @@ class SelectItem(QWidget):
         self.setLayout(windowLayout)
         self.setWindowModality(Qt.Qt.ApplicationModal)
         self.products_table.itemDoubleClicked.connect(self.add)
+        self.show()
 
     def add(self):
         temp_insert(self.products_table.row_data_products)
         self.close()
+        self.parent().refresh_products_in_order()
 
 
 class ProductsTable(QTableWidget):
     def __init__(self):
         super(QTableWidget, self).__init__()
-
         self.products_column_names = view_column_names("products")
         self.products_data = view_data("products")
 
@@ -244,17 +239,10 @@ class ProductsTemp(QTableWidget):
 
 
 class NewItem(QWidget):
-    def __init__(self, data):
-        super(QWidget, self).__init__()
+    def __init__(self, data, parent=None):
+        super(QWidget, self).__init__(parent)
 
-        self.title = "Add new item"
-        self.left = 100
-        self.top = 100
-        self.width = 400
-        self.height = 300
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
-
+        self.setAutoFillBackground(True)
         self.groupbox= QGroupBox()
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
@@ -365,22 +353,16 @@ class NewItem(QWidget):
         sql_insert([self.id_input.text(), self.name_input_edit.text(),
                     self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
+        self.parent().refresh_products()
 
 
 class UpdateItem(QWidget):
-    def __init__(self, data, row_data):
-        super(QWidget, self).__init__()
+    def __init__(self, data, row_data, parent=None):
+        super(QWidget, self).__init__(parent)
 
         self.data = data
         self.row_data = row_data
-
-        self.title = "Update product"
-        self.left = 100
-        self.top = 100
-        self.width = 400
-        self.height = 300
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setAutoFillBackground(True)
 
         self.groupbox= QGroupBox()
         self.layout = QGridLayout()
@@ -451,10 +433,10 @@ class UpdateItem(QWidget):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        sql_update([self.name_input.text(),
-                    self.quantity_input.text(), price, self.category_input.text(), self.id])
+        sql_update([self.name_input_edit.text(),
+                    self.quantity_input.text(), price, self.category_input_edit.text(), self.id])
         self.close()
-
+        self.parent().refresh_products()
 
 
 

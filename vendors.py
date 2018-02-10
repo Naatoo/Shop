@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTabWidget, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import pyqtSlot
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5.QtWidgets import QMainWindow
 
 import psycopg2
 
@@ -55,22 +56,14 @@ def delete_order(id):
 
 
 class NewVendor(QWidget):
-    def __init__(self, data):
-        super(QWidget, self).__init__()
-
-        self.title = "Add new vendor"
-        self.left = 100
-        self.top = 100
-        self.width = 400
-        self.height = 300
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+    def __init__(self, data, parent=None):
+        super(QWidget, self).__init__(parent)
 
         self.groupbox= QGroupBox()
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
-
+        self.setAutoFillBackground(True)
         self.default_values = []
 
         self.id_label = QLabel("Vendor id")
@@ -164,9 +157,11 @@ class NewVendor(QWidget):
 
     @pyqtSlot()
     def add(self):
-        data = view_data("vendors")
-
         sql_insert([self.name_input_edit.text(),
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
+        self.parent().refresh_vendors()
+
+
+

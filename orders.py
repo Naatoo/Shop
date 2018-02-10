@@ -65,15 +65,8 @@ def insert_order(data):
 
 class Order(QWidget):
     def __init__(self, parent):
-        super(QWidget, self).__init__()
+        super(QWidget, self).__init__(parent)
 
-        self.title = "Order details"
-        self.left = 100
-        self.top = 100
-        self.width = 800
-        self.height = 600
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
         self.groupbox= QGroupBox()
         self.layout = QVBoxLayout(self)
 
@@ -94,6 +87,10 @@ class Order(QWidget):
         self.single_order_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.layout.addWidget(self.single_order_view)
 
+        self.close_button = QPushButton("Close")
+        self.layout.addWidget(self.close_button)
+        self.close_button.clicked.connect(self.close)
+
         self.setLayout(self.layout)
 
         self.groupbox.setLayout(self.layout)
@@ -113,66 +110,66 @@ class Order(QWidget):
         self.layout.update()
 
 
-class NewOrder(QWidget):
-    def __init__(self):
-        super(QWidget, self).__init__()
-
-        self.title = "Add new order"
-        self.left = 100
-        self.top = 100
-        self.width = 800
-        self.height = 600
-        self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
-
-        self.groupbox= QGroupBox()
-        self.layout = QGridLayout()
-
-        self.default_values = []
-
-        self.id_label = QLabel("Customer id")
-        self.id_input = QSpinBox()
-        self.id_input.setMaximum(100000)
-
-        # Default values
-        self.customers, self.orders_id, self.products = view_new_order()
-        print(self.customers)
-        print(self.orders_id)
-        print(self.products)
-#        self.id_default = max(self.orders_id) + 1
- #       print(self.id_default)
-
-        self.customer_name_input = QComboBox()
-        self.customer_name_input.addItems(self.customers)
-#        self.layout.addWidget(self.customer_name_label, 1, 0)
-        self.layout.addWidget(self.customer_name_input, 1, 0)
-
-        self.add_customers_button = QPushButton("Add new customers", self)
-        self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
-        self.add_customers_button.move(500, 80)
-        self.add_customers_button.clicked.connect(self.add_customer)
-        self.layout.addWidget(self.add_customers_button, 2, 0)
-
-        self.customers_view = CustomersTable()
-        self.layout.addWidget(self.customers_view, 3, 0)
-
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
-        self.show()
-
-    @pyqtSlot()
-    def add_customer(self):
-        self.customer = NewCustomer()
-    #    self.customer.refresh_customers()
-
-    @pyqtSlot()
-    def reset_to_default(self):
-   #     self.id_input.setValue(self.id_default)
-        self.name_input.setCurrentIndex(0)
-        self.city_input.setCurrentIndex(0)
-        self.street_input.setCurrentIndex(0)
-        self.house_input.setText("1")
-        self.zipcode_input.setCurrentIndex(1)
-
+# class NewOrder(QWidget):
+#     def __init__(self):
+#         super(QWidget, self).__init__()
+#
+#         self.title = "Add new order"
+#         self.left = 100
+#         self.top = 100
+#         self.width = 800
+#         self.height = 600
+#         self.setWindowTitle(self.title)
+#         self.setGeometry(self.left, self.top, self.width, self.height)
+#
+#         self.groupbox = QGroupBox()
+#         self.layout = QGridLayout()
+#
+#         self.default_values = []
+#
+#         self.id_label = QLabel("Customer id")
+#         self.id_input = QSpinBox()
+#         self.id_input.setMaximum(100000)
+#
+#         # Default values
+#         self.customers, self.orders_id, self.products = view_new_order()
+#         print(self.customers)
+#         print(self.orders_id)
+#         print(self.products)
+# #        self.id_default = max(self.orders_id) + 1
+#  #       print(self.id_default)
+#
+#         self.customer_name_input = QComboBox()
+#         self.customer_name_input.addItems(self.customers)
+# #        self.layout.addWidget(self.customer_name_label, 1, 0)
+#         self.layout.addWidget(self.customer_name_input, 1, 0)
+#
+#         self.add_customers_button = QPushButton("Add new customers", self)
+#         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
+#         self.add_customers_button.move(500, 80)
+#         self.add_customers_button.clicked.connect(self.add_customer)
+#         self.layout.addWidget(self.add_customers_button, 2, 0)
+#
+#         self.customers_view = CustomersTable()
+#         self.layout.addWidget(self.customers_view, 3, 0)
+#
+#         self.groupbox.setLayout(self.layout)
+#         windowLayout = QVBoxLayout()
+#         windowLayout.addWidget(self.groupbox)
+#         self.setLayout(windowLayout)
+#         self.show()
+#
+#     @pyqtSlot()
+#     def add_customer(self):
+#         self.customer = NewCustomer()
+#     #    self.customer.refresh_customers()
+#
+#     @pyqtSlot()
+#     def reset_to_default(self):
+#    #     self.id_input.setValue(self.id_default)
+#         self.name_input.setCurrentIndex(0)
+#         self.city_input.setCurrentIndex(0)
+#         self.street_input.setCurrentIndex(0)
+#         self.house_input.setText("1")
+#         self.zipcode_input.setCurrentIndex(1)
+#
