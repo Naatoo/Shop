@@ -1,11 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QWidget, QGroupBox, QPushButton
+from PyQt5.QtWidgets import QVBoxLayout, QTableWidget, QTableWidgetItem
 from PyQt5 import QtWidgets
 
 import psycopg2
-from customers import NewCustomer
-from customers import CustomersTable
 from queries import view_data, view_column_names
 
 

@@ -79,11 +79,6 @@ class MainWidget(QWidget):
 
         self.label_chosen_customer = QLabel("Choose customer")
         self.tab0.layout.addWidget(self.label_chosen_customer)
-        # self.refresh_customer_button = QPushButton("Refresh customer", self)
-        # self.refresh_customer_button.setToolTip("Add a customer which is not in the list yet")
-        # self.refresh_customer_button.move(500, 80)
-        # self.refresh_customer_button.clicked.connect(self.refresh_customer)
-        # self.tab0.layout.addWidget(self.refresh_customer_button)
 
         self.add_button = QPushButton("Add product", self)
         self.add_button.setToolTip("Add new product to the order")
@@ -104,7 +99,6 @@ class MainWidget(QWidget):
 
         self.finish_order_button = QPushButton("Finish order", self)
         self.finish_order_button.setToolTip("Finish this order")
-     #   self.finish_order_button.move(500, 80)
         self.finish_order_button.clicked.connect(self.finish_order)
         self.tab0.layout.addWidget(self.finish_order_button)
 
@@ -114,7 +108,6 @@ class MainWidget(QWidget):
         self.tab1.layout = QVBoxLayout(self)
 
         self.data = products.view("products")
-        column_names = self.data[0]
         self.rows = self.data[1]
 
         self.add_button = QPushButton("Add new product", self)
@@ -286,20 +279,21 @@ class MainWidget(QWidget):
                 row_id += 1
 
     def finish_order(self):
-        data = products.give_items_for_new_order()
-        print(data)
-        free_order_id = max([val[0] for val in self.orders_data]) + 1
-        final_order_data = []
-        for row in data:
-            final_row = list(row)
-            final_row.append(free_order_id)
-            final_order_data.append(final_row)
-        print(final_order_data)
-        now_datetime = str(datetime.now())[:-7]
-        orders.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
-        orders.insert_ordered_position(final_order_data)
-        self.refresh_orders()
-
+        if self.temp_products.rows and self.label_chosen_customer.text() != "Choose customer":
+            data = products.give_items_for_new_order()
+            free_order_id = max([val[0] for val in self.orders_data]) + 1
+            final_order_data = []
+            for row in data:
+                final_row = list(row)
+                final_row.append(free_order_id)
+                final_order_data.append(final_row)
+            now_datetime = str(datetime.now())[:-7]
+            orders.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
+            orders.insert_ordered_position(final_order_data)
+            self.refresh_orders()
+            tables.temp()
+            self.temp_products.refresh_products()
+            self.label_chosen_customer.setText("Choose customer")
 
     # ------------------------------------------------
 
@@ -330,7 +324,6 @@ class MainWidget(QWidget):
             return
         vendors.delete_order(self.row_data_vendors[0])
         self.refresh_vendors()
-
 
         # -------------------------------------------------------
 
@@ -401,6 +394,6 @@ class MainWidget(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-  #  app.setStyle(QStyleFactory.create("Fusion"))
+    app.setStyle(QStyleFactory.create("Fusion"))
     shop = App()
     sys.exit(app.exec_())
