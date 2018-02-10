@@ -53,6 +53,16 @@ def insert_ordered_position(data):
     connection.close()
 
 
+def insert_order(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''INSERT INTO orders ("Ordered", "Paid", "ID_cust")
+             VALUES (%s, %s, %s)'''
+    cursor.execute(sql, data)
+    connection.commit()
+    connection.close()
+
+
 class Order(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__()

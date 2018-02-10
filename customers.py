@@ -86,6 +86,7 @@ class CustomersTable(QTableWidget):
     def change_customers(self):
         items = self.selectedItems()
         self.row_data_customers = [cell.text() for cell in items]
+        print(123)
    #     print(self.row_data_customers[0])
 
     @pyqtSlot()
@@ -251,5 +252,5 @@ class CustomersWindow(QWidget):
 
 
     def choose_and_close(self):
-        print(self.customers_view.row_data_customers)
+        self.chosen_customer_id = self.customers_view.row_data_customers[0]
         self.close()

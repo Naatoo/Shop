@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWid
 from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox, QStyleFactory
 from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5 import QtWidgets
+from datetime import datetime
 
 
 import products
@@ -76,6 +77,8 @@ class MyTableWidget(QWidget):
         self.choose_customer_button.clicked.connect(self.choose_customer)
         self.tab0.layout.addWidget(self.choose_customer_button)
 
+        self.label_chosen_customer = QLabel("Choose customer")
+        self.tab0.layout.addWidget(self.label_chosen_customer)
         # self.refresh_customer_button = QPushButton("Refresh customer", self)
         # self.refresh_customer_button.setToolTip("Add a customer which is not in the list yet")
         # self.refresh_customer_button.move(500, 80)
@@ -240,10 +243,59 @@ class MyTableWidget(QWidget):
 
         # -------------------------------------------------------
 
+
     @pyqtSlot()
     def choose_customer(self):
+        try:
+            print(123)
+            self.label_chosen_customer.setText(self.customer.customers_view.row_data_customers[1])
+            self.tab0.layout.update()
+        except AttributeError:
+            pass
+
         self.customer = customers.CustomersWindow()
 
+
+    @pyqtSlot()
+    def add_item_to_order(self):
+        self.selected_product = products.SelectItem()
+        self.selected_product.show()
+
+    def change_products(self):
+        items = self.goods_view.selectedItems()
+        self.row_data_product = [cell.text() for cell in items]
+
+    def refresh_products(self):
+        self.rows = products.view("products")[1]
+        self.category = self.dropdownlist_category.currentText()
+        if self.category == "All products":
+            self.goods_view.setRowCount(len(self.rows))
+        else:
+            self.rows_table = [row[4] for row in self.rows].count(self.category)
+            self.goods_view.setRowCount(self.rows_table)
+        row_id = 0
+        for row in self.rows:
+            if self.category == row[4] or self.category == "All products":
+                for column_id, cell in enumerate(row):
+                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                row_id += 1
+        self.tab1.layout.update()
+
+    def finish_order(self):
+        data = products.give_items_for_new_order()
+        print(data)
+        free_order_id = max([val[0] for val in self.orders_data]) + 1
+        final_order_data = []
+        for row in data:
+            final_row = list(row)
+            final_row.append(free_order_id)
+            final_order_data.append(final_row)
+        print(final_order_data)
+        now_datetime = str(datetime.now())[:-7]
+        orders.insert_order([now_datetime, None, self.customer.chosen_customer_id])
+        orders.insert_ordered_position(final_order_data)
+
+    # ------------------------------------------------
 
     def refresh_vendors(self):
         self.vendors_data = vendors.view_data("vendors")
@@ -304,45 +356,6 @@ class MyTableWidget(QWidget):
         self.row_data_order = [cell.text() for cell in items]
 
         # -------------------------------------------------------
-
-    @pyqtSlot()
-    def add_item_to_order(self):
-        self.selected_product = products.SelectItem()
-        self.selected_product.show()
-
-    def change_products(self):
-        items = self.goods_view.selectedItems()
-        self.row_data_product = [cell.text() for cell in items]
-
-    def refresh_products(self):
-        self.rows = products.view("products")[1]
-        self.category = self.dropdownlist_category.currentText()
-        if self.category == "All products":
-            self.goods_view.setRowCount(len(self.rows))
-        else:
-            self.rows_table = [row[4] for row in self.rows].count(self.category)
-            self.goods_view.setRowCount(self.rows_table)
-        row_id = 0
-        for row in self.rows:
-            if self.category == row[4] or self.category == "All products":
-                for column_id, cell in enumerate(row):
-                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-                row_id += 1
-        self.tab1.layout.update()
-
-    def finish_order(self):
-        data = products.give_items_for_new_order()
-        print(data)
-        free_order_id = max([val[0] for val in self.orders_data]) + 1
-        final_order_data = []
-        for row in data:
-            final_row = list(row)
-            final_row.append(free_order_id)
-            final_order_data.append(final_row)
-        print(final_order_data)
-        orders.insert_ordered_position(final_order_data)
-
-    # ------------------------------------------------
 
     @pyqtSlot()
     def select_category(self):
