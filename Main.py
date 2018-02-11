@@ -280,16 +280,19 @@ class MainWidget(QWidget):
 
     def finish_order(self):
         if self.temp_products.rows and self.label_chosen_customer.text() != "Choose customer":
-            data = products.give_items_for_new_order()
+   #         data = products.give_items_for_new_order()
+            quantity_list = [int(self.temp_products.cellWidget(row, 2).text()) for row in range(self.temp_products.rowCount())]
+            price_list = [int(self.temp_products.cellWidget(row, 3).text()[:-3]) for row in range(self.temp_products.rowCount())]
+            print(price_list)
             free_order_id = max([val[0] for val in self.orders_data]) + 1
-            final_order_data = []
-            for row in data:
-                final_row = list(row)
-                final_row.append(free_order_id)
-                final_order_data.append(final_row)
+            final_order_data = [[row[0], quantity_list[index], price_list[index], free_order_id] for index, row in enumerate(self.temp_products.rows)]
+            print(final_order_data)
+
             now_datetime = str(datetime.now())[:-7]
             orders.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
+
             orders.insert_ordered_position(final_order_data)
+
             self.refresh_orders()
             tables.temp()
             self.temp_products.refresh_products()

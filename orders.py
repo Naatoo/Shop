@@ -68,7 +68,7 @@ class Order(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.setLayout(self.layout)
-
+        self.setAutoFillBackground(True)
         self.orders_column_names = view_column_names("orders_items_view")
         self.orders_data = view_data("orders_items_view")
         self.single_order_view = QTableWidget()

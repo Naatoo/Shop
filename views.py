@@ -46,12 +46,18 @@ def create_view_orders_items(id_order):
                                 ordered_position."Quantity"
                                 WHERE 
                                     ordered_position."ID_prod" = products."ID") AS "Quantity",
-                        products."Selling price",
+                        (SELECT 
+                                ordered_position."Selling price"
+                                WHERE 
+                                    ordered_position."ID_prod" = products."ID") AS "Selling price",
                         (SELECT 
                                 ordered_position."Quantity"
                                 WHERE 
-                                    ordered_position."ID_prod" = products."ID") * products."Selling price" 
-                                    AS "Total price",
+                                    ordered_position."ID_prod" = products."ID") * (SELECT 
+                                                                ordered_position."Selling price"
+                                                                WHERE 
+                                                                ordered_position."ID_prod" = products."ID")  
+                                                                AS "Total price",
                         products."Category"   
                     FROM
                         products, ordered_position

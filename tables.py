@@ -27,7 +27,6 @@ data = (
     ('Fifa18 PC', 32, 219, "GAM"),
     ('Nokia Lumia 900', 12, 700, "MOB"),
 )
-#create_products(data)
 
 
 def create_orders(data):
@@ -53,7 +52,6 @@ data_ord = (
     ('2017-11-28 11:45:45', '2017-11-29 12:45:45', 1),
     ('2017-11-28 12:12:56', '2017-11-30 21:12:56', 2)
 )
-#create_orders(data_ord)
 
 
 def create_ordered_products(data):
@@ -83,7 +81,7 @@ data_pos = (
     (7, 700, 4, 2),
     (2, 2300, 2, 1)
 )
-#create_ordered_products(data_pos)
+
 
 
 def create_customers(data):
@@ -111,7 +109,6 @@ data_customers = (
     ("Jan Kowalski", "Bydgoszcz", "Kwiatowa", "13A", "67-232"),
     ("Adam Nowak", "Katowice", "Mariacka", "2/5", "25-200")
 )
-#create_customers(data_customers)
 
 
 def create_vendors(data):
@@ -139,7 +136,6 @@ data_vendors = (
     ("Frapol", "Szczecin", "Ogrodowa", "143", "78-456"),
     ("Rinus", "Rybnik", "Centralna", "2C", "41-328")
 )
-#create_vendors(data_vendors)
 
 
 # def temp_create_orders():
@@ -170,4 +166,11 @@ def temp():
     connection.close()
 
 
+def fill_in_with_sample_data():
+    create_vendors(data_vendors)
+    create_customers(data_customers)
+    create_ordered_products(data_pos)
+    create_orders(data_ord)
+    create_products(data)
 
+#fill_in_with_sample_data()
