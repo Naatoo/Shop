@@ -65,7 +65,6 @@ class CustomersTable(QTableWidget):
         self.setHorizontalHeaderLabels(self.customers_column_names)
         self.move(0, 0)
         self.itemSelectionChanged.connect(self.change_customers)
-        # self.customers_view.itemClicked.connect(self.show_details)
 
         self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -79,13 +78,10 @@ class CustomersTable(QTableWidget):
         for row_id, row in enumerate(self.customers_data):
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-        # self.tab3.layout.update()
 
     def change_customers(self):
         items = self.selectedItems()
         self.row_data_customers = [cell.text() for cell in items]
-        print(123)
-   #     print(self.row_data_customers[0])
 
     @pyqtSlot()
     def add_customer(self):

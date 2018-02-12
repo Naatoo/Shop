@@ -1,13 +1,11 @@
 import sys
 
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QDialog
-from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel
+from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel, QComboBox, QStyleFactory
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
-from PyQt5.QtWidgets import QLineEdit, QInputDialog, QGridLayout, QGroupBox, QSpinBox, QComboBox, QStyleFactory
 from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5 import QtWidgets, QtCore
 from datetime import datetime
-
 
 import products
 import orders
@@ -280,14 +278,13 @@ class MainWidget(QWidget):
 
     def finish_order(self):
         if self.temp_products.rows and self.label_chosen_customer.text() != "Choose customer":
-   #         data = products.give_items_for_new_order()
-            quantity_list = [int(self.temp_products.cellWidget(row, 2).text()) for row in range(self.temp_products.rowCount())]
-            price_list = [int(self.temp_products.cellWidget(row, 3).text()[:-3]) for row in range(self.temp_products.rowCount())]
-            print(price_list)
+            quantity_list = [int(self.temp_products.cellWidget(row, 2).text())
+                             for row in range(self.temp_products.rowCount())]
+            price_list = [int(self.temp_products.cellWidget(row, 3).text()[:-3])
+                          for row in range(self.temp_products.rowCount())]
             free_order_id = max([val[0] for val in self.orders_data]) + 1
-            final_order_data = [[row[0], quantity_list[index], price_list[index], free_order_id] for index, row in enumerate(self.temp_products.rows)]
-            print(final_order_data)
-
+            final_order_data = [[row[0], quantity_list[index], price_list[index], free_order_id]
+                                for index, row in enumerate(self.temp_products.rows)]
             now_datetime = str(datetime.now())[:-7]
             orders.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
 

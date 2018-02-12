@@ -1,8 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTabWidget, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import pyqtSlot
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QMainWindow
 
 import psycopg2
 

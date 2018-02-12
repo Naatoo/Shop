@@ -50,17 +50,6 @@ def give_name_to_select(name):
     return name[0]
 
 
-# def give_items_for_new_order():
-#     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-#     cursor = connection.cursor()
-#     sql = '''SELECT "Item ID", "Quantity", "Selling Price" FROM temp'''
-#     cursor.execute(sql)
-#     data = cursor.fetchall()
-#     connection.commit()
-#     connection.close()
-#     return data
-
-
 def sql_update(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
@@ -224,9 +213,6 @@ class ProductsTemp(QTableWidget):
                         editable.setDecimals(2)
                         editable.setValue(cell)
                     self.setCellWidget(row_id, column_id, editable)
-
-    def asd(self):
-        print("asdasd")
 
     def delete(self):
         if self.rows and self.row_data_product:

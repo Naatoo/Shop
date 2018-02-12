@@ -138,19 +138,6 @@ data_vendors = (
 )
 
 
-# def temp_create_orders():
-#     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-#     cursor = connection.cursor()
-#     cursor.execute('''DROP TABLE IF EXISTS temp_orders CASCADE''')
-#     cursor.execute('''CREATE TABLE temp_orders
-#                      ("ID" SERIAL PRIMARY KEY NOT NULL,
-#                       "Ordered" TIMESTAMP NOT NULL,
-#                       "Paid" TIMESTAMP NULL,
-#                       "ID_cust" INT NOT NULL REFERENCES customers ("ID"));''')
-#     connection.commit()
-#     connection.close()
-
-
 def temp():
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
