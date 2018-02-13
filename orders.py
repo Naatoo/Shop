@@ -60,6 +60,17 @@ def insert_order(data):
     connection.close()
 
 
+def update_order(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''UPDATE orders
+             SET "Paid"=%s
+             WHERE "ID"=%s'''
+    cursor.execute(sql, data)
+    connection.commit()
+    connection.close()
+
+
 class Order(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
@@ -100,7 +111,6 @@ class Order(QWidget):
         self.orders_data = view_data("orders_items_view")
         self.single_order_view.setRowCount(len(self.orders_data))
         row_id = 0
-        print("asd")
         for row in self.orders_data:
             for column_id, cell in enumerate(row):
                 self.single_order_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))

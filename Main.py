@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWid
 from PyQt5.QtCore import pyqtSlot, QObject
 from PyQt5 import QtWidgets, QtCore
 from datetime import datetime
+from functools import partial
+
 
 import products
 import orders
@@ -349,17 +351,31 @@ class MainWidget(QWidget):
         self.order.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     def refresh_orders(self):
+        not_paid = {}
         self.orders_data = orders.view_data("orders_view")
         self.orders_view.setRowCount(len(self.orders_data))
         for row_id, row in enumerate(self.orders_data):
             for column_id, cell in enumerate(row):
-                self.orders_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                if column_id != 3 or cell is not None:
+                    self.orders_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                else:
+                    button = QPushButton("Already paid")
+                    not_paid[row[0]] = button
+                    button.clicked.connect(partial(self.order_paid, button, not_paid))
+                    self.orders_view.setCellWidget(row_id, column_id, button)
         self.tab2.layout.update()
 
+    @pyqtSlot()
+    def order_paid(self, button, not_paid):
+        for id, but in not_paid.items():
+            if button is but:
+                orders.update_order((str(datetime.now())[:-7], id,))
+                self.orders_view.removeCellWidget(id - 1, 3)
+                self.refresh_orders()
+                break
 
     def change_orders(self):
         items = self.orders_view.selectedItems()
-        free_order_id = []
         self.row_data_order = [cell.text() for cell in items]
 
         # -------------------------------------------------------
