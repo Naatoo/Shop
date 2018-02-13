@@ -17,12 +17,7 @@ def create_view_orders():
                         "Ordered",
                         "Paid",
                         (SELECT 
-                                SUM("Quantity" * (SELECT 
-                                            "Selling price"
-                                        FROM
-                                            products
-                                        WHERE
-                                            ordered_position."ID_prod" = products."ID"))
+                                SUM("Quantity" * "Selling price")
                             FROM
                                 ordered_position
                             WHERE

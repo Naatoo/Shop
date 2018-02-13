@@ -100,6 +100,7 @@ class Order(QWidget):
         self.orders_data = view_data("orders_items_view")
         self.single_order_view.setRowCount(len(self.orders_data))
         row_id = 0
+        print("asd")
         for row in self.orders_data:
             for column_id, cell in enumerate(row):
                 self.single_order_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))

@@ -146,6 +146,12 @@ class MainWidget(QWidget):
         self.orders_data = orders.view_data("orders_view")
         self.tab2.layout = QVBoxLayout(self)
 
+        self.order_details_button = QPushButton("Show order details", self)
+        self.order_details_button.setToolTip("Show details of selected order")
+        self.order_details_button.move(500, 80)
+        self.order_details_button.clicked.connect(self.show_details)
+        self.tab2.layout.addWidget(self.order_details_button)
+
         self.delete_button_orders = QPushButton("Delete order", self)
         self.delete_button_orders.setToolTip("Delete selected order")
         self.delete_button_orders.move(500, 80)
