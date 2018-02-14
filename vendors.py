@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTabWidget, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView
 from PyQt5.QtCore import pyqtSlot
 
 import psycopg2
@@ -42,7 +42,7 @@ def sql_insert(data):
     connection.close()
 
 
-def delete_order(id):
+def delete_vendor(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
 
@@ -53,11 +53,40 @@ def delete_order(id):
     connection.close()
 
 
+class VendorsTable(QTableWidget):
+    def __init__(self):
+        super(QTableWidget, self).__init__()
+
+        self.column_names = view_column_names("vendors")
+
+        self.setColumnCount(len(self.column_names))
+        self.setHorizontalHeaderLabels(self.column_names)
+        self.itemSelectionChanged.connect(self.change_vendors)
+
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        self.refresh_vendors()
+
+    def refresh_vendors(self):
+        self.data = view_data("vendors")
+        self.setRowCount(len(self.data))
+        for row_id, row in enumerate(self.data):
+            for column_id, cell in enumerate(row):
+                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+
+    def change_vendors(self):
+        items = self.selectedItems()
+        self.row_data = [cell.text() for cell in items]
+
+
 class NewVendor(QWidget):
-    def __init__(self, data, parent=None):
+    def __init__(self, parent=None):
         super(QWidget, self).__init__(parent)
 
-        self.groupbox= QGroupBox()
+        data = view_data("vendors")
+
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
@@ -68,7 +97,6 @@ class NewVendor(QWidget):
         self.id_input = QSpinBox()
         self.id_input.setMaximum(100000)
 
-        # Default values
         self.indexes = [number[0] for number in data]
         if min(self.indexes) > 2:
             self.id_default = min(range(1, min(self.indexes) - 1))
@@ -138,10 +166,7 @@ class NewVendor(QWidget):
         self.layout.addWidget(self.reset_button, 7, 2)
         self.reset_button.clicked.connect(self.reset_to_default)
 
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
+        self.setLayout(self.layout)
         self.show()
 
     @pyqtSlot()
@@ -159,7 +184,7 @@ class NewVendor(QWidget):
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
-        self.parent().refresh_vendors()
+        self.parent().vendors_table.refresh_vendors()
 
 
 

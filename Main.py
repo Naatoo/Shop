@@ -68,7 +68,7 @@ class MainWidget(QWidget):
         self.default_values = []
 
         # Default values
-        self.customers, self.id, self.products = orders.view_new_order()
+        self.customers, self.id, self.products = orders.OrderQueries.view_new_order()
 
         tables.temp()
         self.choose_customer_button = QPushButton("Choose customer", self)
@@ -144,35 +144,24 @@ class MainWidget(QWidget):
         # -------------------------------------------------------
         # -------------------------------------------------------
 
-        self.orders_column_names = orders.view_column_names("orders_view")
-        self.orders_data = orders.view_data("orders_view")
         self.tab2.layout = QVBoxLayout(self)
+
+        self.orders_table = orders.OrdersTable()
 
         self.order_details_button = QPushButton("Show order details", self)
         self.order_details_button.setToolTip("Show details of selected order")
         self.order_details_button.move(500, 80)
-        self.order_details_button.clicked.connect(self.show_details)
-        self.tab2.layout.addWidget(self.order_details_button)
+        self.order_details_button.clicked.connect(self.orders_table.show_details)
 
         self.delete_button_orders = QPushButton("Delete order", self)
         self.delete_button_orders.setToolTip("Delete selected order")
         self.delete_button_orders.move(500, 80)
-        self.delete_button_orders.clicked.connect(self.delete_order)
+        self.delete_button_orders.clicked.connect(self.orders_table.delete_order)
+
+        self.orders_table.refresh_orders()
+        self.tab2.layout.addWidget(self.order_details_button)
         self.tab2.layout.addWidget(self.delete_button_orders)
-
-        self.orders_view = QTableWidget()
-        self.orders_view.repaint()
-        self.orders_view.setColumnCount(len(self.orders_column_names))
-        self.orders_view.setHorizontalHeaderLabels(self.orders_column_names)
-        self.orders_view.move(0, 0)
-        self.orders_view.itemSelectionChanged.connect(self.change_orders)
-        self.orders_view.itemDoubleClicked.connect(self.show_details)
-
-        self.orders_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.orders_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-
-        self.refresh_orders()
-        self.tab2.layout.addWidget(self.orders_view)
+        self.tab2.layout.addWidget(self.orders_table)
 
         self.tab2.setLayout(self.tab2.layout)
 
@@ -199,40 +188,23 @@ class MainWidget(QWidget):
         # -------------------------------------------------------
         # -------------------------------------------------------
 
-        self.vendors_column_names = customers.view_column_names("vendors")
-        self.vendors_data = customers.view_data("vendors")
         self.tab4.layout = QVBoxLayout(self)
+        self.vendors_table = vendors.VendorsTable()
 
         self.add_vendors_button = QPushButton("Add new vendors", self)
         self.add_vendors_button.setToolTip("Add a vendor which is not in the list yet")
-        self.add_vendors_button.move(500, 80)
         self.add_vendors_button.clicked.connect(self.add_vendor)
-        self.tab4.layout.addWidget(self.add_vendors_button)
 
         self.delete_button_vendors = QPushButton("Delete vendor", self)
         self.delete_button_vendors.setToolTip("Delete selected vendor")
-        self.delete_button_vendors.move(500, 80)
         self.delete_button_vendors.clicked.connect(self.delete_vendor)
+
+        self.tab4.layout.addWidget(self.add_vendors_button)
         self.tab4.layout.addWidget(self.delete_button_vendors)
-
-        self.vendors_view = QTableWidget()
-        self.vendors_view.repaint()
-        self.vendors_view.setColumnCount(len(self.vendors_column_names))
-        self.vendors_view.setHorizontalHeaderLabels(self.vendors_column_names)
-        self.vendors_view.move(0, 0)
-        self.vendors_view.itemSelectionChanged.connect(self.change_vendors)
-
-        self.vendors_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.vendors_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-
-        self.refresh_vendors()
-        self.vendors_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.tab4.layout.addWidget(self.vendors_view)
-
+        self.tab4.layout.addWidget(self.vendors_table)
         self.tab4.setLayout(self.tab4.layout)
 
         # -------------------------------------------------------
-
 
     @pyqtSlot()
     def choose_customer(self):
@@ -254,6 +226,8 @@ class MainWidget(QWidget):
 
     def refresh_customers(self):
         self.customers_view.refresh_customers()
+
+        # -------------------------------------------------------
 
     @pyqtSlot()
     def add_item_to_order(self):
@@ -290,93 +264,36 @@ class MainWidget(QWidget):
                              for row in range(self.temp_products.rowCount())]
             price_list = [int(self.temp_products.cellWidget(row, 3).text()[:-3])
                           for row in range(self.temp_products.rowCount())]
-            free_order_id = max([val[0] for val in self.orders_data]) + 1
+            free_order_id = max([val[0] for val in self.orders_table.data]) + 1
             final_order_data = [[row[0], quantity_list[index], price_list[index], free_order_id]
                                 for index, row in enumerate(self.temp_products.rows)]
             now_datetime = str(datetime.now())[:-7]
-            orders.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
+            orders.OrderQueries.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
 
-            orders.insert_ordered_position(final_order_data)
+            orders.OrderQueries.insert_ordered_position(final_order_data)
 
-            self.refresh_orders()
+            self.orders_table.refresh_orders()
             tables.temp()
             self.temp_products.refresh_products()
             self.label_chosen_customer.setText("Choose customer")
 
     # ------------------------------------------------
 
-    def refresh_vendors(self):
-        self.vendors_data = vendors.view_data("vendors")
-        self.vendors_view.setRowCount(len(self.vendors_data))
-        for row_id, row in enumerate(self.vendors_data):
-            for column_id, cell in enumerate(row):
-                self.vendors_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-        self.tab4.layout.update()
-
-    def change_vendors(self):
-        items = self.vendors_view.selectedItems()
-        self.row_data_vendors = [cell.text() for cell in items]
-
     @pyqtSlot()
     def add_vendor(self):
-        self.vendors_data = vendors.view_data("vendors")
-        self.vendor = vendors.NewVendor(self.vendors_data, parent=self)
+        self.vendor = vendors.NewVendor(parent=self)
         width = 400
         height = 300
-        self.vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
-        self.refresh_vendors()
+        self.vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width,
+                                height)
+        self.vendors_table.refresh_vendors()
 
     @pyqtSlot()
     def delete_vendor(self):
-        if self.vendors_view.currentRow() < 0:
+        if self.vendors_table.currentRow() < 0:
             return
-        vendors.delete_order(self.row_data_vendors[0])
-        self.refresh_vendors()
-
-        # -------------------------------------------------------
-
-    @pyqtSlot()
-    def delete_order(self):
-        if self.orders_view.currentRow() < 0:
-            return
-        orders.delete_order(self.row_data_order[0])
-        self.refresh_orders()
-
-    @pyqtSlot()
-    def show_details(self):
-        views.create_view_orders_items(self.row_data_order[0])
-        self.order = orders.Order(parent=self)
-        width = 850
-        height = 600
-        self.order.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
-
-    def refresh_orders(self):
-        not_paid = {}
-        self.orders_data = orders.view_data("orders_view")
-        self.orders_view.setRowCount(len(self.orders_data))
-        for row_id, row in enumerate(self.orders_data):
-            for column_id, cell in enumerate(row):
-                if column_id != 3 or cell is not None:
-                    self.orders_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-                else:
-                    button = QPushButton("Already paid")
-                    not_paid[row[0]] = button
-                    button.clicked.connect(partial(self.order_paid, button, not_paid))
-                    self.orders_view.setCellWidget(row_id, column_id, button)
-        self.tab2.layout.update()
-
-    @pyqtSlot()
-    def order_paid(self, button, not_paid):
-        for id, but in not_paid.items():
-            if button is but:
-                orders.update_order((str(datetime.now())[:-7], id,))
-                self.orders_view.removeCellWidget(id - 1, 3)
-                self.refresh_orders()
-                break
-
-    def change_orders(self):
-        items = self.orders_view.selectedItems()
-        self.row_data_order = [cell.text() for cell in items]
+        vendors.delete_vendor(self.vendors_table.row_data[0])
+        self.vendors_table.refresh_vendors()
 
         # -------------------------------------------------------
 
