@@ -106,23 +106,19 @@ class MainWidget(QWidget):
         self.tab1.layout = QVBoxLayout(self)
 
         self.data = products.view("products")
-        self.rows = self.data[1]
 
         self.add_button = QPushButton("Add new product", self)
         self.add_button.setToolTip("Add an item which is not in the list yet")
-        self.add_button.move(500, 80)
         self.add_button.clicked.connect(self.add_item)
         self.tab1.layout.addWidget(self.add_button)
 
         self.update_button = QPushButton("Update product", self)
         self.update_button.setToolTip("Update selected product")
-        self.update_button.move(500, 80)
         self.update_button.clicked.connect(self.update_item)
         self.tab1.layout.addWidget(self.update_button)
 
         self.delete_button = QPushButton("Delete product", self)
         self.delete_button.setToolTip("Delete selected product")
-        self.delete_button.move(500, 80)
         self.delete_button.clicked.connect(self.delete_item)
         self.tab1.layout.addWidget(self.delete_button)
 
@@ -130,13 +126,13 @@ class MainWidget(QWidget):
         categories = set([item_id[4] for item_id in self.data[1]])
         categories.add("All products")
         self.dropdownlist_category.addItems(categories)
-        self.dropdownlist_category.activated.connect(self.select_category)
+
         self.tab1.layout.addWidget(self.dropdownlist_category)
 
-        self.goods_view = products.ProductsTable()
+        self.products_table = products.ProductsTable(parent=self)
+        self.dropdownlist_category.activated.connect(self.products_table.select_category)
 
-        self.refresh_products()
-        self.tab1.layout.addWidget(self.goods_view)
+        self.tab1.layout.addWidget(self.products_table)
         self.tab1.setLayout(self.tab1.layout)
 
         # -------------------------------------------------------
@@ -232,25 +228,6 @@ class MainWidget(QWidget):
     def refresh_products_in_order(self):
         self.temp_products.refresh_products()
 
-    def change_products(self):
-        items = self.goods_view.selectedItems()
-        self.row_data_product = [cell.text() for cell in items]
-
-    def refresh_products(self):
-        self.rows = products.view("products")[1]
-        self.category = self.dropdownlist_category.currentText()
-        if self.category == "All products":
-            self.goods_view.setRowCount(len(self.rows))
-        else:
-            self.rows_table = [row[4] for row in self.rows].count(self.category)
-            self.goods_view.setRowCount(self.rows_table)
-        row_id = 0
-        for row in self.rows:
-            if self.category == row[4] or self.category == "All products":
-                for column_id, cell in enumerate(row):
-                    self.goods_view.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-                row_id += 1
-
     def finish_order(self):
         if self.temp_products.rows and self.label_chosen_customer.text() != "Choose customer":
             quantity_list = [int(self.temp_products.cellWidget(row, 2).text())
@@ -290,9 +267,28 @@ class MainWidget(QWidget):
 
         # -------------------------------------------------------
 
-    @pyqtSlot()
-    def select_category(self):
-        self.refresh_products()
+    # def change_products(self):
+    #     items = self.products_table.selectedItems()
+    #     self.row_data_product = [cell.text() for cell in items]
+    #
+    # def refresh_products(self):
+    #     self.rows = view("products")[1]
+    #     self.category = self.dropdownlist_category.currentText()
+    #     if self.category == "All products":
+    #         self.products_table.setRowCount(len(self.rows))
+    #     else:
+    #         self.rows_table = [row[4] for row in self.rows].count(self.category)
+    #         self.products_table.setRowCount(self.rows_table)
+    #     row_id = 0
+    #     for row in self.rows:
+    #         if self.category == row[4] or self.category == "All products":
+    #             for column_id, cell in enumerate(row):
+    #                 self.products_table.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+    #             row_id += 1
+    #
+    # @pyqtSlot()
+    # def select_category(self):
+    #     self.refresh_products()
 
     @pyqtSlot()
     def add_item(self):
@@ -303,22 +299,22 @@ class MainWidget(QWidget):
 
     @pyqtSlot()
     def delete_item(self):
-        if self.goods_view.currentRow() < 0:
+        if self.products_table.currentRow() < 0:
             return
         buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove "
-                                           + self.goods_view.row_data_products[1],
+                                           + self.products_table.row_data_products[1],
                                            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if buttonReply == QMessageBox.No:
             return
         else:
-            products.delete(self.goods_view.row_data_products[0])
+            products.delete(self.products_table.row_data_products[0])
             self.refresh_products()
 
     @pyqtSlot()
     def update_item(self):
-        if self.goods_view.currentRow() < 1:
+        if self.products_table.currentRow() < 1:
             return
-        self.update_item = products.UpdateItem(self.data, self.goods_view.currentRow(), parent=self)
+        self.update_item = products.UpdateItem(self.data, self.products_table.currentRow(), parent=self)
         width = 400
         height = 300
         self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)

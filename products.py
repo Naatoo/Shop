@@ -1,8 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
-from PyQt5.QtCore import pyqtSlot, pyqtSignal, QRegExp
-from PyQt5 import QtWidgets, Qt
-from PyQt5.QtGui import QRegExpValidator, QDoubleValidator
+from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtCore import pyqtSlot
+from PyQt5 import QtWidgets
 
 import psycopg2
 from queries import view_column_names, view_data
@@ -97,94 +96,111 @@ def temp_insert(data):
 
 
 class SelectItem(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
         self.setAutoFillBackground(True)
-        self.groupbox= QGroupBox()
         self.layout = QGridLayout()
 
         self.add_button = QPushButton("Add product", self)
         self.add_button.setToolTip("Add this item to an order")
-        self.add_button.move(500, 80)
         self.add_button.clicked.connect(self.add)
-        self.layout.addWidget(self.add_button)
 
         self.cancel_button = QPushButton("Cancel")
-        self.layout.addWidget(self.cancel_button)
         self.cancel_button.clicked.connect(self.close)
-        self.layout.addWidget(self.cancel_button)
 
-        self.products_table = ProductsTable()
+        self.dropdownlist_category = QComboBox()
+        self.data = view("products")
+        categories = set([item_id[4] for item_id in self.data[1]])
+        categories.add("All products")
+        self.dropdownlist_category.addItems(categories)
 
-        self.layout.addWidget(self.products_table)
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
-        self.setWindowModality(Qt.Qt.ApplicationModal)
+        self.products_table = ProductsTable(parent=self)
         self.products_table.itemDoubleClicked.connect(self.add)
+
+        self.dropdownlist_category.activated.connect(self.products_table.select_category)
+
+        self.layout.addWidget(self.add_button)
+        self.layout.addWidget(self.cancel_button)
+        self.layout.addWidget(self.dropdownlist_category)
+        self.layout.addWidget(self.products_table)
+        self.setLayout(self.layout)
         self.show()
 
     def add(self):
-        temp_insert(self.products_table.row_data_products)
+        temp_insert(self.products_table.row_data)
         self.close()
         self.parent().refresh_products_in_order()
 
 
 class ProductsTable(QTableWidget):
-    def __init__(self):
-        super(QTableWidget, self).__init__()
-        self.products_column_names = view_column_names("products")
-        self.products_data = view_data("products")
+    def __init__(self, parent):
+        super(QTableWidget, self).__init__(parent)
 
-        self.repaint()
+        self.products_column_names = view_column_names("products")
         self.setColumnCount(len(self.products_column_names))
         self.setHorizontalHeaderLabels(self.products_column_names)
-        self.move(0, 0)
         self.itemSelectionChanged.connect(self.change_products)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
         self.refresh_products()
-        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.change_products()
-
-    def refresh_products(self):
-        self.products_data = view_data("products")
-        self.setRowCount(len(self.products_data))
-        for row_id, row in enumerate(self.products_data):
-            for column_id, cell in enumerate(row):
-                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
+    # def refresh_products(self):
+    #     self.products_data = view_data("products")
+    #     self.setRowCount(len(self.products_data))
+    #     for row_id, row in enumerate(self.products_data):
+    #         for column_id, cell in enumerate(row):
+    #             self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+    #
+    # def change_products(self):
+    #     items = self.selectedItems()
+    #     self.row_data_products = [cell.text() for cell in items]
 
     def change_products(self):
+        print("assad")
         items = self.selectedItems()
-        self.row_data_products = [cell.text() for cell in items]
+        self.row_data = [cell.text() for cell in items]
+
+    def refresh_products(self):
+        self.rows = view("products")[1]
+        self.category = self.parent().dropdownlist_category.currentText()
+        if self.category == "All products":
+            self.setRowCount(len(self.rows))
+        else:
+            self.rows_table = [row[4] for row in self.rows].count(self.category)
+            self.setRowCount(self.rows_table)
+        row_id = 0
+        for row in self.rows:
+            if self.category == row[4] or self.category == "All products":
+                for column_id, cell in enumerate(row):
+                    self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                row_id += 1
+
+    @pyqtSlot()
+    def select_category(self):
+        self.refresh_products()
 
 
 class ProductsTemp(QTableWidget):
     def __init__(self):
         super(QTableWidget, self).__init__()
 
-        self.data = view("temp")
-        column_names = self.data[0][1:]
-        self.rows = self.data[1]
+        column_names = view("temp")[0][1:]
 
-        self.repaint()
-        self.setColumnCount(len(self.data[0]) - 1)
+        self.setColumnCount(len(column_names))
         self.setHorizontalHeaderLabels(column_names)
-        self.move(0, 0)
         self.itemSelectionChanged.connect(self.change_products)
 
         self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+
         self.quantity_list = []
         self.price_list = []
 
-
         self.refresh_products()
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.change_products()
 
     def change_products(self):
         items = self.selectedItems()
@@ -233,11 +249,10 @@ class ProductsTemp(QTableWidget):
 
 
 class NewItem(QWidget):
-    def __init__(self, data, parent=None):
+    def __init__(self, data, parent):
         super(QWidget, self).__init__(parent)
 
         self.setAutoFillBackground(True)
-        self.groupbox= QGroupBox()
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
@@ -308,10 +323,7 @@ class NewItem(QWidget):
         self.layout.addWidget(self.reset_button, 5, 2)
         self.reset_button.clicked.connect(self.reset_to_default)
 
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
+        self.setLayout(self.layout)
         self.show()
 
     @pyqtSlot()
@@ -347,7 +359,7 @@ class NewItem(QWidget):
         sql_insert([self.id_input.text(), self.name_input_edit.text(),
                     self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
-        self.parent().refresh_products()
+        self.parent().products_table.refresh_products()
 
 
 class UpdateItem(QWidget):
@@ -358,7 +370,6 @@ class UpdateItem(QWidget):
         self.row_data = row_data
         self.setAutoFillBackground(True)
 
-        self.groupbox= QGroupBox()
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
@@ -409,10 +420,7 @@ class UpdateItem(QWidget):
         self.layout.addWidget(self.reset_button, 5, 2)
         self.reset_button.clicked.connect(self.reset_to_default)
 
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
+        self.setLayout(self.layout)
         self.show()
 
     @pyqtSlot()
@@ -430,7 +438,7 @@ class UpdateItem(QWidget):
         sql_update([self.name_input_edit.text(),
                     self.quantity_input.text(), price, self.category_input_edit.text(), self.id])
         self.close()
-        self.parent().refresh_products()
+        self.parent().products_table.refresh_products()
 
 
 
