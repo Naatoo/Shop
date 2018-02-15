@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGroupBox, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QDoubleSpinBox, QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView
 from PyQt5.QtCore import pyqtSlot
-from PyQt5 import QtWidgets
 
 import psycopg2
 
@@ -59,18 +58,14 @@ class CustomersTable(QTableWidget):
         super(QTableWidget, self).__init__()
 
         self.customers_column_names = view_column_names("customers")
-        self.customers_data = view_data("customers")
-        self.repaint()
         self.setColumnCount(len(self.customers_column_names))
         self.setHorizontalHeaderLabels(self.customers_column_names)
-        self.move(0, 0)
-        self.itemSelectionChanged.connect(self.change_customers)
+        self.itemSelectionChanged.connect(self.change_selection)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.refresh_customers()
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.change_customers()
 
     def refresh_customers(self):
         self.customers_data = view_data("customers")
@@ -79,24 +74,18 @@ class CustomersTable(QTableWidget):
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
 
-    def change_customers(self):
+    def change_selection(self):
         items = self.selectedItems()
         self.row_data_customers = [cell.text() for cell in items]
 
-    @pyqtSlot()
-    def add_customer(self):
-        self.customer = NewCustomer()
-        self.refresh_customers()
 
-
-class NewCustomer(QWidget):
+class NewCustomerWindow(QWidget):
     def __init__(self, parent=None):
         super(QWidget, self).__init__(parent)
 
         data = view_data("customers")
 
         self.setAutoFillBackground(True)
-        self.groupbox= QGroupBox()
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
@@ -177,10 +166,7 @@ class NewCustomer(QWidget):
         self.layout.addWidget(self.reset_button, 7, 2)
         self.reset_button.clicked.connect(self.reset_to_default)
 
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
+        self.setLayout(self.layout)
         self.show()
 
     @pyqtSlot()
@@ -194,44 +180,32 @@ class NewCustomer(QWidget):
 
     @pyqtSlot()
     def add(self):
-        data = view_data("customers")
-
         sql_insert([self.name_input_edit.text(),
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
-        self.parent().refresh_customers()
+        self.parent().customers_table.refresh_customers()
 
 
 class CustomersWindow(QWidget):
     def __init__(self, parent=None):
         super(QWidget, self).__init__(parent)
 
-        self.groupbox = QGroupBox()
-        self.layout = QGridLayout()
-
         self.layout = QVBoxLayout(self)
 
-        self.customers_view = CustomersTable()
-        self.customers_view.itemDoubleClicked.connect(self.choose_and_close)
-        self.layout.addWidget(self.customers_view)
+        self.customers_table = CustomersTable()
+        self.customers_table.itemDoubleClicked.connect(self.select_and_close)
+        self.layout.addWidget(self.customers_table)
 
         self.choose_customer_button = QPushButton("Choose customer", self)
         self.choose_customer_button.setToolTip("Choose the customer of this order")
-        self.choose_customer_button.move(500, 80)
-        self.choose_customer_button.clicked.connect(self.choose_and_close)
+        self.choose_customer_button.clicked.connect(self.select_and_close)
         self.layout.addWidget(self.choose_customer_button)
 
         self.setLayout(self.layout)
-        self.layout.update()
-
-        self.groupbox.setLayout(self.layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.groupbox)
-        self.setLayout(windowLayout)
         self.show()
 
-    def choose_and_close(self):
-        self.chosen_customer_id = self.customers_view.row_data_customers[0]
+    def select_and_close(self):
+        self.chosen_customer_id = self.customers_table.row_data_customers[0]
         self.close()
         self.parent().refresh_chosen_customer()

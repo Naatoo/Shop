@@ -4,10 +4,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QDi
 from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel, QComboBox, QStyleFactory
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
 from PyQt5.QtCore import pyqtSlot, QObject
-from PyQt5 import QtWidgets, QtCore
-from datetime import datetime
-from functools import partial
 
+from datetime import datetime
 
 import products
 import orders
@@ -171,15 +169,13 @@ class MainWidget(QWidget):
 
         self.tab3.layout = QVBoxLayout(self)
 
-        self.customers_view = customers.CustomersTable()
+        self.customers_table = customers.CustomersTable()
         self.add_customers_button = QPushButton("Add new customers", self)
         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
         self.add_customers_button.clicked.connect(self.add_customer)
-        self.add_customers_button.move(500, 80)
+
+        self.tab3.layout.addWidget(self.customers_table)
         self.tab3.layout.addWidget(self.add_customers_button)
-
-        self.tab3.layout.addWidget(self.customers_view)
-
         self.tab3.setLayout(self.tab3.layout)
         self.tab3.layout.update()
 
@@ -214,18 +210,15 @@ class MainWidget(QWidget):
         self.customer_choice_window.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     def refresh_chosen_customer(self):
-        self.customers_view.refresh_customers()
-        self.label_chosen_customer.setText(self.customer_choice_window.customers_view.row_data_customers[1])
+        self.customers_table.refresh_customers()
+        self.label_chosen_customer.setText(self.customer_choice_window.customers_table.row_data_customers[1])
 
     @pyqtSlot()
     def add_customer(self):
-        self.customer = customers.NewCustomer(parent=self)
+        self.customer = customers.NewCustomerWindow(parent=self)
         width = 400
         height = 300
         self.customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
-
-    def refresh_customers(self):
-        self.customers_view.refresh_customers()
 
         # -------------------------------------------------------
 
