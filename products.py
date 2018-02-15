@@ -1,13 +1,14 @@
+import psycopg2
+
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView
 from PyQt5.QtCore import pyqtSlot
 from PyQt5 import QtWidgets
 
-import psycopg2
 from queries import view_column_names, view_data
 
 
-def sql_insert(data):
+def insert_product(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
     sql = "INSERT INTO products VALUES (%s, %s, %s, %s, %s)"
@@ -16,7 +17,7 @@ def sql_insert(data):
     connection.close()
 
 
-def delete(id):
+def delete_product(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
     sql = '''DELETE FROM products WHERE "ID"=%s;'''
@@ -49,7 +50,7 @@ def give_name_to_select(name):
     return name[0]
 
 
-def sql_update(data):
+def update_product(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
     sql = '''UPDATE products
@@ -65,22 +66,22 @@ def sql_update(data):
     connection.close()
 
 
-def view(table_name):
-    data = (table_name,)
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-
-    sql = '''SELECT * FROM %s ORDER BY "ID"''' % table_name
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-
-    sql = "SELECT column_name FROM information_schema.columns WHERE table_name=%s"
-    cursor.execute(sql, data)
-    column_names = cursor.fetchall()
-    column_names_final = [tup[0].title() for tup in column_names]
-
-    connection.close()
-    return column_names_final, rows
+# def view(table_name):
+#     data = (table_name,)
+#     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+#     cursor = connection.cursor()
+#
+#     sql = '''SELECT * FROM %s ORDER BY "ID"''' % table_name
+#     cursor.execute(sql)
+#     rows = cursor.fetchall()
+#
+#     sql = "SELECT column_name FROM information_schema.columns WHERE table_name=%s"
+#     cursor.execute(sql, data)
+#     column_names = cursor.fetchall()
+#     column_names_final = [tup[0].title() for tup in column_names]
+#
+#     connection.close()
+#     return column_names_final, rows
 
 
 def temp_insert(data):
@@ -110,8 +111,8 @@ class SelectItem(QWidget):
         self.cancel_button.clicked.connect(self.close)
 
         self.dropdownlist_category = QComboBox()
-        self.data = view("products")
-        categories = set([item_id[4] for item_id in self.data[1]])
+        self.data = view_data("products")
+        categories = set([item_id[4] for item_id in self.data])
         categories.add("All products")
         self.dropdownlist_category.addItems(categories)
 
@@ -159,12 +160,11 @@ class ProductsTable(QTableWidget):
     #     self.row_data_products = [cell.text() for cell in items]
 
     def change_products(self):
-        print("assad")
         items = self.selectedItems()
         self.row_data = [cell.text() for cell in items]
 
     def refresh_products(self):
-        self.rows = view("products")[1]
+        self.rows = view_data("products")
         self.category = self.parent().dropdownlist_category.currentText()
         if self.category == "All products":
             self.setRowCount(len(self.rows))
@@ -187,7 +187,7 @@ class ProductsTemp(QTableWidget):
     def __init__(self):
         super(QTableWidget, self).__init__()
 
-        column_names = view("temp")[0][1:]
+        column_names = view_column_names("temp")[1:]
 
         self.setColumnCount(len(column_names))
         self.setHorizontalHeaderLabels(column_names)
@@ -207,7 +207,7 @@ class ProductsTemp(QTableWidget):
         self.row_data_product = [cell.text() for cell in items]
 
     def refresh_products(self):
-        self.rows = [row[1:] for row in view("temp")[1]]
+        self.rows = [row[1:] for row in view_data("temp")]
         self.setRowCount(len(self.rows))
         for row_id, row in enumerate(self.rows):
             for column_id, cell in enumerate(row):
@@ -263,7 +263,6 @@ class NewItem(QWidget):
         self.id_input = QSpinBox()
         self.id_input.setMaximum(100000)
 
-        # Default values
         self.indexes = [number[0] for number in data[1]]
         if min(self.indexes) > 2:
             self.id_default = min(range(1, min(self.indexes) - 1))
@@ -336,7 +335,7 @@ class NewItem(QWidget):
 
     @pyqtSlot()
     def add(self):
-        data = view("products")[1]
+        data = view_data("products")
         if len(self.name_input_edit.text()) > 40 or self.name_input_edit.text() in [row[1] for row in data]:
             return
         if self.id_input.text() in [str(row[0]) for row in data] or self.id_input.text() == 0:
@@ -356,8 +355,8 @@ class NewItem(QWidget):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        sql_insert([self.id_input.text(), self.name_input_edit.text(),
-                    self.quantity_input.text(), price, self.category_input_edit.text()])
+        insert_product([self.id_input.text(), self.name_input_edit.text(),
+                        self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
         self.parent().products_table.refresh_products()
 
@@ -435,8 +434,8 @@ class UpdateItem(QWidget):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        sql_update([self.name_input_edit.text(),
-                    self.quantity_input.text(), price, self.category_input_edit.text(), self.id])
+        update_product([self.name_input_edit.text(),
+                        self.quantity_input.text(), price, self.category_input_edit.text(), self.id])
         self.close()
         self.parent().products_table.refresh_products()
 

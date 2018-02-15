@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWid
 from PyQt5.QtCore import pyqtSlot, QObject
 
 from datetime import datetime
+from queries import view_column_names, view_data
 
 import products
 import orders
@@ -59,19 +60,16 @@ class MainWidget(QWidget):
 
         views.create_view_orders()
 
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         self.tab0.layout = QVBoxLayout(self)
         self.default_values = []
 
-        # Default values
         self.customers, self.id, self.products = orders.OrderQueries.view_new_order()
 
         tables.temp()
         self.choose_customer_button = QPushButton("Choose customer", self)
         self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
-        self.choose_customer_button.move(500, 80)
         self.choose_customer_button.clicked.connect(self.choose_customer)
         self.tab0.layout.addWidget(self.choose_customer_button)
 
@@ -80,7 +78,6 @@ class MainWidget(QWidget):
 
         self.add_button = QPushButton("Add product", self)
         self.add_button.setToolTip("Add new product to the order")
-        self.add_button.move(500, 80)
         self.add_button.clicked.connect(self.add_item_to_order)
         self.tab0.layout.addWidget(self.add_button)
 
@@ -88,7 +85,6 @@ class MainWidget(QWidget):
 
         self.delete_button = QPushButton("Delete product", self)
         self.delete_button.setToolTip("Delete selected product from this order")
-        self.delete_button.move(500, 80)
         self.delete_button.clicked.connect(self.temp_products.delete)
         self.tab0.layout.addWidget(self.delete_button)
 
@@ -101,41 +97,40 @@ class MainWidget(QWidget):
         self.tab0.layout.addWidget(self.finish_order_button)
 
         self.tab0.setLayout(self.tab0.layout)
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         self.tab1.layout = QVBoxLayout(self)
 
-        self.data = products.view("products")
+        self.data = view_data("products")
 
         self.add_button = QPushButton("Add new product", self)
         self.add_button.setToolTip("Add an item which is not in the list yet")
         self.add_button.clicked.connect(self.add_item)
-        self.tab1.layout.addWidget(self.add_button)
 
         self.update_button = QPushButton("Update product", self)
         self.update_button.setToolTip("Update selected product")
         self.update_button.clicked.connect(self.update_item)
-        self.tab1.layout.addWidget(self.update_button)
 
         self.delete_button = QPushButton("Delete product", self)
         self.delete_button.setToolTip("Delete selected product")
         self.delete_button.clicked.connect(self.delete_item)
-        self.tab1.layout.addWidget(self.delete_button)
 
         self.dropdownlist_category = QComboBox()
-        categories = set([item_id[4] for item_id in self.data[1]])
+        categories = set([item_id[4] for item_id in self.data])
         categories.add("All products")
         self.dropdownlist_category.addItems(categories)
-
-        self.tab1.layout.addWidget(self.dropdownlist_category)
-
         self.products_table = products.ProductsTable(parent=self)
+
         self.dropdownlist_category.activated.connect(self.products_table.select_category)
 
+        self.tab1.layout.addWidget(self.add_button)
+        self.tab1.layout.addWidget(self.update_button)
+        self.tab1.layout.addWidget(self.delete_button)
+        self.tab1.layout.addWidget(self.dropdownlist_category)
         self.tab1.layout.addWidget(self.products_table)
         self.tab1.setLayout(self.tab1.layout)
 
-        # -------------------------------------------------------
         # -------------------------------------------------------
 
         self.tab2.layout = QVBoxLayout(self)
@@ -144,23 +139,18 @@ class MainWidget(QWidget):
 
         self.order_details_button = QPushButton("Show order details", self)
         self.order_details_button.setToolTip("Show details of selected order")
-        self.order_details_button.move(500, 80)
         self.order_details_button.clicked.connect(self.orders_table.show_details)
 
         self.delete_button_orders = QPushButton("Delete order", self)
         self.delete_button_orders.setToolTip("Delete selected order")
-        self.delete_button_orders.move(500, 80)
         self.delete_button_orders.clicked.connect(self.orders_table.delete_order)
 
-        self.orders_table.refresh_orders()
         self.tab2.layout.addWidget(self.order_details_button)
         self.tab2.layout.addWidget(self.delete_button_orders)
         self.tab2.layout.addWidget(self.orders_table)
 
         self.tab2.setLayout(self.tab2.layout)
 
-        # -------------------------------------------------------
-        # -------------------------------------------------------
         # -------------------------------------------------------
 
         self.tab3.layout = QVBoxLayout(self)
@@ -175,9 +165,6 @@ class MainWidget(QWidget):
         self.tab3.setLayout(self.tab3.layout)
         self.tab3.layout.update()
 
-        # -------------------------------------------------------
-        # -------------------------------------------------------
-        # -------------------------------------------------------
         # -------------------------------------------------------
 
         self.tab4.layout = QVBoxLayout(self)
@@ -307,7 +294,7 @@ class MainWidget(QWidget):
         if buttonReply == QMessageBox.No:
             return
         else:
-            products.delete(self.products_table.row_data_products[0])
+            products.delete_product(self.products_table.row_data_products[0])
             self.refresh_products()
 
     @pyqtSlot()

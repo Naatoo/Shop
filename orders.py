@@ -1,14 +1,14 @@
-from PyQt5.QtWidgets import QWidget, QPushButton
-from PyQt5.QtWidgets import QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView
+import psycopg2
+
+from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView
 from PyQt5.QtCore import pyqtSlot
 
 from datetime import datetime
 from functools import partial
+
 from queries import view_data, view_column_names
-
-import psycopg2
-
-import views
+from views import create_view_orders_items
 
 
 class OrderQueries:
@@ -123,7 +123,7 @@ class OrdersTable(QTableWidget):
 
     @pyqtSlot()
     def show_details(self):
-        views.create_view_orders_items(self.row_data[0])
+        create_view_orders_items(self.row_data[0])
         self.order = OrderDetailsWindow(parent=self)
         width = 850
         height = 600
