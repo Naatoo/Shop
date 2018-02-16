@@ -119,7 +119,7 @@ class SelectItem(QWidget):
         self.products_table = ProductsTable(parent=self)
         self.products_table.itemDoubleClicked.connect(self.add)
 
-        self.dropdownlist_category.activated.connect(self.products_table.select_category)
+        self.dropdownlist_category.activated.connect(self.select_category)
 
         self.layout.addWidget(self.add_button)
         self.layout.addWidget(self.cancel_button)
@@ -132,6 +132,10 @@ class SelectItem(QWidget):
         temp_insert(self.products_table.row_data)
         self.close()
         self.parent().refresh_products_in_order()
+
+    @pyqtSlot()
+    def select_category(self):
+        self.products_table.refresh_products()
 
 
 class ProductsTable(QTableWidget):
@@ -163,9 +167,13 @@ class ProductsTable(QTableWidget):
         items = self.selectedItems()
         self.row_data = [cell.text() for cell in items]
 
-    def refresh_products(self):
+    def refresh_products(self, *args):
+        print(args)
         self.rows = view_data("products")
-        self.category = self.parent().dropdownlist_category.currentText()
+        if not args:
+            self.category = self.parent().dropdownlist_category.currentText()
+        else:
+            self.category = args[0]
         if self.category == "All products":
             self.setRowCount(len(self.rows))
         else:
@@ -249,9 +257,11 @@ class ProductsTemp(QTableWidget):
 
 
 class NewItem(QWidget):
-    def __init__(self, data, parent):
+    def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
+        data = view_data("products")
+        print(data)
         self.setAutoFillBackground(True)
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
@@ -263,7 +273,9 @@ class NewItem(QWidget):
         self.id_input = QSpinBox()
         self.id_input.setMaximum(100000)
 
-        self.indexes = [number[0] for number in data[1]]
+        # for row in data:
+        #     print(row[0])
+        self.indexes = [row[0] for row in data]
         if min(self.indexes) > 2:
             self.id_default = min(range(1, min(self.indexes) - 1))
         elif min(self.indexes) == 2:
@@ -281,7 +293,7 @@ class NewItem(QWidget):
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
-        self.name_input.addItems(set([item_id[1] for item_id in data[1]]))
+        self.name_input.addItems(set([row[1] for row in data]))
         self.name_input_edit = QLineEdit()
 
         self.name_input.setLineEdit(self.name_input_edit)
@@ -304,7 +316,7 @@ class NewItem(QWidget):
 
         self.category_label = QLabel("Category")
         self.category_input = QComboBox()
-        self.category_input.addItems(set([item_id[4] for item_id in data[1]]))
+        self.category_input.addItems(set([row[4] for row in data]))
         self.category_input_edit = QLineEdit()
         self.category_input.setLineEdit(self.category_input_edit)
         self.layout.addWidget(self.category_label, 4, 0)
@@ -358,25 +370,23 @@ class NewItem(QWidget):
         insert_product([self.id_input.text(), self.name_input_edit.text(),
                         self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
-        self.parent().products_table.refresh_products()
+        self.parent().select_category()
 
 
 class UpdateItem(QWidget):
-    def __init__(self, data, row_data, parent=None):
+    def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
-        self.data = data
-        self.row_data = row_data
+        data = view_data("products")
         self.setAutoFillBackground(True)
 
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
 
-        self.id = row_data
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
-        self.name_input.addItems(set([item_id[1] for item_id in data[1]]))
+        self.name_input.addItems(set([row[1] for row in data]))
         self.name_input_edit = QLineEdit()
         self.name_input.setLineEdit(self.name_input_edit)
 
@@ -386,20 +396,20 @@ class UpdateItem(QWidget):
         self.quantity_label = QLabel("Quantity")
         self.quantity_input = QSpinBox()
         self.quantity_input.setMaximum(100000)
-        self.quantity_input.setValue(data[1][row_data][2])
+        self.default_quantity = data[self.parent().products_table.currentRow()][2]
         self.layout.addWidget(self.quantity_label, 2, 0)
         self.layout.addWidget(self.quantity_input, 2, 1)
 
         self.price_sell_label = QLabel("Selling price")
         self.price_sell_input = QDoubleSpinBox()
         self.price_sell_input.setMaximum(100000)
-        self.price_sell_input.setValue(data[1][row_data][3])
+        self.default_price = data[self.parent().products_table.currentRow()][3]
         self.layout.addWidget(self.price_sell_label, 3, 0)
         self.layout.addWidget(self.price_sell_input, 3, 1)
 
         self.category_label = QLabel("Category")
         self.category_input = QComboBox()
-        self.category_input.addItems(set([item_id[4] for item_id in data[1]]))
+        self.category_input.addItems(set([row[4] for row in data]))
         self.category_input_edit = QLineEdit()
         self.category_input.setLineEdit(self.category_input_edit)
 
@@ -425,8 +435,8 @@ class UpdateItem(QWidget):
     @pyqtSlot()
     def reset_to_default(self):
         self.name_input.setCurrentIndex(1)
-        self.quantity_input.setValue(self.data[1][self.row_data][2])
-        self.price_sell_input.setValue(self.data[1][self.row_data][3])
+        self.quantity_input.setValue(self.default_quantity)
+        self.price_sell_input.setValue(self.default_price)
         self.category_input.setCurrentIndex(1)
 
     @pyqtSlot()
@@ -435,9 +445,10 @@ class UpdateItem(QWidget):
         if "," in price:
             price = price.replace(",", ".")
         update_product([self.name_input_edit.text(),
-                        self.quantity_input.text(), price, self.category_input_edit.text(), self.id])
+                        self.quantity_input.text(), price, self.category_input_edit.text(),
+                        self.parent().products_table.currentRow()])
         self.close()
-        self.parent().products_table.refresh_products()
+        self.parent().select_category()
 
 
 

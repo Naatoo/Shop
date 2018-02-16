@@ -122,7 +122,7 @@ class MainWidget(QWidget):
         self.dropdownlist_category.addItems(categories)
         self.products_table = products.ProductsTable(parent=self)
 
-        self.dropdownlist_category.activated.connect(self.products_table.select_category)
+        self.dropdownlist_category.activated.connect(self.select_category)
 
         self.tab1.layout.addWidget(self.add_button)
         self.tab1.layout.addWidget(self.update_button)
@@ -254,32 +254,15 @@ class MainWidget(QWidget):
 
         # -------------------------------------------------------
 
-    # def change_products(self):
-    #     items = self.products_table.selectedItems()
-    #     self.row_data_product = [cell.text() for cell in items]
-    #
-    # def refresh_products(self):
-    #     self.rows = view("products")[1]
-    #     self.category = self.dropdownlist_category.currentText()
-    #     if self.category == "All products":
-    #         self.products_table.setRowCount(len(self.rows))
-    #     else:
-    #         self.rows_table = [row[4] for row in self.rows].count(self.category)
-    #         self.products_table.setRowCount(self.rows_table)
-    #     row_id = 0
-    #     for row in self.rows:
-    #         if self.category == row[4] or self.category == "All products":
-    #             for column_id, cell in enumerate(row):
-    #                 self.products_table.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-    #             row_id += 1
-    #
-    # @pyqtSlot()
-    # def select_category(self):
-    #     self.refresh_products()
+    @pyqtSlot()
+    def select_category(self):
+        args = self.dropdownlist_category.currentText(),
+        self.products_table.refresh_products(*args)
+
 
     @pyqtSlot()
     def add_item(self):
-        self.item = products.NewItem(self.data, parent=self)
+        self.item = products.NewItem(parent=self)
         width = 400
         height = 300
         self.item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
@@ -289,19 +272,19 @@ class MainWidget(QWidget):
         if self.products_table.currentRow() < 0:
             return
         buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove "
-                                           + self.products_table.row_data_products[1],
+                                           + self.products_table.row_data[1],
                                            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if buttonReply == QMessageBox.No:
             return
         else:
-            products.delete_product(self.products_table.row_data_products[0])
-            self.refresh_products()
+            products.delete_product(self.products_table.row_data[0])
+            self.select_category()
 
     @pyqtSlot()
     def update_item(self):
         if self.products_table.currentRow() < 1:
             return
-        self.update_item = products.UpdateItem(self.data, self.products_table.currentRow(), parent=self)
+        self.update_item = products.UpdateItem(parent=self)
         width = 400
         height = 300
         self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
