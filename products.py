@@ -1,7 +1,7 @@
 import psycopg2
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox
 from PyQt5.QtCore import pyqtSlot
 from PyQt5 import QtWidgets
 
@@ -66,6 +66,19 @@ def update_product(data):
     connection.close()
 
 
+def update_quantity(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    sql = '''UPDATE products
+             SET
+             "Quantity" = "Quantity" - %s
+             WHERE "ID" = %s
+              '''
+    for row in data:
+        cursor.execute(sql, row)
+        connection.commit()
+    connection.close()
+
 # def view(table_name):
 #     data = (table_name,)
 #     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
@@ -129,9 +142,13 @@ class SelectItem(QWidget):
         self.show()
 
     def add(self):
-        temp_insert(self.products_table.row_data)
-        self.close()
-        self.parent().refresh_products_in_order()
+        if self.products_table.row_data[2] == "0":
+            QMessageBox.information(self, "Error", "You do not have this item in stock")
+            return
+        else:
+            temp_insert(self.products_table.row_data)
+            self.close()
+            self.parent().refresh_products_in_order()
 
     @pyqtSlot()
     def select_category(self):
@@ -152,23 +169,11 @@ class ProductsTable(QTableWidget):
 
         self.refresh_products()
 
-    # def refresh_products(self):
-    #     self.products_data = view_data("products")
-    #     self.setRowCount(len(self.products_data))
-    #     for row_id, row in enumerate(self.products_data):
-    #         for column_id, cell in enumerate(row):
-    #             self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-    #
-    # def change_products(self):
-    #     items = self.selectedItems()
-    #     self.row_data_products = [cell.text() for cell in items]
-
     def change_products(self):
         items = self.selectedItems()
         self.row_data = [cell.text() for cell in items]
 
     def refresh_products(self, *args):
-        print(args)
         self.rows = view_data("products")
         if not args:
             self.category = self.parent().dropdownlist_category.currentText()
@@ -374,7 +379,7 @@ class NewItem(QWidget):
 
 
 class UpdateItem(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, current_row):
         super(QWidget, self).__init__(parent)
 
         data = view_data("products")
@@ -397,6 +402,7 @@ class UpdateItem(QWidget):
         self.quantity_input = QSpinBox()
         self.quantity_input.setMaximum(100000)
         self.default_quantity = data[self.parent().products_table.currentRow()][2]
+        print(self.default_quantity)
         self.layout.addWidget(self.quantity_label, 2, 0)
         self.layout.addWidget(self.quantity_input, 2, 1)
 
@@ -430,6 +436,8 @@ class UpdateItem(QWidget):
         self.reset_button.clicked.connect(self.reset_to_default)
 
         self.setLayout(self.layout)
+
+        self.reset_to_default()
         self.show()
 
     @pyqtSlot()

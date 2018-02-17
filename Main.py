@@ -226,10 +226,10 @@ class MainWidget(QWidget):
                                 for index, row in enumerate(self.temp_products.rows)]
             now_datetime = str(datetime.now())[:-7]
             orders.OrderQueries.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
-
             orders.OrderQueries.insert_ordered_position(final_order_data)
-
             self.orders_table.refresh_orders()
+            products.update_quantity([row[1::-1] for row in final_order_data])
+            self.select_category()
             tables.temp()
             self.temp_products.refresh_products()
             self.label_chosen_customer.setText("Choose customer")
@@ -282,9 +282,9 @@ class MainWidget(QWidget):
 
     @pyqtSlot()
     def update_item(self):
-        if self.products_table.currentRow() < 1:
+        if self.products_table.currentRow() < 0:
             return
-        self.update_item = products.UpdateItem(parent=self)
+        self.update_item = products.UpdateItem(self, self.products_table.row_data)
         width = 400
         height = 300
         self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
