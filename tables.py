@@ -156,8 +156,9 @@ def fill_in_with_sample_data():
     create_products(data)
     create_vendors(data_vendors)
     create_customers(data_customers)
-    create_ordered_products(data_pos)
     create_orders(data_ord)
+    create_ordered_products(data_pos)
+
 
 
 #fill_in_with_sample_data()

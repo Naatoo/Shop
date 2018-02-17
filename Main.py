@@ -178,8 +178,13 @@ class MainWidget(QWidget):
         self.delete_button_vendors.setToolTip("Delete selected vendor")
         self.delete_button_vendors.clicked.connect(self.delete_vendor)
 
+        self.update_button_vendors = QPushButton("Update vendor", self)
+        self.update_button_vendors.setToolTip("Update selected vendor")
+        self.update_button_vendors.clicked.connect(self.update_vendor)
+
         self.tab4.layout.addWidget(self.add_vendors_button)
         self.tab4.layout.addWidget(self.delete_button_vendors)
+        self.tab4.layout.addWidget(self.update_button_vendors)
         self.tab4.layout.addWidget(self.vendors_table)
         self.tab4.setLayout(self.tab4.layout)
 
@@ -252,6 +257,16 @@ class MainWidget(QWidget):
         vendors.delete_vendor(self.vendors_table.row_data[0])
         self.vendors_table.refresh_vendors()
 
+    @pyqtSlot()
+    def update_vendor(self):
+        if self.vendors_table.currentRow() < 0:
+            return
+        self.update_vendor = vendors.UpdateVendor()
+        width = 400
+        height = 300
+        self.update_vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+
+
         # -------------------------------------------------------
 
     @pyqtSlot()
@@ -284,7 +299,7 @@ class MainWidget(QWidget):
     def update_item(self):
         if self.products_table.currentRow() < 0:
             return
-        self.update_item = products.UpdateItem(self, self.products_table.row_data)
+        self.update_item = products.UpdateItem(self)
         width = 400
         height = 300
         self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)

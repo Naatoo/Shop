@@ -380,7 +380,7 @@ class NewItem(QWidget):
 
 
 class UpdateItem(QWidget):
-    def __init__(self, parent, current_row):
+    def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
         data = view_data("products")
