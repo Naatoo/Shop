@@ -213,6 +213,7 @@ class ProductsTemp(QTableWidget):
         self.quantity_list = []
         self.price_list = []
 
+        self.change_products()
         self.refresh_products()
 
     def change_products(self):

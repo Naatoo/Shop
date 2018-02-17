@@ -123,11 +123,14 @@ class OrdersTable(QTableWidget):
 
     @pyqtSlot()
     def show_details(self):
-        create_view_orders_items(self.row_data[0])
-        self.order = OrderDetailsWindow(parent=self)
-        width = 850
-        height = 600
-        self.order.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+        if not self.row_data:
+            return
+        else:
+            create_view_orders_items(self.row_data[0])
+            self.order = OrderDetailsWindow(parent=self)
+            width = 850
+            height = 600
+            self.order.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     @pyqtSlot()
     def order_paid(self, button, not_paid):

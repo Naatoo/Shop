@@ -42,6 +42,7 @@ class CustomersTable(QTableWidget):
         self.setSelectionMode(QAbstractItemView.SingleSelection)
 
         self.refresh_customers()
+        self.change_selection()
 
     def refresh_customers(self):
         self.customers_data = view_data("customers")
@@ -178,10 +179,17 @@ class CustomersWindow(QWidget):
         self.choose_customer_button.clicked.connect(self.select_and_close)
         self.layout.addWidget(self.choose_customer_button)
 
+        self.cancel_button = QPushButton("Cancel")
+        self.layout.addWidget(self.cancel_button)
+        self.cancel_button.clicked.connect(self.close)
+
         self.setLayout(self.layout)
         self.show()
 
     def select_and_close(self):
-        self.chosen_customer_id = self.customers_table.row_data_customers[0]
-        self.close()
-        self.parent().refresh_chosen_customer()
+        if not self.customers_table.row_data_customers:
+            return
+        else:
+            self.chosen_customer_id = self.customers_table.row_data_customers[0]
+            self.close()
+            self.parent().refresh_chosen_customer()
