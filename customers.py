@@ -237,7 +237,7 @@ class UpdateCustomerWindow(QWidget):
         update_customer([self.name_input_edit.text(),
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text(),
-                    self.parent().customers_table.currentRow()])
+                    self.parent().customers_table.currentRow() + 1])
         self.close()
         self.parent().customers_table.refresh_customers()
 

@@ -11,7 +11,13 @@ from queries import view_column_names, view_data
 def insert_product(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = "INSERT INTO products VALUES (%s, %s, %s, %s, %s)"
+    sql = '''INSERT INTO products
+             ("Name",
+             "Quantity",
+             "Selling price",
+             "Category")
+              VALUES
+              (%s, %s, %s, %s)'''
     cursor.execute(sql, data)
     connection.commit()
     connection.close()
@@ -272,27 +278,27 @@ class NewItem(QWidget):
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
 
-        self.default_values = []
-
-        self.id_label = QLabel("Product id")
-        self.id_input = QSpinBox()
-        self.id_input.setMaximum(100000)
-
-        self.indexes = [row[0] for row in self.data]
-        if min(self.indexes) > 2:
-            self.id_default = min(range(1, min(self.indexes) - 1))
-        elif min(self.indexes) == 2:
-            self.id_default = 1
-        else:
-            self.indexes_sorted = sorted(self.indexes)
-            for id in self.indexes_sorted:
-                if id + 1 not in self.indexes:
-                    self.id_default = id + 1
-                    break
-
-        self.id_input.setValue(self.id_default)
-        self.layout.addWidget(self.id_label, 0, 0)
-        self.layout.addWidget(self.id_input, 0, 1)
+        # self.default_values = []
+        #
+        # self.id_label = QLabel("Product id")
+        # self.id_input = QSpinBox()
+        # self.id_input.setMaximum(100000)
+        #
+        # self.indexes = [row[0] for row in self.data]
+        # if min(self.indexes) > 2:
+        #     self.id_default = min(range(1, min(self.indexes) - 1))
+        # elif min(self.indexes) == 2:
+        #     self.id_default = 1
+        # else:
+        #     self.indexes_sorted = sorted(self.indexes)
+        #     for id in self.indexes_sorted:
+        #         if id + 1 not in self.indexes:
+        #             self.id_default = id + 1
+        #             break
+        #
+        # self.id_input.setValue(self.id_default)
+        # self.layout.addWidget(self.id_label, 0, 0)
+        # self.layout.addWidget(self.id_input, 0, 1)
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
@@ -342,7 +348,7 @@ class NewItem(QWidget):
 
     @pyqtSlot()
     def reset_to_default(self):
-        self.id_input.setValue(self.id_default)
+        # self.id_input.setValue(self.id_default)
         self.name_input.setCurrentIndex(0)
         self.quantity_input.setValue(1)
         self.price_sell_input.setValue(100.00)
@@ -353,14 +359,14 @@ class NewItem(QWidget):
         self.data = view_data("products")
         if len(self.name_input_edit.text()) > 40 or self.name_input_edit.text() in [row[1] for row in self.data]:
             return
-        if self.id_input.text() in [str(row[0]) for row in self.data] or self.id_input.text() == 0:
-            return
+        # if self.id_input.text() in [str(row[0]) for row in self.data] or self.id_input.text() == 0:
+        #     return
         if self.price_sell_input.text() == "0,00":
             return
         if len(self.category_input_edit.text()) != 3 or self.category_input_edit.text().isupper() is not True:
             return
         try:
-            int(self.id_input.text())
+            # int(self.id_input.text())
             int(self.quantity_input.text())
             price = self.price_sell_input.text()
             price = price.replace(",", ".")
@@ -370,7 +376,7 @@ class NewItem(QWidget):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        insert_product([self.id_input.text(), self.name_input_edit.text(),
+        insert_product([self.name_input_edit.text(),
                         self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
         self.parent().select_category()
@@ -399,14 +405,14 @@ class UpdateItem(QWidget):
         self.quantity_label = QLabel("Quantity")
         self.quantity_input = QSpinBox()
         self.quantity_input.setMaximum(100000)
-        self.default_quantity = self.data[self.parent().products_table.currentRow()][2]
+        # self.default_quantity = self.data[self.parent().products_table.currentRow()][2]
         self.layout.addWidget(self.quantity_label, 2, 0)
         self.layout.addWidget(self.quantity_input, 2, 1)
 
         self.price_sell_label = QLabel("Selling price")
         self.price_sell_input = QDoubleSpinBox()
         self.price_sell_input.setMaximum(100000)
-        self.default_price = self.data[self.parent().products_table.currentRow()][3]
+        # self.default_price = self.data[self.parent().products_table.currentRow()][3]
         self.layout.addWidget(self.price_sell_label, 3, 0)
         self.layout.addWidget(self.price_sell_input, 3, 1)
 
@@ -452,7 +458,7 @@ class UpdateItem(QWidget):
             price = price.replace(",", ".")
         update_product([self.name_input_edit.text(),
                         self.quantity_input.text(), price, self.category_input_edit.text(),
-                        self.parent().products_table.currentRow()])
+                        self.parent().products_table.currentRow() + 1])
         self.close()
         self.parent().select_category()
 

@@ -225,7 +225,7 @@ class UpdateVendorWindow(QWidget):
 
     @pyqtSlot()
     def reset_to_default(self):
-        row = self.data[self.parent().customers_table.currentRow()]
+        row = self.data[self.parent().vendors_table.currentRow()]
         self.name_input.setCurrentText(row[1])
         self.city_input.setCurrentText(row[2])
         self.street_input.setCurrentText(row[3])
@@ -237,6 +237,6 @@ class UpdateVendorWindow(QWidget):
         update_vendor([self.name_input_edit.text(),
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text(),
-                    self.parent().vendors_table.currentRow()])
+                    self.parent().vendors_table.currentRow() + 1])
         self.close()
         self.parent().vendors_table.refresh_vendors()
