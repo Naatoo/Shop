@@ -76,7 +76,7 @@ class NewVendorWindow(QWidget):
     def __init__(self, parent=None):
         super(QWidget, self).__init__(parent)
 
-        data = view_data("vendors")
+        self.data = view_data("vendors")
 
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
@@ -85,7 +85,7 @@ class NewVendorWindow(QWidget):
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
-        self.name_input.addItems(set([item_id[1] for item_id in data]))
+        self.name_input.addItems(set([item_id[1] for item_id in self.data]))
         self.name_input_edit = QLineEdit()
 
         self.name_input.setLineEdit(self.name_input_edit)
@@ -94,7 +94,7 @@ class NewVendorWindow(QWidget):
 
         self.city_label = QLabel("City")
         self.city_input = QComboBox()
-        self.city_input.addItems(set([item_id[2] for item_id in data]))
+        self.city_input.addItems(set([item_id[2] for item_id in self.data]))
         self.city_input_edit = QLineEdit()
 
         self.city_input.setLineEdit(self.city_input_edit)
@@ -103,7 +103,7 @@ class NewVendorWindow(QWidget):
 
         self.street_label = QLabel("Street")
         self.street_input = QComboBox()
-        self.street_input.addItems(set([item_id[3] for item_id in data]))
+        self.street_input.addItems(set([item_id[3] for item_id in self.data]))
         self.street_input_edit = QLineEdit()
 
         self.street_input.setLineEdit(self.street_input_edit)
@@ -117,7 +117,7 @@ class NewVendorWindow(QWidget):
 
         self.zipcode_label = QLabel("Zip Code")
         self.zipcode_input = QComboBox()
-        self.zipcode_input.addItems(set([item_id[5] for item_id in data]))
+        self.zipcode_input.addItems(set([item_id[5] for item_id in self.data]))
         self.zipcode_input_edit = QLineEdit()
 
         self.zipcode_input.setLineEdit(self.zipcode_input_edit)
@@ -160,7 +160,7 @@ class UpdateVendorWindow(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
-        data = view_data("vendors")
+        self.data = view_data("vendors")
 
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
@@ -169,7 +169,7 @@ class UpdateVendorWindow(QWidget):
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
-        self.name_input.addItems(set([item_id[1] for item_id in data]))
+        self.name_input.addItems(set([item_id[1] for item_id in self.data]))
         self.name_input_edit = QLineEdit()
         self.name_input.setLineEdit(self.name_input_edit)
         self.layout.addWidget(self.name_label, 1, 0)
@@ -177,7 +177,7 @@ class UpdateVendorWindow(QWidget):
 
         self.city_label = QLabel("City")
         self.city_input = QComboBox()
-        self.city_input.addItems(set([item_id[2] for item_id in data]))
+        self.city_input.addItems(set([item_id[2] for item_id in self.data]))
         self.city_input_edit = QLineEdit()
 
         self.city_input.setLineEdit(self.city_input_edit)
@@ -186,7 +186,7 @@ class UpdateVendorWindow(QWidget):
 
         self.street_label = QLabel("Street")
         self.street_input = QComboBox()
-        self.street_input.addItems(set([item_id[3] for item_id in data]))
+        self.street_input.addItems(set([item_id[3] for item_id in self.data]))
         self.street_input_edit = QLineEdit()
 
         self.street_input.setLineEdit(self.street_input_edit)
@@ -200,7 +200,7 @@ class UpdateVendorWindow(QWidget):
 
         self.zipcode_label = QLabel("Zip Code")
         self.zipcode_input = QComboBox()
-        self.zipcode_input.addItems(set([item_id[5] for item_id in data]))
+        self.zipcode_input.addItems(set([item_id[5] for item_id in self.data]))
         self.zipcode_input_edit = QLineEdit()
 
         self.zipcode_input.setLineEdit(self.zipcode_input_edit)
@@ -219,16 +219,18 @@ class UpdateVendorWindow(QWidget):
         self.layout.addWidget(self.reset_button, 7, 2)
         self.reset_button.clicked.connect(self.reset_to_default)
 
+        self.reset_to_default()
         self.setLayout(self.layout)
         self.show()
 
     @pyqtSlot()
     def reset_to_default(self):
-        self.name_input.setCurrentIndex(0)
-        self.city_input.setCurrentIndex(0)
-        self.street_input.setCurrentIndex(0)
-        self.house_input.setText("1")
-        self.zipcode_input.setCurrentIndex(1)
+        row = self.data[self.parent().customers_table.currentRow()]
+        self.name_input.setCurrentText(row[1])
+        self.city_input.setCurrentText(row[2])
+        self.street_input.setCurrentText(row[3])
+        self.house_input.setText(row[4])
+        self.zipcode_input.setCurrentText(row[5])
 
     @pyqtSlot()
     def update(self):

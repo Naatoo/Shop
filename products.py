@@ -266,8 +266,7 @@ class NewItem(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
-        data = view_data("products")
-        print(data)
+        self.data = view_data("products")
         self.setAutoFillBackground(True)
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
@@ -279,9 +278,7 @@ class NewItem(QWidget):
         self.id_input = QSpinBox()
         self.id_input.setMaximum(100000)
 
-        # for row in data:
-        #     print(row[0])
-        self.indexes = [row[0] for row in data]
+        self.indexes = [row[0] for row in self.data]
         if min(self.indexes) > 2:
             self.id_default = min(range(1, min(self.indexes) - 1))
         elif min(self.indexes) == 2:
@@ -299,7 +296,7 @@ class NewItem(QWidget):
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
-        self.name_input.addItems(set([row[1] for row in data]))
+        self.name_input.addItems(set([row[1] for row in self.data]))
         self.name_input_edit = QLineEdit()
 
         self.name_input.setLineEdit(self.name_input_edit)
@@ -322,7 +319,7 @@ class NewItem(QWidget):
 
         self.category_label = QLabel("Category")
         self.category_input = QComboBox()
-        self.category_input.addItems(set([row[4] for row in data]))
+        self.category_input.addItems(set([row[4] for row in self.data]))
         self.category_input_edit = QLineEdit()
         self.category_input.setLineEdit(self.category_input_edit)
         self.layout.addWidget(self.category_label, 4, 0)
@@ -353,10 +350,10 @@ class NewItem(QWidget):
 
     @pyqtSlot()
     def add(self):
-        data = view_data("products")
-        if len(self.name_input_edit.text()) > 40 or self.name_input_edit.text() in [row[1] for row in data]:
+        self.data = view_data("products")
+        if len(self.name_input_edit.text()) > 40 or self.name_input_edit.text() in [row[1] for row in self.data]:
             return
-        if self.id_input.text() in [str(row[0]) for row in data] or self.id_input.text() == 0:
+        if self.id_input.text() in [str(row[0]) for row in self.data] or self.id_input.text() == 0:
             return
         if self.price_sell_input.text() == "0,00":
             return
@@ -383,7 +380,7 @@ class UpdateItem(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
-        data = view_data("products")
+        self.data = view_data("products")
         self.setAutoFillBackground(True)
 
         self.layout = QGridLayout()
@@ -392,7 +389,7 @@ class UpdateItem(QWidget):
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
-        self.name_input.addItems(set([row[1] for row in data]))
+        self.name_input.addItems(set([row[1] for row in self.data]))
         self.name_input_edit = QLineEdit()
         self.name_input.setLineEdit(self.name_input_edit)
 
@@ -402,21 +399,20 @@ class UpdateItem(QWidget):
         self.quantity_label = QLabel("Quantity")
         self.quantity_input = QSpinBox()
         self.quantity_input.setMaximum(100000)
-        self.default_quantity = data[self.parent().products_table.currentRow()][2]
-        print(self.default_quantity)
+        self.default_quantity = self.data[self.parent().products_table.currentRow()][2]
         self.layout.addWidget(self.quantity_label, 2, 0)
         self.layout.addWidget(self.quantity_input, 2, 1)
 
         self.price_sell_label = QLabel("Selling price")
         self.price_sell_input = QDoubleSpinBox()
         self.price_sell_input.setMaximum(100000)
-        self.default_price = data[self.parent().products_table.currentRow()][3]
+        self.default_price = self.data[self.parent().products_table.currentRow()][3]
         self.layout.addWidget(self.price_sell_label, 3, 0)
         self.layout.addWidget(self.price_sell_input, 3, 1)
 
         self.category_label = QLabel("Category")
         self.category_input = QComboBox()
-        self.category_input.addItems(set([row[4] for row in data]))
+        self.category_input.addItems(set([row[4] for row in self.data]))
         self.category_input_edit = QLineEdit()
         self.category_input.setLineEdit(self.category_input_edit)
 
@@ -443,10 +439,11 @@ class UpdateItem(QWidget):
 
     @pyqtSlot()
     def reset_to_default(self):
-        self.name_input.setCurrentIndex(1)
-        self.quantity_input.setValue(self.default_quantity)
-        self.price_sell_input.setValue(self.default_price)
-        self.category_input.setCurrentIndex(1)
+        row = self.data[self.parent().products_table.currentRow()]
+        self.name_input.setCurrentText(row[1])
+        self.quantity_input.setValue(int(row[2]))
+        self.price_sell_input.setValue(int(row[3]))
+        self.category_input.setCurrentText(row[4])
 
     @pyqtSlot()
     def update(self):
