@@ -160,8 +160,13 @@ class MainWidget(QWidget):
         self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
         self.add_customers_button.clicked.connect(self.add_customer)
 
-        self.tab3.layout.addWidget(self.customers_table)
+        self.update_button_customers = QPushButton("Update customer", self)
+        self.update_button_customers.setToolTip("Update selected customer")
+        self.update_button_customers.clicked.connect(self.update_customer)
+
         self.tab3.layout.addWidget(self.add_customers_button)
+        self.tab3.layout.addWidget(self.update_button_customers)
+        self.tab3.layout.addWidget(self.customers_table)
         self.tab3.setLayout(self.tab3.layout)
         self.tab3.layout.update()
 
@@ -208,6 +213,15 @@ class MainWidget(QWidget):
         height = 300
         self.customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
+    @pyqtSlot()
+    def update_customer(self):
+        if self.customers_table.currentRow() < 0:
+            return
+        self.update_customer = customers.UpdateCustomerWindow(self)
+        width = 400
+        height = 300
+        self.update_customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2),
+                                       width, height)
         # -------------------------------------------------------
 
     @pyqtSlot()
@@ -243,7 +257,7 @@ class MainWidget(QWidget):
 
     @pyqtSlot()
     def add_vendor(self):
-        self.vendor = vendors.NewVendor(parent=self)
+        self.vendor = vendors.NewVendorWindow(parent=self)
         width = 400
         height = 300
         self.vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width,
@@ -261,7 +275,7 @@ class MainWidget(QWidget):
     def update_vendor(self):
         if self.vendors_table.currentRow() < 0:
             return
-        self.update_vendor = vendors.UpdateVendor()
+        self.update_vendor = vendors.UpdateVendorWindow(self)
         width = 400
         height = 300
         self.update_vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)

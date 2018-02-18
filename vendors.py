@@ -38,7 +38,7 @@ def update_vendor(data):
             "Street"=%s,
             "House number"=%s,
             "Zip code"=%s
-             WHERE "ID"=%s)'''
+             WHERE "ID"=%s'''
     cursor.execute(sql, data)
     connection.commit()
     connection.close()
@@ -72,7 +72,7 @@ class VendorsTable(QTableWidget):
         self.row_data = [cell.text() for cell in items]
 
 
-class NewVendor(QWidget):
+class NewVendorWindow(QWidget):
     def __init__(self, parent=None):
         super(QWidget, self).__init__(parent)
 
@@ -82,27 +82,6 @@ class NewVendor(QWidget):
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
         self.setAutoFillBackground(True)
-        self.default_values = []
-
-        self.id_label = QLabel("Vendor id")
-        self.id_input = QSpinBox()
-        self.id_input.setMaximum(100000)
-
-        self.indexes = [number[0] for number in data]
-        if min(self.indexes) > 2:
-            self.id_default = min(range(1, min(self.indexes) - 1))
-        elif min(self.indexes) == 2:
-            self.id_default = 1
-        else:
-            self.indexes_sorted = sorted(self.indexes)
-            for id in self.indexes_sorted:
-                if id + 1 not in self.indexes:
-                    self.id_default = id + 1
-                    break
-
-        self.id_input.setValue(self.id_default)
-        self.layout.addWidget(self.id_label, 0, 0)
-        self.layout.addWidget(self.id_input, 0, 1)
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
@@ -162,7 +141,6 @@ class NewVendor(QWidget):
 
     @pyqtSlot()
     def reset_to_default(self):
-        self.id_input.setValue(self.id_default)
         self.name_input.setCurrentIndex(0)
         self.city_input.setCurrentIndex(0)
         self.street_input.setCurrentIndex(0)
@@ -178,7 +156,7 @@ class NewVendor(QWidget):
         self.parent().vendors_table.refresh_vendors()
 
 
-class UpdateVendor(QWidget):
+class UpdateVendorWindow(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
 
@@ -188,7 +166,6 @@ class UpdateVendor(QWidget):
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
         self.setAutoFillBackground(True)
-        self.default_values = []
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
@@ -247,7 +224,6 @@ class UpdateVendor(QWidget):
 
     @pyqtSlot()
     def reset_to_default(self):
-        self.id_input.setValue(self.id_default)
         self.name_input.setCurrentIndex(0)
         self.city_input.setCurrentIndex(0)
         self.street_input.setCurrentIndex(0)
@@ -256,7 +232,6 @@ class UpdateVendor(QWidget):
 
     @pyqtSlot()
     def update(self):
-        print(self.parent().vendors_table)
         update_vendor([self.name_input_edit.text(),
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text(),
