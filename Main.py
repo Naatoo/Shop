@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QDialog
 from PyQt5.QtWidgets import QVBoxLayout, QMessageBox, QLineEdit, QAction, QLabel, QComboBox, QStyleFactory
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QTabWidget, QHBoxLayout, QGridLayout
 from PyQt5.QtCore import pyqtSlot, QObject
 
 from datetime import datetime
@@ -172,7 +172,9 @@ class MainWidget(QWidget):
 
         # -------------------------------------------------------
 
-        self.tab4.layout = QVBoxLayout(self)
+        self.tab4.layout = QGridLayout(self)
+
+        # self.tab4.layout.setColumnStretch(1, 4)
         self.vendors_table = vendors.VendorsTable()
 
         self.add_vendors_button = QPushButton("Add new vendors", self)
@@ -187,13 +189,32 @@ class MainWidget(QWidget):
         self.update_button_vendors.setToolTip("Update selected vendor")
         self.update_button_vendors.clicked.connect(self.update_vendor)
 
-        self.tab4.layout.addWidget(self.add_vendors_button)
-        self.tab4.layout.addWidget(self.delete_button_vendors)
-        self.tab4.layout.addWidget(self.update_button_vendors)
-        self.tab4.layout.addWidget(self.vendors_table)
+        self.search_label = QLabel("Search by:")
+        self.dropdownlist_search = QComboBox()
+        categories = [column for index, column in enumerate(self.vendors_table.column_names)
+                      if index in range(3) or index == 5]
+        categories.insert(0, "All")
+        self.dropdownlist_search.addItems(categories)
+
+        self.search_field = QLineEdit()
+        self.search_field.textChanged.connect(self.search_vendors)
+
+        self.tab4.layout.addWidget(self.add_vendors_button, 0, 0)
+        self.tab4.layout.addWidget(self.delete_button_vendors, 0, 1)
+        self.tab4.layout.addWidget(self.update_button_vendors, 0, 2)
+        self.tab4.layout.addWidget(self.search_label, 1, 0)
+        self.tab4.layout.addWidget(self.dropdownlist_search, 1, 1)
+        self.tab4.layout.addWidget(self.search_field, 1, 2)
+        self.tab4.layout.addWidget(self.vendors_table, 2, 0, 1, 3)
         self.tab4.setLayout(self.tab4.layout)
 
         # -------------------------------------------------------
+
+    def search_vendors(self):
+        b = self.search_field.text()
+        search_by = self.dropdownlist_search.currentText()
+        print(b, search_by)
+        self.vendors_table.refresh_vendors(self.dropdownlist_search.currentText(), self.search_field.text())
 
     @pyqtSlot()
     def choose_customer(self):
