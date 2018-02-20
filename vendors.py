@@ -56,30 +56,105 @@ def search_vendor(data):
                  OR "Name" ILIKE %s
                  OR "City" ILIKE %s 
                  OR "Street" ILIKE %s
-                 OR "Zip code" ILIKE %s '''
+                 OR "Zip code" ILIKE %s
+                 ORDER BY "ID"'''
         cursor.execute(sql, tuple([text for text in data[1] for columns in range(5)]))
     else:
         if data[0] == "Id":
             sql = '''SELECT * FROM vendors
-                    WHERE "ID"=%s '''
+                    WHERE "ID"=%s
+                    ORDER BY "ID" '''
         elif data[0] == "Name":
             sql = '''SELECT * FROM vendors
-                    WHERE "Name" ILIKE %s '''
+                    WHERE "Name" ILIKE %s
+                    ORDER BY "ID" '''
         elif data[0] == "City":
             sql = '''SELECT * FROM vendors
-                    WHERE "City" ILIKE %s '''
+                    WHERE "City" ILIKE %s 
+                    ORDER BY "ID" '''
         elif data[0] == "Street":
             sql = '''SELECT * FROM vendors
-                    WHERE "Street" ILIKE %s '''
+                    WHERE "Street" ILIKE %s
+                    ORDER BY "ID" '''
         elif data[0] == "Zipcode":
             sql = '''SELECT * FROM vendors
-                    WHERE "Zip code" ILIKE %s '''
+                    WHERE "Zip code" ILIKE %s
+                    ORDER BY "ID" '''
         cursor.execute(sql, data[1])
 
     rows = cursor.fetchall()
 
     connection.close()
     return rows
+
+
+class VendorsWidgetTab(QTabWidget):
+    def __init__(self):
+        super(QWidget, self).__init__()
+
+        self.layout = QGridLayout(self)
+
+        self.vendors_table = VendorsTable()
+
+        self.add_vendors_button = QPushButton("Add new vendors", self)
+        self.add_vendors_button.setToolTip("Add a vendor which is not in the list yet")
+        self.add_vendors_button.clicked.connect(self.add_vendor)
+
+        self.delete_button_vendors = QPushButton("Delete vendor", self)
+        self.delete_button_vendors.setToolTip("Delete selected vendor")
+        self.delete_button_vendors.clicked.connect(self.delete_vendor)
+
+        self.update_button_vendors = QPushButton("Update vendor", self)
+        self.update_button_vendors.setToolTip("Update selected vendor")
+        self.update_button_vendors.clicked.connect(self.update_vendor)
+
+        self.search_label = QLabel("Search by:")
+        self.dropdownlist_search = QComboBox()
+        categories = [column for index, column in enumerate(self.vendors_table.column_names)
+                      if index in range(4) or index == 5]
+        categories.insert(0, "All")
+        self.dropdownlist_search.addItems(categories)
+
+        self.search_field = QLineEdit()
+        self.search_field.textChanged.connect(self.search_vendors)
+
+        self.layout.addWidget(self.add_vendors_button, 0, 0)
+        self.layout.addWidget(self.delete_button_vendors, 0, 1)
+        self.layout.addWidget(self.update_button_vendors, 0, 2)
+        self.layout.addWidget(self.search_label, 1, 0)
+        self.layout.addWidget(self.dropdownlist_search, 1, 1)
+        self.layout.addWidget(self.search_field, 1, 2)
+        self.layout.addWidget(self.vendors_table, 2, 0, 1, 3)
+        self.setLayout(self.layout)
+
+    def search_vendors(self):
+        self.vendors_table.refresh_vendors(self.dropdownlist_search.currentText(), self.search_field.text())
+
+    @pyqtSlot()
+    def add_vendor(self):
+        self.vendor = NewVendorWindow(parent=self)
+        width = 400
+        height = 300
+        self.vendor.setGeometry(int(self.width() / 2 - width / 2),
+                                int(self.height() / 2 - height / 2), width, height)
+
+
+    @pyqtSlot()
+    def delete_vendor(self):
+        if self.vendors_table.currentRow() < 0:
+            return
+        delete_vendor(self.vendors_table.row_data[0])
+        self.search_vendors()
+
+    @pyqtSlot()
+    def update_vendor(self):
+        if self.vendors_table.currentRow() < 0:
+            return
+        self.update_vendor = UpdateVendorWindow(self)
+        width = 400
+        height = 300
+        self.update_vendor.setGeometry(int(self.width() / 2 - width / 2),
+                                       int(self.height() / 2 - height / 2), width, height)
 
 
 class VendorsTable(QTableWidget):
@@ -191,7 +266,7 @@ class NewVendorWindow(QWidget):
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
-        self.parent().vendors_table.refresh_vendors(search_by="All", text="")
+        self.parent().search_vendors()
 
 
 class UpdateVendorWindow(QWidget):
@@ -275,6 +350,6 @@ class UpdateVendorWindow(QWidget):
         update_vendor([self.name_input_edit.text(),
                     self.city_input_edit.text(), self.street_input_edit.text(),
                     self.house_input.text(), self.zipcode_input_edit.text(),
-                    self.parent().vendors_table.currentRow() + 1])
+                    self.parent().vendors_table.row_data[0]])
         self.close()
-        self.parent().vendors_table.refresh_vendors(search_by="All", text="")
+        self.parent().search_vendors()

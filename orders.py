@@ -1,7 +1,7 @@
 import psycopg2
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget
 from PyQt5.QtCore import pyqtSlot
 
 from datetime import datetime
@@ -77,6 +77,29 @@ class OrderQueries:
         cursor.execute(sql, data)
         connection.commit()
         connection.close()
+
+
+class OrdersWidgetTab(QTabWidget):
+    def __init__(self):
+        super(QWidget, self).__init__()
+
+        self.layout = QVBoxLayout(self)
+
+        self.orders_table = OrdersTable()
+
+        self.order_details_button = QPushButton("Show order details", self)
+        self.order_details_button.setToolTip("Show details of selected order")
+        self.order_details_button.clicked.connect(self.orders_table.show_details)
+
+        self.delete_button_orders = QPushButton("Delete order", self)
+        self.delete_button_orders.setToolTip("Delete selected order")
+        self.delete_button_orders.clicked.connect(self.orders_table.delete_order)
+
+        self.layout.addWidget(self.order_details_button)
+        self.layout.addWidget(self.delete_button_orders)
+        self.layout.addWidget(self.orders_table)
+
+        self.setLayout(self.layout)
 
 
 class OrdersTable(QTableWidget):

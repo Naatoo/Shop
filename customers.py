@@ -1,7 +1,7 @@
 import psycopg2
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget
 from PyQt5.QtCore import pyqtSlot
 
 from queries import view_column_names, view_data
@@ -42,6 +42,46 @@ def update_customer(data):
     cursor.execute(sql, data)
     connection.commit()
     connection.close()
+
+
+class CustomersWidgetTab(QTabWidget):
+    def __init__(self):
+        super(QWidget, self).__init__()
+
+        self.layout = QVBoxLayout(self)
+
+        self.customers_table = CustomersTable()
+        self.add_customers_button = QPushButton("Add new customers", self)
+        self.add_customers_button.setToolTip("Add a customer which is not in the list yet")
+        self.add_customers_button.clicked.connect(self.add_customer)
+
+        self.update_button_customers = QPushButton("Update customer", self)
+        self.update_button_customers.setToolTip("Update selected customer")
+        self.update_button_customers.clicked.connect(self.update_customer)
+
+        self.layout.addWidget(self.add_customers_button)
+        self.layout.addWidget(self.update_button_customers)
+        self.layout.addWidget(self.customers_table)
+        self.setLayout(self.layout)
+        self.layout.update()
+
+
+    @pyqtSlot()
+    def add_customer(self):
+        self.customer = NewCustomerWindow(parent=self)
+        width = 400
+        height = 300
+        self.customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+
+    @pyqtSlot()
+    def update_customer(self):
+        if self.customers_table.currentRow() < 0:
+            return
+        self.update_customer = UpdateCustomerWindow(self)
+        width = 400
+        height = 300
+        self.update_customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2),
+                                       width, height)
 
 
 class CustomersTable(QTableWidget):
