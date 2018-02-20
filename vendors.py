@@ -2,7 +2,7 @@ import psycopg2
 from psycopg2.extensions import AsIs
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget
 from PyQt5.QtCore import pyqtSlot
 
 
@@ -51,25 +51,31 @@ def search_vendor(data):
     cursor = connection.cursor()
     if data[0] == "All":
         sql = '''SELECT * FROM vendors
-                WHERE "ID"=%s OR "Name" ILIKE %s OR "City" ILIKE %s 
-                OR "Street" ILIKE %s OR "Zip code" ILIKE %s '''
-    elif data[0] == "Id":
-        sql = '''SELECT * FROM vendors
-                WHERE "ID"=%s '''
-    elif data[0] == "Name":
-        sql = '''SELECT * FROM vendors
-                WHERE "Name" ILIKE %s '''
-    elif data[0] == "City":
-        sql = '''SELECT * FROM vendors
-                WHERE "City" ILIKE %s '''
-    elif data[0] == "Street":
-        sql = '''SELECT * FROM vendors
-                WHERE "Street" ILIKE %s '''
-    elif data[0] == "Zipcode":
-        sql = '''SELECT * FROM vendors
-                WHERE "Zip code" ILIKE %s '''
-    print(sql)
-    cursor.execute(sql, data[1])
+                 WHERE
+                 CAST("ID" AS TEXT) LIKE %s
+                 OR "Name" ILIKE %s
+                 OR "City" ILIKE %s 
+                 OR "Street" ILIKE %s
+                 OR "Zip code" ILIKE %s '''
+        cursor.execute(sql, tuple([text for text in data[1] for columns in range(5)]))
+    else:
+        if data[0] == "Id":
+            sql = '''SELECT * FROM vendors
+                    WHERE "ID"=%s '''
+        elif data[0] == "Name":
+            sql = '''SELECT * FROM vendors
+                    WHERE "Name" ILIKE %s '''
+        elif data[0] == "City":
+            sql = '''SELECT * FROM vendors
+                    WHERE "City" ILIKE %s '''
+        elif data[0] == "Street":
+            sql = '''SELECT * FROM vendors
+                    WHERE "Street" ILIKE %s '''
+        elif data[0] == "Zipcode":
+            sql = '''SELECT * FROM vendors
+                    WHERE "Zip code" ILIKE %s '''
+        cursor.execute(sql, data[1])
+
     rows = cursor.fetchall()
 
     connection.close()
@@ -93,12 +99,7 @@ class VendorsTable(QTableWidget):
         self.refresh_vendors(search_by="All", text="")
 
     def refresh_vendors(self, search_by, text):
-        text = text + "%"
-        if search_by == "All":
-            self.data = view_data("vendors")
-        else:
-            self.data = search_vendor((search_by, (text,),))
-        print(self.data)
+        self.data = search_vendor((search_by, (text + "%",),))
         self.setRowCount(len(self.data))
         for row_id, row in enumerate(self.data):
             for column_id, cell in enumerate(row):

@@ -172,9 +172,10 @@ class MainWidget(QWidget):
 
         # -------------------------------------------------------
 
+
+
         self.tab4.layout = QGridLayout(self)
 
-        # self.tab4.layout.setColumnStretch(1, 4)
         self.vendors_table = vendors.VendorsTable()
 
         self.add_vendors_button = QPushButton("Add new vendors", self)
@@ -192,7 +193,7 @@ class MainWidget(QWidget):
         self.search_label = QLabel("Search by:")
         self.dropdownlist_search = QComboBox()
         categories = [column for index, column in enumerate(self.vendors_table.column_names)
-                      if index in range(3) or index == 5]
+                      if index in range(4) or index == 5]
         categories.insert(0, "All")
         self.dropdownlist_search.addItems(categories)
 
@@ -283,14 +284,14 @@ class MainWidget(QWidget):
         height = 300
         self.vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width,
                                 height)
-        self.vendors_table.refresh_vendors()
+   #     self.vendors_table.refresh_vendors(search_by="All", text="")
 
     @pyqtSlot()
     def delete_vendor(self):
         if self.vendors_table.currentRow() < 0:
             return
         vendors.delete_vendor(self.vendors_table.row_data[0])
-        self.vendors_table.refresh_vendors()
+  #      self.vendors_table.refresh_vendors(search_by="All", text="")
 
     @pyqtSlot()
     def update_vendor(self):
