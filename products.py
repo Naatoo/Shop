@@ -1,6 +1,6 @@
 import psycopg2
 
-from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton, QTabWidget
 from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox
 from PyQt5.QtCore import pyqtSlot
 from PyQt5 import QtWidgets
@@ -113,6 +113,75 @@ def temp_insert(data):
     cursor.execute(sql, data)
     connection.commit()
     connection.close()
+
+
+class ProductsWidgetTab(QTabWidget):
+    def __init__(self):
+        super(QWidget, self).__init__()
+        self.layout = QGridLayout(self)
+
+        self.data = view_data("products")
+
+        self.add_button = QPushButton("Add new product", self)
+        self.add_button.setToolTip("Add an item which is not in the list yet")
+        self.add_button.clicked.connect(self.add_item)
+
+        self.update_button = QPushButton("Update product", self)
+        self.update_button.setToolTip("Update selected product")
+        self.update_button.clicked.connect(self.update_item)
+
+        self.delete_button = QPushButton("Delete product", self)
+        self.delete_button.setToolTip("Delete selected product")
+        self.delete_button.clicked.connect(self.delete_item)
+
+        self.dropdownlist_category = QComboBox()
+        categories = set([item_id[4] for item_id in self.data])
+        categories.add("All products")
+        self.dropdownlist_category.addItems(categories)
+        self.products_table = ProductsTable(parent=self)
+
+        self.dropdownlist_category.activated.connect(self.select_category)
+
+        self.layout.addWidget(self.add_button)
+        self.layout.addWidget(self.update_button)
+        self.layout.addWidget(self.delete_button)
+        self.layout.addWidget(self.dropdownlist_category)
+        self.layout.addWidget(self.products_table)
+        self.setLayout(self.layout)
+
+    @pyqtSlot()
+    def select_category(self):
+        args = self.dropdownlist_category.currentText(),
+        self.products_table.refresh_products(*args)
+
+    @pyqtSlot()
+    def add_item(self):
+        self.item = NewItem(parent=self)
+        width = 400
+        height = 300
+        self.item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+
+    @pyqtSlot()
+    def delete_item(self):
+        if self.products_table.currentRow() < 0:
+            return
+        buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove "
+                                           + self.products_table.row_data[1],
+                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if buttonReply == QMessageBox.No:
+            return
+        else:
+            delete_product(self.products_table.row_data[0])
+            self.select_category()
+
+    @pyqtSlot()
+    def update_item(self):
+        if self.products_table.currentRow() < 0:
+            return
+        self.update_item = UpdateItem(self)
+        width = 400
+        height = 300
+        self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
 
 class SelectItem(QWidget):
