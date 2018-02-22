@@ -56,7 +56,7 @@ class MainWidget(QWidget):
         self.tabs.addTab(self.tab_orders, "Orders")
         self.tabs.addTab(self.tab_customers, "Customers")
         self.tabs.addTab(self.tab_vendors, "Vendors")
-        
+
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 

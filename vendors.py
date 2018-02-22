@@ -76,7 +76,7 @@ def search_vendor(data):
             sql = '''SELECT * FROM vendors
                     WHERE "Street" ILIKE %s
                     ORDER BY "ID" '''
-        elif data[0] == "Zipcode":
+        elif data[0] == "Zip Code":
             sql = '''SELECT * FROM vendors
                     WHERE "Zip code" ILIKE %s
                     ORDER BY "ID" '''
@@ -137,7 +137,6 @@ class VendorsWidgetTab(QTabWidget):
         height = 300
         self.vendor.setGeometry(int(self.width() / 2 - width / 2),
                                 int(self.height() / 2 - height / 2), width, height)
-
 
     @pyqtSlot()
     def delete_vendor(self):
@@ -348,8 +347,8 @@ class UpdateVendorWindow(QWidget):
     @pyqtSlot()
     def update(self):
         update_vendor([self.name_input_edit.text(),
-                    self.city_input_edit.text(), self.street_input_edit.text(),
-                    self.house_input.text(), self.zipcode_input_edit.text(),
-                    self.parent().vendors_table.row_data[0]])
+                       self.city_input_edit.text(), self.street_input_edit.text(),
+                       self.house_input.text(), self.zipcode_input_edit.text(),
+                       self.parent().vendors_table.row_data[0]])
         self.close()
         self.parent().search_vendors()
