@@ -64,30 +64,30 @@ class MainWidget(QWidget):
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-        # self.tab0.layout = QVBoxLayout(self)
-        # self.default_values = []
-        #
-        # self.customers, self.id, self.products = orders.OrderQueries.view_new_order()
-        #
-        # tables.temp()
-        # self.choose_customer_button = QPushButton("Choose customer", self)
-        # self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
-        # self.choose_customer_button.clicked.connect(self.choose_customer)
-        # self.tab0.layout.addWidget(self.choose_customer_button)
-        #
-        # self.label_chosen_customer = QLabel("Choose customer")
-        # self.tab0.layout.addWidget(self.label_chosen_customer)
-        #
-        # self.add_button = QPushButton("Add product", self)
-        # self.add_button.setToolTip("Add new product to the order")
-        # self.add_button.clicked.connect(self.add_item_to_order)
-        # self.tab0.layout.addWidget(self.add_button)
-        #
-        # self.temp_products = products.ProductsTemp()
-        #
-        # self.delete_button = QPushButton("Delete product", self)
-        # self.delete_button.setToolTip("Delete selected product from this order")
-        # self.delete_button.clicked.connect(self.temp_products.delete)
+    # self.tab0.layout = QVBoxLayout(self)
+    # self.default_values = []
+    #
+    # self.customers, self.id, self.products = orders.OrderQueries.view_new_order()
+    #
+    # tables.temp()
+    # self.choose_customer_button = QPushButton("Choose customer", self)
+    # self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
+    # self.choose_customer_button.clicked.connect(self.choose_customer)
+    # self.tab0.layout.addWidget(self.choose_customer_button)
+    #
+    # self.label_chosen_customer = QLabel("Choose customer")
+    # self.tab0.layout.addWidget(self.label_chosen_customer)
+    #
+    # self.add_button = QPushButton("Add product", self)
+    # self.add_button.setToolTip("Add new product to the order")
+    # self.add_button.clicked.connect(self.add_item_to_order)
+    # self.tab0.layout.addWidget(self.add_button)
+    #
+    # self.temp_products = products.ProductsTemp()
+    #
+    # self.delete_button = QPushButton("Delete product", self)
+    # self.delete_button.setToolTip("Delete selected product from this order")
+    # self.delete_button.clicked.connect(self.temp_products.delete)
         # self.tab0.layout.addWidget(self.delete_button)
         #
         # self.orders_data = orders.view_data("orders_view")

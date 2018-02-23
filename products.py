@@ -85,24 +85,6 @@ def update_quantity(data):
         connection.commit()
     connection.close()
 
-# def view(table_name):
-#     data = (table_name,)
-#     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-#     cursor = connection.cursor()
-#
-#     sql = '''SELECT * FROM %s ORDER BY "ID"''' % table_name
-#     cursor.execute(sql)
-#     rows = cursor.fetchall()
-#
-#     sql = "SELECT column_name FROM information_schema.columns WHERE table_name=%s"
-#     cursor.execute(sql, data)
-#     column_names = cursor.fetchall()
-#     column_names_final = [tup[0].title() for tup in column_names]
-#
-#     connection.close()
-#     return column_names_final, rows
-
-
 def temp_insert(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
@@ -135,11 +117,10 @@ class ProductsWidgetTab(QTabWidget):
         self.delete_button.clicked.connect(self.delete_item)
 
         self.dropdownlist_category = QComboBox()
-        categories = set([item_id[4] for item_id in self.data])
-        categories.add("All products")
+        categories = list({item_id[4] for item_id in self.data})
+        categories.insert(0, "All products")
         self.dropdownlist_category.addItems(categories)
         self.products_table = ProductsTable(parent=self)
-
         self.dropdownlist_category.activated.connect(self.select_category)
 
         self.layout.addWidget(self.add_button)
@@ -165,8 +146,8 @@ class ProductsWidgetTab(QTabWidget):
     def delete_item(self):
         if self.products_table.currentRow() < 0:
             return
-        buttonReply = QMessageBox.question(self, 'Confirmation', "Do you want to remove "
-                                           + self.products_table.row_data[1],
+        buttonReply = QMessageBox.question(self, 'Confirmation',
+                                           "Do you want to remove " + self.products_table.row_data[1],
                                            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if buttonReply == QMessageBox.No:
             return
@@ -181,7 +162,8 @@ class ProductsWidgetTab(QTabWidget):
         self.update_item = UpdateItem(self)
         width = 400
         height = 300
-        self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+        self.update_item.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width,
+                                     height)
 
 
 class SelectItem(QWidget):
@@ -200,8 +182,8 @@ class SelectItem(QWidget):
 
         self.dropdownlist_category = QComboBox()
         self.data = view_data("products")
-        categories = set([item_id[4] for item_id in self.data])
-        categories.add("All products")
+        categories = list({item_id[4] for item_id in self.data})
+        categories.insert(0, "All products")
         self.dropdownlist_category.addItems(categories)
 
         self.products_table = ProductsTable(parent=self)
@@ -445,8 +427,8 @@ class NewItem(QWidget):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        insert_product([self.name_input_edit.text(),
-                        self.quantity_input.text(), price, self.category_input_edit.text()])
+        insert_product(
+            [self.name_input_edit.text(), self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
         self.parent().select_category()
 
@@ -525,11 +507,7 @@ class UpdateItem(QWidget):
         price = self.price_sell_input.text()
         if "," in price:
             price = price.replace(",", ".")
-        update_product([self.name_input_edit.text(),
-                        self.quantity_input.text(), price, self.category_input_edit.text(),
+        update_product([self.name_input_edit.text(), self.quantity_input.text(), price, self.category_input_edit.text(),
                         self.parent().products_table.currentRow() + 1])
         self.close()
         self.parent().select_category()
-
-
-

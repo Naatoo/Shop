@@ -1,7 +1,7 @@
 import psycopg2
 
-from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget
+from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout, QGridLayout, QLabel, QComboBox
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget, QLineEdit
 from PyQt5.QtCore import pyqtSlot
 
 from datetime import datetime
@@ -12,7 +12,6 @@ from views import create_view_orders_items
 
 
 class OrderQueries:
-
     @staticmethod
     def delete_order(id):
         connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
@@ -43,7 +42,7 @@ class OrderQueries:
         cursor.execute(sql)
         products = cursor.fetchall()
 
-        return [name[0] for name in customers],  orders_id[0], products
+        return [name[0] for name in customers], orders_id[0], products
 
     @staticmethod
     def insert_ordered_position(data):
@@ -61,7 +60,7 @@ class OrderQueries:
     def insert_order(data):
         connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
         cursor = connection.cursor()
-        sql = '''INSERT INTO orders ("Ordered", "Paid", "ID_cust")
+        sql = '''INSERT INTO orders ("Order Date", "Payment Date", "ID_cust")
                  VALUES (%s, %s, %s)'''
         cursor.execute(sql, data)
         connection.commit()
@@ -72,18 +71,58 @@ class OrderQueries:
         connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
         cursor = connection.cursor()
         sql = '''UPDATE orders
-                 SET "Paid"=%s
+                 SET "Payment Date"=%s
                  WHERE "ID"=%s'''
         cursor.execute(sql, data)
         connection.commit()
         connection.close()
+
+    @staticmethod
+    def search_order(data):
+        connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+        cursor = connection.cursor()
+        if data[0] == "All":
+            sql = '''SELECT * FROM orders_view
+                     WHERE
+                     CAST("ID" AS TEXT) LIKE %s
+                     OR "Customer" ILIKE %s
+                     OR CAST("Order Date" AS TEXT) ILIKE %s
+                     OR CAST("Payment Date" AS TEXT) ILIKE %s
+                     ORDER BY "ID"'''
+            cursor.execute(sql, tuple([text for text in data[1] for columns in range(4)]))
+        else:
+            if data[0] == "Id":
+                sql = '''SELECT * FROM orders_view
+                        WHERE CAST("ID" AS TEXT) ILIKE %s
+                        ORDER BY "ID" '''
+            elif data[0] == "Customer":
+                sql = '''SELECT * FROM orders_view
+                        WHERE "Customer" ILIKE %s
+                        ORDER BY "ID" '''
+            elif data[0] == "Order Date":
+                sql = '''SELECT * FROM orders_view
+                        WHERE CAST("Order Date" AS TEXT) ILIKE %s
+                        ORDER BY "ID" '''
+            elif data[0] == "Payment Date":
+                sql = '''SELECT * FROM orders_view
+                        WHERE CAST("Payment Date" AS TEXT) ILIKE %s
+                        ORDER BY "ID" '''
+            elif data[0] == "Zip Code":
+                sql = '''SELECT * FROM vendors
+                        WHERE "Zip code" ILIKE %s
+                        ORDER BY "ID" '''
+            cursor.execute(sql, data[1])
+
+        rows = cursor.fetchall()
+        connection.close()
+        return rows
 
 
 class OrdersWidgetTab(QTabWidget):
     def __init__(self):
         super(QWidget, self).__init__()
 
-        self.layout = QVBoxLayout(self)
+        self.layout = QGridLayout(self)
 
         self.orders_table = OrdersTable()
 
@@ -95,11 +134,27 @@ class OrdersWidgetTab(QTabWidget):
         self.delete_button_orders.setToolTip("Delete selected order")
         self.delete_button_orders.clicked.connect(self.orders_table.delete_order)
 
-        self.layout.addWidget(self.order_details_button)
-        self.layout.addWidget(self.delete_button_orders)
-        self.layout.addWidget(self.orders_table)
+        self.search_label = QLabel("Search by:")
+        self.dropdownlist_search = QComboBox()
+        categories = [column for index, column in enumerate(self.orders_table.column_names) if
+                      index in range(4) or index == 5]
+        categories.insert(0, "All")
+        self.dropdownlist_search.addItems(categories)
+
+        self.search_field = QLineEdit()
+        self.search_field.textChanged.connect(self.search_orders)
+
+        self.layout.addWidget(self.order_details_button, 0, 0)
+        self.layout.addWidget(self.delete_button_orders, 0, 1)
+        self.layout.addWidget(self.search_label, 1, 0)
+        self.layout.addWidget(self.dropdownlist_search, 1, 1)
+        self.layout.addWidget(self.search_field, 1, 2)
+        self.layout.addWidget(self.orders_table, 2, 0, 1, 3)
 
         self.setLayout(self.layout)
+
+    def search_orders(self):
+        self.orders_table.refresh_orders(self.dropdownlist_search.currentText(), self.search_field.text())
 
 
 class OrdersTable(QTableWidget):
@@ -115,13 +170,14 @@ class OrdersTable(QTableWidget):
 
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.refresh_orders()
+        self.refresh_orders(search_by="All", text="")
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.change_orders()
 
-    def refresh_orders(self):
+    def refresh_orders(self, search_by, text):
         not_paid = {}
-        self.data = view_data("orders_view")
+        self.data = OrderQueries.search_order((search_by, (text + "%",),))
+ #       self.data = view_data("orders_view")
         self.setRowCount(len(self.data))
         for row_id, row in enumerate(self.data):
             for column_id, cell in enumerate(row):
@@ -142,7 +198,7 @@ class OrdersTable(QTableWidget):
         if self.currentRow() < 0:
             return
         OrderQueries.delete_order(self.row_data[0])
-        self.refresh_orders()
+        self.refresh_orders(search_by="All", text="")
 
     @pyqtSlot()
     def show_details(self):
@@ -153,7 +209,8 @@ class OrdersTable(QTableWidget):
             self.order = OrderDetailsWindow(parent=self)
             width = 850
             height = 600
-            self.order.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
+            self.order.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width,
+                                   height)
 
     @pyqtSlot()
     def order_paid(self, button, not_paid):
@@ -161,7 +218,7 @@ class OrdersTable(QTableWidget):
             if button is but:
                 OrderQueries.update_order((str(datetime.now())[:-7], id,))
                 self.removeCellWidget(id - 1, 3)
-                self.refresh_orders()
+                self.refresh_orders(search_by="All", text="")
                 break
 
 

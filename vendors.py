@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, Q
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget
 from PyQt5.QtCore import pyqtSlot
 
-
 from queries import view_data, view_column_names
 
 
@@ -110,8 +109,8 @@ class VendorsWidgetTab(QTabWidget):
 
         self.search_label = QLabel("Search by:")
         self.dropdownlist_search = QComboBox()
-        categories = [column for index, column in enumerate(self.vendors_table.column_names)
-                      if index in range(4) or index == 5]
+        categories = [column for index, column in enumerate(self.vendors_table.column_names) if
+                      index in range(4) or index == 5]
         categories.insert(0, "All")
         self.dropdownlist_search.addItems(categories)
 
@@ -135,8 +134,7 @@ class VendorsWidgetTab(QTabWidget):
         self.vendor = NewVendorWindow(parent=self)
         width = 400
         height = 300
-        self.vendor.setGeometry(int(self.width() / 2 - width / 2),
-                                int(self.height() / 2 - height / 2), width, height)
+        self.vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     @pyqtSlot()
     def delete_vendor(self):
@@ -152,8 +150,8 @@ class VendorsWidgetTab(QTabWidget):
         self.update_vendor = UpdateVendorWindow(self)
         width = 400
         height = 300
-        self.update_vendor.setGeometry(int(self.width() / 2 - width / 2),
-                                       int(self.height() / 2 - height / 2), width, height)
+        self.update_vendor.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width,
+                                       height)
 
 
 class VendorsTable(QTableWidget):
@@ -261,9 +259,8 @@ class NewVendorWindow(QWidget):
 
     @pyqtSlot()
     def add(self):
-        insert_vendor([self.name_input_edit.text(),
-                    self.city_input_edit.text(), self.street_input_edit.text(),
-                    self.house_input.text(), self.zipcode_input_edit.text()])
+        insert_vendor([self.name_input_edit.text(), self.city_input_edit.text(), self.street_input_edit.text(),
+                       self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
         self.parent().search_vendors()
 
@@ -346,8 +343,7 @@ class UpdateVendorWindow(QWidget):
 
     @pyqtSlot()
     def update(self):
-        update_vendor([self.name_input_edit.text(),
-                       self.city_input_edit.text(), self.street_input_edit.text(),
+        update_vendor([self.name_input_edit.text(), self.city_input_edit.text(), self.street_input_edit.text(),
                        self.house_input.text(), self.zipcode_input_edit.text(),
                        self.parent().vendors_table.row_data[0]])
         self.close()

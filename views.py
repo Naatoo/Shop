@@ -14,8 +14,8 @@ def create_view_orders():
                                     customers 
                                 WHERE
                                     orders."ID_cust" = customers."ID") AS "Customer",
-                        "Ordered",
-                        "Paid",
+                        "Order Date",
+                        "Payment Date",
                         (SELECT 
                                 SUM("Quantity" * "Selling price")
                             FROM
@@ -65,5 +65,3 @@ def create_view_orders_items(id_order):
     cursor.execute(sql, id_order)
     connection.commit()
     connection.close()
-
-

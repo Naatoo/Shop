@@ -21,12 +21,8 @@ def create_products(data):
     connection.close()
 
 
-data = (
-    ('Samsung S8/32GB/Black', 4, 2900, "MOB"),
-    ('LG G6/32GB/Grey', 12, 2300, "MOB"),
-    ('Fifa18 PC', 32, 219, "GAM"),
-    ('Nokia Lumia 900', 12, 700, "MOB"),
-)
+data = (('Samsung S8/32GB/Black', 4, 2900, "MOB"), ('LG G6/32GB/Grey', 12, 2300, "MOB"), ('Fifa18 PC', 32, 219, "GAM"),
+        ('Nokia Lumia 900', 12, 700, "MOB"),)
 
 
 def create_orders(data):
@@ -35,12 +31,12 @@ def create_orders(data):
     cursor.execute('''DROP TABLE IF EXISTS orders CASCADE''')
     cursor.execute('''CREATE TABLE orders
                      ("ID" SERIAL PRIMARY KEY NOT NULL,
-                      "Ordered" TIMESTAMP NOT NULL,
-                      "Paid" TIMESTAMP NULL,
+                      "Order Date" TIMESTAMP NOT NULL,
+                      "Payment Date" TIMESTAMP NULL,
                       "ID_cust" INT NOT NULL REFERENCES customers ("ID"));''')
     connection.commit()
     for row in data:
-        sql = '''INSERT INTO orders ("Ordered", "Paid", "ID_cust")
+        sql = '''INSERT INTO orders ("Order Date", "Payment Date", "ID_cust")
                  VALUES (%s, %s, %s)'''
         data = row
         cursor.execute(sql, data)
@@ -48,10 +44,7 @@ def create_orders(data):
     connection.close()
 
 
-data_ord = (
-    ('2017-11-28 11:45:45', '2017-11-29 12:45:45', 1),
-    ('2017-11-28 12:12:56', '2017-11-30 21:12:56', 2)
-)
+data_ord = (('2017-11-28 11:45:45', '2017-11-29 12:45:45', 1), ('2017-11-28 12:12:56', '2017-11-30 21:12:56', 2))
 
 
 def create_ordered_products(data):
@@ -74,13 +67,7 @@ def create_ordered_products(data):
     connection.close()
 
 
-data_pos = (
-    (1, 2900, 1, 1),
-    (2, 219, 3, 2),
-    (5, 2900, 1, 2),
-    (7, 700, 4, 2),
-    (2, 2300, 2, 1)
-)
+data_pos = ((1, 2900, 1, 1), (2, 219, 3, 2), (5, 2900, 1, 2), (7, 700, 4, 2), (2, 2300, 2, 1))
 
 
 def create_customers(data):
@@ -105,9 +92,7 @@ def create_customers(data):
 
 
 data_customers = (
-    ("Jan Kowalski", "Bydgoszcz", "Kwiatowa", "13A", "67-232"),
-    ("Adam Nowak", "Katowice", "Mariacka", "2/5", "25-200")
-)
+    ("Jan Kowalski", "Bydgoszcz", "Kwiatowa", "13A", "67-232"), ("Adam Nowak", "Katowice", "Mariacka", "2/5", "25-200"))
 
 
 def create_vendors(data):
@@ -131,10 +116,7 @@ def create_vendors(data):
     connection.close()
 
 
-data_vendors = (
-    ("Frapol", "Szczecin", "Ogrodowa", "143", "78-456"),
-    ("Rinus", "Rybnik", "Centralna", "2C", "41-328")
-)
+data_vendors = (("Frapol", "Szczecin", "Ogrodowa", "143", "78-456"), ("Rinus", "Rybnik", "Centralna", "2C", "41-328"))
 
 
 def temp():
@@ -159,6 +141,4 @@ def fill_in_with_sample_data():
     create_orders(data_ord)
     create_ordered_products(data_pos)
 
-
-
-#fill_in_with_sample_data()
+# fill_in_with_sample_data()

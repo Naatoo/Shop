@@ -81,6 +81,7 @@ class NewOrderWidgetTab(QTabWidget):
         self.selected_product.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     def refresh_products_in_order(self):
+
         self.temp_products.refresh_products()
 
     def finish_order(self):
@@ -95,7 +96,7 @@ class NewOrderWidgetTab(QTabWidget):
             now_datetime = str(datetime.now())[:-7]
             OrderQueries.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
             OrderQueries.insert_ordered_position(final_order_data)
-     #       self.parent().tab_orders.orders_table.refresh_orders()
+    #        self.parent().tab_orders.orders_table.refresh_orders(search_by="All", text="")
             update_quantity([row[1::-1] for row in final_order_data])
      #       self.parent().tab_products.select_category()
             tables.temp()

@@ -107,8 +107,8 @@ class CustomersWidgetTab(QTabWidget):
 
         self.search_label = QLabel("Search by:")
         self.dropdownlist_search = QComboBox()
-        categories = [column for index, column in enumerate(self.customers_table.column_names)
-                      if index in range(4) or index == 5]
+        categories = [column for index, column in enumerate(self.customers_table.column_names) if
+                      index in range(4) or index == 5]
         categories.insert(0, "All")
         self.dropdownlist_search.addItems(categories)
 
@@ -123,7 +123,6 @@ class CustomersWidgetTab(QTabWidget):
         self.layout.addWidget(self.search_field, 1, 2)
         self.layout.addWidget(self.customers_table, 2, 0, 1, 3)
         self.setLayout(self.layout)
-        self.layout.update()
 
     def search_customers(self):
         self.customers_table.refresh_customers(self.dropdownlist_search.currentText(), self.search_field.text())
@@ -133,8 +132,7 @@ class CustomersWidgetTab(QTabWidget):
         self.customer = NewCustomerWindow(parent=self)
         width = 400
         height = 300
-        self.customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2),
-                                  width, height)
+        self.customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     @pyqtSlot()
     def delete_customer(self):
@@ -150,8 +148,8 @@ class CustomersWidgetTab(QTabWidget):
         self.update_customer = UpdateCustomerWindow(self)
         width = 400
         height = 300
-        self.update_customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2),
-                                         width, height)
+        self.update_customer.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width,
+                                         height)
 
 
 class CustomersTable(QTableWidget):
@@ -258,9 +256,8 @@ class NewCustomerWindow(QWidget):
 
     @pyqtSlot()
     def add(self):
-        insert_customer([self.name_input_edit.text(),
-                    self.city_input_edit.text(), self.street_input_edit.text(),
-                    self.house_input.text(), self.zipcode_input_edit.text()])
+        insert_customer([self.name_input_edit.text(), self.city_input_edit.text(), self.street_input_edit.text(),
+                         self.house_input.text(), self.zipcode_input_edit.text()])
         self.close()
         self.parent().search_customers()
 
@@ -343,10 +340,9 @@ class UpdateCustomerWindow(QWidget):
 
     @pyqtSlot()
     def update(self):
-        update_customer([self.name_input_edit.text(),
-                        self.city_input_edit.text(), self.street_input_edit.text(),
-                        self.house_input.text(), self.zipcode_input_edit.text(),
-                        self.parent().customers_table.row_data_customers[0]])
+        update_customer([self.name_input_edit.text(), self.city_input_edit.text(), self.street_input_edit.text(),
+                         self.house_input.text(), self.zipcode_input_edit.text(),
+                         self.parent().customers_table.row_data_customers[0]])
         self.close()
         self.parent().search_customers()
 
