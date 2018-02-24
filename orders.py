@@ -137,7 +137,7 @@ class OrdersWidgetTab(QTabWidget):
         self.search_label = QLabel("Search by:")
         self.dropdownlist_search = QComboBox()
         categories = [column for index, column in enumerate(self.orders_table.column_names) if
-                      index in range(4) or index == 5]
+                      index in range(4)]
         categories.insert(0, "All")
         self.dropdownlist_search.addItems(categories)
 

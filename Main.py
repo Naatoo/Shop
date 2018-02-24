@@ -45,7 +45,7 @@ class MainWidget(QWidget):
         views.create_view_orders()
 
         self.tabs = QTabWidget()
-        self.tab_new_order = new_order.NewOrderWidgetTab(self)
+        self.tab_new_order = new_order.NewOrderWidgetTab()
         self.tab_products = products.ProductsWidgetTab()
         self.tab_orders = orders.OrdersWidgetTab()
         self.tab_customers = customers.CustomersWidgetTab()

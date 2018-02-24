@@ -26,8 +26,8 @@ def find_free_id():
 
 
 class NewOrderWidgetTab(QTabWidget):
-    def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+    def __init__(self):
+        super(QWidget, self).__init__()
         self.layout = QGridLayout(self)
 
         self.customers, self.id, self.products = OrderQueries.view_new_order()

@@ -85,6 +85,7 @@ def update_quantity(data):
         connection.commit()
     connection.close()
 
+
 def temp_insert(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
@@ -95,6 +96,37 @@ def temp_insert(data):
     cursor.execute(sql, data)
     connection.commit()
     connection.close()
+
+
+def search_product(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    if data[0] == "All":
+        sql = '''SELECT * FROM products
+                 WHERE
+                 CAST("ID" AS TEXT) LIKE %s
+                 OR "Name" ILIKE %s
+                 OR "Category" ILIKE %s
+                 ORDER BY "ID"'''
+        cursor.execute(sql, tuple([text for text in data[1] for column in range(3)]))
+    else:
+        if data[0] == "Id":
+            sql = '''SELECT * FROM products
+                    WHERE CAST("ID" AS TEXT) ILIKE %s
+                    ORDER BY "ID" '''
+        elif data[0] == "Name":
+            sql = '''SELECT * FROM products
+                    WHERE "Name" ILIKE %s
+                    ORDER BY "ID" '''
+        elif data[0] == "Category":
+            sql = '''SELECT * FROM products
+                    WHERE "Category" ILIKE %s
+                    ORDER BY "ID" '''
+        cursor.execute(sql, data[1])
+
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
 
 
 class ProductsWidgetTab(QTabWidget):
@@ -116,24 +148,30 @@ class ProductsWidgetTab(QTabWidget):
         self.delete_button.setToolTip("Delete selected product")
         self.delete_button.clicked.connect(self.delete_item)
 
-        self.dropdownlist_category = QComboBox()
-        categories = list({item_id[4] for item_id in self.data})
-        categories.insert(0, "All products")
-        self.dropdownlist_category.addItems(categories)
         self.products_table = ProductsTable(parent=self)
-        self.dropdownlist_category.activated.connect(self.select_category)
 
-        self.layout.addWidget(self.add_button)
-        self.layout.addWidget(self.update_button)
-        self.layout.addWidget(self.delete_button)
-        self.layout.addWidget(self.dropdownlist_category)
-        self.layout.addWidget(self.products_table)
+        self.search_label = QLabel("Search by:")
+        self.dropdownlist_search = QComboBox()
+        categories = [column for index, column in enumerate(self.products_table.products_column_names) if
+                      index in (0, 1, 4)]
+        categories.insert(0, "All")
+        self.dropdownlist_search.addItems(categories)
+
+        self.search_field = QLineEdit()
+        self.search_field.textChanged.connect(self.search_products)
+
+        self.layout.addWidget(self.add_button, 0, 0)
+        self.layout.addWidget(self.delete_button, 0, 1)
+        self.layout.addWidget(self.update_button, 0, 2)
+        self.layout.addWidget(self.search_label, 1, 0)
+        self.layout.addWidget(self.dropdownlist_search, 1, 1)
+        self.layout.addWidget(self.search_field, 1, 2)
+        self.layout.addWidget(self.products_table, 2, 0, 1, 3)
         self.setLayout(self.layout)
 
-    @pyqtSlot()
-    def select_category(self):
-        args = self.dropdownlist_category.currentText(),
-        self.products_table.refresh_products(*args)
+
+    def search_products(self):
+        self.products_table.refresh_products(self.dropdownlist_search.currentText(), self.search_field.text())
 
     @pyqtSlot()
     def add_item(self):
@@ -153,7 +191,7 @@ class ProductsWidgetTab(QTabWidget):
             return
         else:
             delete_product(self.products_table.row_data[0])
-            self.select_category()
+            self.search_products()
 
     @pyqtSlot()
     def update_item(self):
@@ -224,33 +262,18 @@ class ProductsTable(QTableWidget):
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.refresh_products()
+        self.refresh_products(search_by="All", text="")
 
     def change_products(self):
         items = self.selectedItems()
         self.row_data = [cell.text() for cell in items]
 
-    def refresh_products(self, *args):
-        self.rows = view_data("products")
-        if not args:
-            self.category = self.parent().dropdownlist_category.currentText()
-        else:
-            self.category = args[0]
-        if self.category == "All products":
-            self.setRowCount(len(self.rows))
-        else:
-            self.rows_table = [row[4] for row in self.rows].count(self.category)
-            self.setRowCount(self.rows_table)
-        row_id = 0
-        for row in self.rows:
-            if self.category == row[4] or self.category == "All products":
-                for column_id, cell in enumerate(row):
-                    self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-                row_id += 1
-
-    @pyqtSlot()
-    def select_category(self):
-        self.refresh_products()
+    def refresh_products(self, search_by, text):
+        self.data = search_product((search_by, (text + "%",),))
+        self.setRowCount(len(self.data))
+        for row_id, row in enumerate(self.data):
+            for column_id, cell in enumerate(row):
+                self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
 
 
 class ProductsTemp(QTableWidget):
@@ -328,28 +351,6 @@ class NewItem(QWidget):
         self.layout = QGridLayout()
         self.layout.setRowStretch(1, 6)
         self.layout.setColumnStretch(1, 2)
-
-        # self.default_values = []
-        #
-        # self.id_label = QLabel("Product id")
-        # self.id_input = QSpinBox()
-        # self.id_input.setMaximum(100000)
-        #
-        # self.indexes = [row[0] for row in self.data]
-        # if min(self.indexes) > 2:
-        #     self.id_default = min(range(1, min(self.indexes) - 1))
-        # elif min(self.indexes) == 2:
-        #     self.id_default = 1
-        # else:
-        #     self.indexes_sorted = sorted(self.indexes)
-        #     for id in self.indexes_sorted:
-        #         if id + 1 not in self.indexes:
-        #             self.id_default = id + 1
-        #             break
-        #
-        # self.id_input.setValue(self.id_default)
-        # self.layout.addWidget(self.id_label, 0, 0)
-        # self.layout.addWidget(self.id_input, 0, 1)
 
         self.name_label = QLabel("Name")
         self.name_input = QComboBox()
@@ -430,7 +431,7 @@ class NewItem(QWidget):
         insert_product(
             [self.name_input_edit.text(), self.quantity_input.text(), price, self.category_input_edit.text()])
         self.close()
-        self.parent().select_category()
+        self.parent().search_products()
 
 
 class UpdateItem(QWidget):
@@ -510,4 +511,4 @@ class UpdateItem(QWidget):
         update_product([self.name_input_edit.text(), self.quantity_input.text(), price, self.category_input_edit.text(),
                         self.parent().products_table.currentRow() + 1])
         self.close()
-        self.parent().select_category()
+        self.parent().search_products()
