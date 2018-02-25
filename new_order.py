@@ -154,7 +154,6 @@ class NewOrderWidgetTab(QTabWidget):
         self.customer_choice_window.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     def refresh_chosen_customer(self):
-    #    self.customers_table.refresh_customers()
         self.label_chosen_customer.setText(self.customer_choice_window.customers_table.row_data_customers[1])
 
     @pyqtSlot()
@@ -165,7 +164,6 @@ class NewOrderWidgetTab(QTabWidget):
         self.selected_product.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
 
     def refresh_products_in_order(self):
-
         self.temp_products.refresh_products()
 
     def finish_order(self):
