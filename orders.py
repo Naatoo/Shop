@@ -11,111 +11,77 @@ from queries import view_data, view_column_names
 from views import create_view_orders_items
 
 
-class OrderQueries:
-    @staticmethod
-    def delete_order(id):
-        connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-        cursor = connection.cursor()
+def update_order_paid(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
 
-        sql = '''DELETE FROM ordered_position WHERE "ID_ord"=%s;'''
-        cursor.execute(sql, (id,))
+    sql = '''
+    UPDATE orders
+    SET "Payment Date"=%s
+    WHERE "ID"=%s
+    '''
+    cursor.execute(sql, data)
 
-        sql = '''DELETE FROM orders WHERE "ID"=%s;'''
-        cursor.execute(sql, (id,))
+    connection.commit()
+    connection.close()
 
-        connection.commit()
-        connection.close()
 
-    @staticmethod
-    def view_new_order():
-        connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-        cursor = connection.cursor()
-        sql = '''SELECT "Name" FROM customers'''
-        cursor.execute(sql)
-        customers = cursor.fetchall()
+def search_order(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+    if data[0] == "All":
+        sql = '''
+        SELECT *
+        FROM orders_view
+        WHERE
+            CAST("ID" AS TEXT) LIKE %s
+            OR "Customer" ILIKE %s
+            OR CAST("Order Date" AS TEXT) ILIKE %s
+            OR CAST("Payment Date" AS TEXT) ILIKE %s
+        ORDER BY "ID"
+        '''
+        cursor.execute(sql, tuple([text for text in data[1] for columns in range(4)]))
+    else:
+        if data[0] == "Id":
+            sql = '''
+            SELECT *
+            FROM orders_view
+            WHERE CAST("ID" AS TEXT) ILIKE %s
+            ORDER BY "ID"
+            '''
+        elif data[0] == "Customer":
+            sql = '''
+            SELECT *
+            FROM orders_view
+            WHERE "Customer" ILIKE %s
+            ORDER BY "ID"
+            '''
+        elif data[0] == "Order Date":
+            sql = '''
+            SELECT *
+            FROM orders_view
+            WHERE CAST("Order Date" AS TEXT) ILIKE %s
+            ORDER BY "ID"
+            '''
+        elif data[0] == "Payment Date":
+            sql = '''
+            SELECT *
+            FROM orders_view
+            WHERE CAST("Payment Date" AS TEXT) ILIKE %s
+            ORDER BY "ID"
+            '''
+        elif data[0] == "Zip Code":
+            sql = '''
+            SELECT *
+            FROM vendors
+            WHERE "Zip code" ILIKE %s
+            ORDER BY "ID"
+            '''
+        cursor.execute(sql, data[1])
 
-        sql = '''SELECT max("ID") FROM orders'''
-        cursor.execute(sql)
-        orders_id = cursor.fetchone()
-
-        sql = '''SELECT * FROM products'''
-        cursor.execute(sql)
-        products = cursor.fetchall()
-
-        return [name[0] for name in customers], orders_id[0], products
-
-    @staticmethod
-    def insert_ordered_position(data):
-        connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-        cursor = connection.cursor()
-        sql = '''INSERT INTO ordered_position
-              ("ID_prod", "Quantity", "Selling price",  "ID_ord")
-              VALUES (%s, %s, %s, %s)'''
-        for row in data:
-            cursor.execute(sql, row)
-            connection.commit()
-        connection.close()
-
-    @staticmethod
-    def insert_order(data):
-        connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-        cursor = connection.cursor()
-        sql = '''INSERT INTO orders ("Order Date", "Payment Date", "ID_cust")
-                 VALUES (%s, %s, %s)'''
-        cursor.execute(sql, data)
-        connection.commit()
-        connection.close()
-
-    @staticmethod
-    def update_order(data):
-        connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-        cursor = connection.cursor()
-        sql = '''UPDATE orders
-                 SET "Payment Date"=%s
-                 WHERE "ID"=%s'''
-        cursor.execute(sql, data)
-        connection.commit()
-        connection.close()
-
-    @staticmethod
-    def search_order(data):
-        connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-        cursor = connection.cursor()
-        if data[0] == "All":
-            sql = '''SELECT * FROM orders_view
-                     WHERE
-                     CAST("ID" AS TEXT) LIKE %s
-                     OR "Customer" ILIKE %s
-                     OR CAST("Order Date" AS TEXT) ILIKE %s
-                     OR CAST("Payment Date" AS TEXT) ILIKE %s
-                     ORDER BY "ID"'''
-            cursor.execute(sql, tuple([text for text in data[1] for columns in range(4)]))
-        else:
-            if data[0] == "Id":
-                sql = '''SELECT * FROM orders_view
-                        WHERE CAST("ID" AS TEXT) ILIKE %s
-                        ORDER BY "ID" '''
-            elif data[0] == "Customer":
-                sql = '''SELECT * FROM orders_view
-                        WHERE "Customer" ILIKE %s
-                        ORDER BY "ID" '''
-            elif data[0] == "Order Date":
-                sql = '''SELECT * FROM orders_view
-                        WHERE CAST("Order Date" AS TEXT) ILIKE %s
-                        ORDER BY "ID" '''
-            elif data[0] == "Payment Date":
-                sql = '''SELECT * FROM orders_view
-                        WHERE CAST("Payment Date" AS TEXT) ILIKE %s
-                        ORDER BY "ID" '''
-            elif data[0] == "Zip Code":
-                sql = '''SELECT * FROM vendors
-                        WHERE "Zip code" ILIKE %s
-                        ORDER BY "ID" '''
-            cursor.execute(sql, data[1])
-
-        rows = cursor.fetchall()
-        connection.close()
-        return rows
+    rows = cursor.fetchall()
+    connection.close()
+    return rows
 
 
 class OrdersWidgetTab(QTabWidget):
@@ -129,10 +95,6 @@ class OrdersWidgetTab(QTabWidget):
         self.order_details_button = QPushButton("Show order details", self)
         self.order_details_button.setToolTip("Show details of selected order")
         self.order_details_button.clicked.connect(self.orders_table.show_details)
-
-        self.delete_button_orders = QPushButton("Delete order", self)
-        self.delete_button_orders.setToolTip("Delete selected order")
-        self.delete_button_orders.clicked.connect(self.orders_table.delete_order)
 
         self.search_label = QLabel("Search by:")
         self.dropdownlist_search = QComboBox()
@@ -151,7 +113,6 @@ class OrdersWidgetTab(QTabWidget):
         header.setSectionResizeMode(3, QHeaderView.Stretch)
 
         self.layout.addWidget(self.order_details_button, 0, 0)
-        self.layout.addWidget(self.delete_button_orders, 0, 1)
         self.layout.addWidget(self.search_label, 1, 0)
         self.layout.addWidget(self.dropdownlist_search, 1, 1)
         self.layout.addWidget(self.search_field, 1, 2)
@@ -188,7 +149,7 @@ class OrdersTable(QTableWidget):
     def refresh_orders(self, search_by, text):
         self.resizeRowsToContents()
         not_paid = {}
-        self.data = OrderQueries.search_order((search_by, (text + "%",),))
+        self.data = search_order((search_by, (text + "%",),))
         self.setRowCount(len(self.data))
         for row_id, row in enumerate(self.data):
             for column_id, cell in enumerate(row):
@@ -203,13 +164,6 @@ class OrdersTable(QTableWidget):
     def change_orders(self):
         items = self.selectedItems()
         self.row_data = [cell.text() for cell in items]
-
-    @pyqtSlot()
-    def delete_order(self):
-        if self.currentRow() < 0:
-            return
-        OrderQueries.delete_order(self.row_data[0])
-        self.refresh_orders(search_by="All", text="")
 
     @pyqtSlot()
     def show_details(self):
@@ -227,7 +181,7 @@ class OrdersTable(QTableWidget):
     def order_paid(self, button, not_paid):
         for id, but in not_paid.items():
             if button is but:
-                OrderQueries.update_order((str(datetime.now())[:-7], id,))
+                update_order_paid((str(datetime.now())[:-7], id,))
                 self.removeCellWidget(id - 1, 3)
                 self.refresh_orders(search_by="All", text="")
                 break

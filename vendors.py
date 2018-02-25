@@ -1,10 +1,8 @@
 import psycopg2
-from psycopg2.extensions import AsIs
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget, QHeaderView
 from PyQt5.QtCore import pyqtSlot
-
 
 from queries import view_data, view_column_names
 
@@ -12,10 +10,14 @@ from queries import view_data, view_column_names
 def insert_vendor(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''INSERT INTO vendors
-          ("Name", "City", "Street", "House number", "Zip code")
-          VALUES (%s, %s, %s, %s, %s)'''
+
+    sql = '''
+    INSERT INTO vendors
+    ("Name", "City", "Street", "House number", "Zip code")
+    VALUES (%s, %s, %s, %s, %s)
+    '''
     cursor.execute(sql, data)
+
     connection.commit()
     connection.close()
 
@@ -24,7 +26,10 @@ def delete_vendor(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
 
-    sql = '''DELETE FROM vendors WHERE "ID"=%s;'''
+    sql = '''
+    DELETE FROM vendors
+    WHERE "ID"=%s;
+    '''
     cursor.execute(sql, (id,))
 
     connection.commit()
@@ -34,14 +39,19 @@ def delete_vendor(id):
 def update_vendor(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''UPDATE vendors SET
-            "Name"=%s,
-            "City"=%s,
-            "Street"=%s,
-            "House number"=%s,
-            "Zip code"=%s
-             WHERE "ID"=%s'''
+
+    sql = '''
+    UPDATE vendors
+    SET
+        "Name"=%s,
+        "City"=%s,
+        "Street"=%s,
+        "House number"=%s,
+        "Zip code"=%s
+    WHERE "ID"=%s
+    '''
     cursor.execute(sql, data)
+
     connection.commit()
     connection.close()
 
@@ -50,36 +60,54 @@ def search_vendor(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
     if data[0] == "All":
-        sql = '''SELECT * FROM vendors
-                 WHERE
-                 CAST("ID" AS TEXT) LIKE %s
-                 OR "Name" ILIKE %s
-                 OR "City" ILIKE %s 
-                 OR "Street" ILIKE %s
-                 OR "Zip code" ILIKE %s
-                 ORDER BY "ID"'''
+        sql = '''
+        SELECT *
+        FROM vendors
+        WHERE
+            CAST("ID" AS TEXT) LIKE %s
+            OR "Name" ILIKE %s
+            OR "City" ILIKE %s 
+            OR "Street" ILIKE %s
+            OR "Zip code" ILIKE %s
+        ORDER BY "ID"
+        '''
         cursor.execute(sql, tuple([text for text in data[1] for columns in range(5)]))
     else:
         if data[0] == "Id":
-            sql = '''SELECT * FROM vendors
-                    WHERE "ID"=%s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM vendors
+            WHERE "ID"=%s
+            ORDER BY "ID"
+            '''
         elif data[0] == "Name":
-            sql = '''SELECT * FROM vendors
-                    WHERE "Name" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM vendors
+            WHERE "Name" ILIKE %s
+            ORDER BY "ID"
+            '''
         elif data[0] == "City":
-            sql = '''SELECT * FROM vendors
-                    WHERE "City" ILIKE %s 
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM vendors
+            WHERE "City" ILIKE %s 
+            ORDER BY "ID" 
+            '''
         elif data[0] == "Street":
-            sql = '''SELECT * FROM vendors
-                    WHERE "Street" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM vendors
+            WHERE "Street" ILIKE %s
+            ORDER BY "ID"
+            '''
         elif data[0] == "Zip Code":
-            sql = '''SELECT * FROM vendors
-                    WHERE "Zip code" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM vendors
+            WHERE "Zip code" ILIKE %s
+            ORDER BY "ID"
+            '''
         cursor.execute(sql, data[1])
 
     rows = cursor.fetchall()
@@ -181,7 +209,6 @@ class VendorsTable(QTableWidget):
         self.setSortingEnabled(True)
         self.resizeRowsToContents()
         self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
-
 
     def refresh_vendors(self, search_by, text):
         self.data = search_vendor((search_by, (text + "%",),))

@@ -11,14 +11,17 @@ from queries import view_column_names, view_data
 def insert_product(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''INSERT INTO products
-             ("Name",
-             "Quantity",
-             "Selling price",
-             "Category")
-              VALUES
-              (%s, %s, %s, %s)'''
+
+    sql = '''
+    INSERT INTO products
+    ("Name",
+     "Quantity",
+     "Selling price",
+     "Category")
+    VALUES
+        (%s, %s, %s, %s)'''
     cursor.execute(sql, data)
+
     connection.commit()
     connection.close()
 
@@ -26,74 +29,32 @@ def insert_product(data):
 def delete_product(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''DELETE FROM products WHERE "ID"=%s;'''
+
+    sql = '''
+    DELETE FROM products
+    WHERE "ID" =%s
+    '''
     cursor.execute(sql, (id,))
+
     connection.commit()
     connection.close()
-
-
-def delete_from_current_order(name):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-    sql = '''DELETE FROM temp WHERE "Name"=%s;'''
-    cursor.execute(sql, (name,))
-    connection.commit()
-    connection.close()
-
-
-def give_name_to_select(name):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-    sql = '''SELECT "Name"
-             FROM temp
-             WHERE "ID" > (SELECT "ID"
-                           FROM temp
-                           WHERE "Name"=%s)'''
-    cursor.execute(sql, (name,))
-    name = cursor.fetchall()
-    connection.commit()
-    connection.close()
-    return name[0]
 
 
 def update_product(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''UPDATE products
-             SET
-             "Name"=%s,
-             "Quantity"=%s,
-             "Selling price"=%s,
-             "Category"=%s
-             WHERE "ID"=%s
-             '''
+
+    sql = '''
+    UPDATE products
+    SET
+        "Name"=%s,
+        "Quantity"=%s,
+        "Selling price"=%s,
+        "Category"=%s
+    WHERE "ID"=%s
+    '''
     cursor.execute(sql, data)
-    connection.commit()
-    connection.close()
 
-
-def update_quantity(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-    sql = '''UPDATE products
-             SET
-             "Quantity" = "Quantity" - %s
-             WHERE "ID" = %s
-              '''
-    for row in data:
-        cursor.execute(sql, row)
-        connection.commit()
-    connection.close()
-
-
-def temp_insert(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
-    cursor = connection.cursor()
-    sql = '''INSERT INTO temp 
-             ("Item ID", "Name", "Quantity", "Selling Price", "Category")
-             VALUES 
-             (%s, %s, %s, %s, %s)'''
-    cursor.execute(sql, data)
     connection.commit()
     connection.close()
 
@@ -102,26 +63,38 @@ def search_product(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
     if data[0] == "All":
-        sql = '''SELECT * FROM products
-                 WHERE
-                 CAST("ID" AS TEXT) LIKE %s
-                 OR "Name" ILIKE %s
-                 OR "Category" ILIKE %s
-                 ORDER BY "ID"'''
+        sql = '''
+        SELECT *
+        FROM products
+        WHERE
+            CAST("ID" AS TEXT) LIKE %s
+            OR "Name" ILIKE %s
+            OR "Category" ILIKE %s
+        ORDER BY "ID"
+        '''
         cursor.execute(sql, tuple([text for text in data[1] for column in range(3)]))
     else:
         if data[0] == "Id":
-            sql = '''SELECT * FROM products
-                    WHERE CAST("ID" AS TEXT) ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM products
+            WHERE CAST("ID" AS TEXT) ILIKE %s
+            ORDER BY "ID"
+            '''
         elif data[0] == "Name":
-            sql = '''SELECT * FROM products
-                    WHERE "Name" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM products
+            WHERE "Name" ILIKE %s
+            ORDER BY "ID"
+            '''
         elif data[0] == "Category":
-            sql = '''SELECT * FROM products
-                    WHERE "Category" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM products
+            WHERE "Category" ILIKE %s
+            ORDER BY "ID"
+            '''
         cursor.execute(sql, data[1])
 
     rows = cursor.fetchall()
@@ -210,59 +183,6 @@ class ProductsWidgetTab(QTabWidget):
                                      height)
 
 
-class SelectItem(QWidget):
-    def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
-
-        self.setAutoFillBackground(True)
-        self.layout = QGridLayout()
-
-        self.add_button = QPushButton("Add product", self)
-        self.add_button.setToolTip("Add this item to an order")
-        self.add_button.clicked.connect(self.add)
-
-        self.cancel_button = QPushButton("Cancel")
-        self.cancel_button.clicked.connect(self.close)
-
-        self.dropdownlist_category = QComboBox()
-        self.data = view_data("products")
-        categories = list({item_id[4] for item_id in self.data})
-        categories.insert(0, "All products")
-        self.dropdownlist_category.addItems(categories)
-
-        self.products_table = ProductsTable(parent=self)
-        self.products_table.itemDoubleClicked.connect(self.add)
-
-        self.dropdownlist_category.activated.connect(self.select_category)
-
-        header = self.products_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
-
-        self.layout.addWidget(self.add_button)
-        self.layout.addWidget(self.cancel_button)
-        self.layout.addWidget(self.dropdownlist_category)
-        self.layout.addWidget(self.products_table)
-        self.setLayout(self.layout)
-        self.show()
-
-    def add(self):
-        if self.products_table.row_data[2] == "0":
-            QMessageBox.information(self, "Error", "You do not have this item in stock")
-            return
-        else:
-            temp_insert(self.products_table.row_data)
-            self.close()
-            self.parent().refresh_products_in_order()
-
-    @pyqtSlot()
-    def select_category(self):
-        self.products_table.refresh_products()
-
-
 class ProductsTable(QTableWidget):
     def __init__(self, parent):
         super(QTableWidget, self).__init__(parent)
@@ -291,76 +211,6 @@ class ProductsTable(QTableWidget):
         for row_id, row in enumerate(self.data):
             for column_id, cell in enumerate(row):
                 self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-
-
-class ProductsTemp(QTableWidget):
-    def __init__(self):
-        super(QTableWidget, self).__init__()
-
-        column_names = view_column_names("temp")[1:]
-
-        self.setColumnCount(len(column_names))
-        self.setHorizontalHeaderLabels(column_names)
-        self.itemSelectionChanged.connect(self.change_products)
-
-        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-
-        self.quantity_list = []
-        self.price_list = []
-
-        self.change_products()
-        self.refresh_products()
-
-        self.setSortingEnabled(True)
-        self.resizeRowsToContents()
-        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
-
-    def change_products(self):
-        items = self.selectedItems()
-        self.row_data_product = [cell.text() for cell in items]
-
-    def refresh_products(self):
-        self.rows = [row[1:] for row in view_data("temp")]
-        self.setRowCount(len(self.rows))
-        for row_id, row in enumerate(self.rows):
-            for column_id, cell in enumerate(row):
-                if column_id not in (2, 3):
-                    self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
-                else:
-                    editable = QDoubleSpinBox()
-                    editable.setSingleStep(1)
-                    if column_id == 2:
-                        self.quantity_list.append(editable)
-                        editable.setMinimum(1)
-                        editable.setMaximum(cell)
-                        editable.setDecimals(0)
-                        editable.setValue(1)
-                    if column_id == 3:
-                        self.price_list.append(editable)
-                        editable.setMinimum(0.01)
-                        editable.setMaximum(100000)
-                        editable.setDecimals(2)
-                        editable.setValue(cell)
-                    self.setCellWidget(row_id, column_id, editable)
-
-    def delete(self):
-        if self.rows and self.row_data_product:
-            name_deleted_item = self.row_data_product[1]
-            if name_deleted_item not in self.rows[-1]:
-                default_name = give_name_to_select(name_deleted_item)[0]
-                for row in self.rows:
-                    if default_name in row:
-                        self.row_data_product = row
-                        break
-            else:
-                if len(self.rows) > 1:
-                    self.row_data_product = self.rows[-2]
-            delete_from_current_order(name_deleted_item)
-            self.refresh_products()
-        else:
-            pass
 
 
 class NewItem(QWidget):
@@ -435,6 +285,7 @@ class NewItem(QWidget):
         # if self.id_input.text() in [str(row[0]) for row in self.data] or self.id_input.text() == 0:
         #     return
         if self.price_sell_input.text() == "0,00":
+            return
         if len(self.category_input_edit.text()) != 3 or self.category_input_edit.text().isupper() is not True:
             return
         try:

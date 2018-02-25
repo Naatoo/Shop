@@ -7,22 +7,102 @@ from PyQt5.QtCore import pyqtSlot
 from datetime import datetime
 
 from queries import view_column_names, view_data
-from orders import OrderQueries
-from products import ProductsTemp, SelectItem, update_quantity
-from customers import CustomersWindow
-import tables
+from products import ProductsTable
+from customers import CustomersTable
+from tables import create_temp
+
+
+def insert_ordered_position(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+
+    sql = '''
+    INSERT INTO ordered_position
+    ("ID_prod", "Quantity", "Selling price", "ID_ord")
+    VALUES (%s, %s, %s, %s)
+    '''
+    for row in data:
+        cursor.execute(sql, row)
+
+    connection.commit()
+    connection.close()
+
+
+def insert_order(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+
+    sql = '''
+    INSERT INTO orders ("Order Date", "Payment Date", "ID_cust")
+    VALUES (%s, %s, %s)
+    '''
+    cursor.execute(sql, data)
+
+    connection.commit()
+    connection.close()
 
 
 def find_free_id():
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''SELECT max("ID") + 1
-             FROM orders'''
+
+    sql = '''
+    SELECT max("ID") + 1
+    FROM orders
+    '''
     cursor.execute(sql)
+
     id = cursor.fetchone()
     connection.commit()
     connection.close()
     return id
+
+
+def temp_insert(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+
+    sql = '''
+    INSERT INTO temp
+    ("Item ID", "Name", "Quantity", "Selling Price", "Category")
+    VALUES
+        (%s, %s, %s, %s, %s)
+    '''
+    cursor.execute(sql, data)
+
+    connection.commit()
+    connection.close()
+
+
+def delete_from_current_order(name):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+
+    sql = '''
+    DELETE FROM temp
+    WHERE "Name" = %s
+    '''
+    cursor.execute(sql, (name,))
+
+    connection.commit()
+    connection.close()
+
+
+def update_quantity(data):
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+
+    sql = '''
+    UPDATE products
+    SET
+        "Quantity" = "Quantity" - %s
+    WHERE "ID" = %s
+    '''
+    for row in data:
+        cursor.execute(sql, row)
+
+    connection.commit()
+    connection.close()
 
 
 class NewOrderWidgetTab(QTabWidget):
@@ -30,9 +110,7 @@ class NewOrderWidgetTab(QTabWidget):
         super(QWidget, self).__init__()
         self.layout = QGridLayout(self)
 
-        self.customers, self.id, self.products = OrderQueries.view_new_order()
-
-        tables.temp()
+        create_temp()
         self.choose_customer_button = QPushButton("Choose customer", self)
         self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
         self.choose_customer_button.clicked.connect(self.choose_customer)
@@ -70,7 +148,7 @@ class NewOrderWidgetTab(QTabWidget):
 
     @pyqtSlot()
     def choose_customer(self):
-        self.customer_choice_window = CustomersWindow(parent=self)
+        self.customer_choice_window = SelectCustomerWindow(parent=self)
         width = 850
         height = 600
         self.customer_choice_window.setGeometry(int(self.width() / 2 - width / 2), int(self.height() / 2 - height / 2), width, height)
@@ -100,11 +178,173 @@ class NewOrderWidgetTab(QTabWidget):
             final_order_data = [[row[0], quantity_list[index], price_list[index], find_free_id()[0]]
                                 for index, row in enumerate(self.temp_products.rows)]
             now_datetime = str(datetime.now())[:-7]
-            OrderQueries.insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
-            OrderQueries.insert_ordered_position(final_order_data)
+            insert_order([now_datetime, None, self.customer_choice_window.chosen_customer_id])
+            insert_ordered_position(final_order_data)
     #        self.parent().tab_orders.orders_table.refresh_orders(search_by="All", text="")
             update_quantity([row[1::-1] for row in final_order_data])
      #       self.parent().tab_products.select_category()
-            tables.temp()
+            create_temp()
             self.temp_products.refresh_products()
             self.label_chosen_customer.setText("Choose customer")
+
+
+class ProductsTemp(QTableWidget):
+    def __init__(self):
+        super(QTableWidget, self).__init__()
+
+        column_names = view_column_names("temp")[1:]
+
+        self.setColumnCount(len(column_names))
+        self.setHorizontalHeaderLabels(column_names)
+        self.itemSelectionChanged.connect(self.change_products)
+
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        self.quantity_list = []
+        self.price_list = []
+
+        self.change_products()
+        self.refresh_products()
+
+        self.setSortingEnabled(True)
+        self.resizeRowsToContents()
+        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
+
+    def change_products(self):
+        items = self.selectedItems()
+        self.row_data_product = [cell.text() for cell in items]
+
+    def refresh_products(self):
+        self.rows = [row[1:] for row in view_data("temp")]
+        self.setRowCount(len(self.rows))
+        for row_id, row in enumerate(self.rows):
+            for column_id, cell in enumerate(row):
+                if column_id not in (2, 3):
+                    self.setItem(row_id, column_id, QTableWidgetItem(str(cell)))
+                else:
+                    editable = QDoubleSpinBox()
+                    editable.setSingleStep(1)
+                    if column_id == 2:
+                        self.quantity_list.append(editable)
+                        editable.setMinimum(1)
+                        editable.setMaximum(cell)
+                        editable.setDecimals(0)
+                        editable.setValue(1)
+                    if column_id == 3:
+                        self.price_list.append(editable)
+                        editable.setMinimum(0.01)
+                        editable.setMaximum(100000)
+                        editable.setDecimals(2)
+                        editable.setValue(cell)
+                    self.setCellWidget(row_id, column_id, editable)
+
+    def delete(self):
+        if self.rows and self.row_data_product:
+            name_deleted_item = self.row_data_product[1]
+            if name_deleted_item not in self.rows[-1]:
+                default_name = give_name_to_select(name_deleted_item)[0]
+                for row in self.rows:
+                    if default_name in row:
+                        self.row_data_product = row
+                        break
+            else:
+                if len(self.rows) > 1:
+                    self.row_data_product = self.rows[-2]
+            delete_from_current_order(name_deleted_item)
+            self.refresh_products()
+        else:
+            pass
+
+
+class SelectItem(QWidget):
+    def __init__(self, parent):
+        super(QWidget, self).__init__(parent)
+
+        self.setAutoFillBackground(True)
+        self.layout = QGridLayout()
+
+        self.add_button = QPushButton("Add product", self)
+        self.add_button.setToolTip("Add this item to an order")
+        self.add_button.clicked.connect(self.add)
+
+        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button.clicked.connect(self.close)
+
+        self.dropdownlist_category = QComboBox()
+        self.data = view_data("products")
+        categories = list({item_id[4] for item_id in self.data})
+        categories.insert(0, "All products")
+        self.dropdownlist_category.addItems(categories)
+
+        self.products_table = ProductsTable(parent=self)
+        self.products_table.itemDoubleClicked.connect(self.add)
+
+        self.dropdownlist_category.activated.connect(self.select_category)
+
+        header = self.products_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+
+        self.layout.addWidget(self.add_button)
+        self.layout.addWidget(self.cancel_button)
+        self.layout.addWidget(self.dropdownlist_category)
+        self.layout.addWidget(self.products_table)
+        self.setLayout(self.layout)
+        self.show()
+
+    def add(self):
+        if self.products_table.row_data[2] == "0":
+            QMessageBox.information(self, "Error", "You do not have this item in stock")
+            return
+        else:
+            temp_insert(self.products_table.row_data)
+            self.close()
+            self.parent().refresh_products_in_order()
+
+    @pyqtSlot()
+    def select_category(self):
+        self.products_table.refresh_products()
+
+
+class SelectCustomerWindow(QWidget):
+    def __init__(self, parent=None):
+        super(QWidget, self).__init__(parent)
+
+        self.layout = QGridLayout(self)
+
+        self.customers_table = CustomersTable()
+        self.customers_table.itemDoubleClicked.connect(self.select_and_close)
+        self.layout.addWidget(self.customers_table)
+
+        self.choose_customer_button = QPushButton("Choose customer", self)
+        self.choose_customer_button.setToolTip("Choose the customer of this order")
+        self.choose_customer_button.clicked.connect(self.select_and_close)
+        self.layout.addWidget(self.choose_customer_button)
+
+        self.cancel_button = QPushButton("Cancel")
+        self.layout.addWidget(self.cancel_button)
+        self.cancel_button.clicked.connect(self.close)
+
+        header = self.customers_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+
+        self.setLayout(self.layout)
+        self.show()
+
+    def select_and_close(self):
+        if not self.customers_table.row_data_customers:
+            return
+        else:
+            self.chosen_customer_id = self.customers_table.row_data_customers[0]
+            self.close()
+            self.parent().refresh_chosen_customer()

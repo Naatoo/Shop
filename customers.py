@@ -10,10 +10,14 @@ from queries import view_column_names, view_data
 def insert_customer(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''INSERT INTO customers
-          ("Name", "City", "Street", "House number", "Zip code")
-          VALUES (%s, %s, %s, %s, %s)'''
+
+    sql = '''
+    INSERT INTO customers
+    ("Name", "City", "Street", "House number", "Zip code")
+    VALUES (%s, %s, %s, %s, %s)
+    '''
     cursor.execute(sql, data)
+
     connection.commit()
     connection.close()
 
@@ -22,7 +26,10 @@ def delete_customer(id):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
 
-    sql = '''DELETE FROM customers WHERE "ID"=%s;'''
+    sql = '''
+    DELETE FROM customers
+    WHERE "ID"=%s
+    '''
     cursor.execute(sql, (id,))
 
     connection.commit()
@@ -32,14 +39,19 @@ def delete_customer(id):
 def update_customer(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
-    sql = '''UPDATE customers SET
-            "Name"=%s,
-            "City"=%s,
-            "Street"=%s,
-            "House number"=%s,
-            "Zip code"=%s
-             WHERE "ID"=%s'''
+
+    sql = '''
+    UPDATE customers
+    SET
+        "Name"=%s,
+        "City"=%s,
+        "Street"=%s,
+        "House number"=%s,
+        "Zip code"=%s
+    WHERE "ID"=%s
+    '''
     cursor.execute(sql, data)
+
     connection.commit()
     connection.close()
 
@@ -48,36 +60,54 @@ def search_customer(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
     if data[0] == "All":
-        sql = '''SELECT * FROM customers
-                 WHERE
-                 CAST("ID" AS TEXT) LIKE %s
-                 OR "Name" ILIKE %s
-                 OR "City" ILIKE %s 
-                 OR "Street" ILIKE %s
-                 OR "Zip code" ILIKE %s
-                 ORDER BY "ID"'''
+        sql = '''
+        SELECT *
+        FROM customers
+        WHERE
+            CAST("ID" AS TEXT) LIKE %s
+            OR "Name" ILIKE %s
+            OR "City" ILIKE %s 
+            OR "Street" ILIKE %s
+            OR "Zip code" ILIKE %s
+        ORDER BY "ID"
+        '''
         cursor.execute(sql, tuple([text for text in data[1] for column in range(5)]))
     else:
         if data[0] == "Id":
-            sql = '''SELECT * FROM customers
-                    WHERE "ID"=%s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM customers
+            WHERE "ID"=%s
+            ORDER BY "ID"
+            '''
         elif data[0] == "Name":
-            sql = '''SELECT * FROM customers
-                    WHERE "Name" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM customers
+            WHERE "Name" ILIKE %s
+            ORDER BY "ID"
+            '''
         elif data[0] == "City":
-            sql = '''SELECT * FROM customers
-                    WHERE "City" ILIKE %s 
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM customers
+            WHERE "City" ILIKE %s 
+            ORDER BY "ID"
+            '''
         elif data[0] == "Street":
-            sql = '''SELECT * FROM customers
-                    WHERE "Street" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM customers
+            WHERE "Street" ILIKE %s
+            ORDER BY "ID"
+            '''
         elif data[0] == "Zip code":
-            sql = '''SELECT * FROM customers
-                    WHERE "Zip code" ILIKE %s
-                    ORDER BY "ID" '''
+            sql = '''
+            SELECT *
+            FROM customers
+            WHERE "Zip code" ILIKE %s
+            ORDER BY "ID"
+            '''
         cursor.execute(sql, data[1])
 
     rows = cursor.fetchall()
@@ -356,42 +386,3 @@ class UpdateCustomerWindow(QWidget):
                          self.parent().customers_table.row_data_customers[0]])
         self.close()
         self.parent().search_customers()
-
-
-class CustomersWindow(QWidget):
-    def __init__(self, parent=None):
-        super(QWidget, self).__init__(parent)
-
-        self.layout = QVBoxLayout(self)
-
-        self.customers_table = CustomersTable()
-        self.customers_table.itemDoubleClicked.connect(self.select_and_close)
-        self.layout.addWidget(self.customers_table)
-
-        self.choose_customer_button = QPushButton("Choose customer", self)
-        self.choose_customer_button.setToolTip("Choose the customer of this order")
-        self.choose_customer_button.clicked.connect(self.select_and_close)
-        self.layout.addWidget(self.choose_customer_button)
-
-        self.cancel_button = QPushButton("Cancel")
-        self.layout.addWidget(self.cancel_button)
-        self.cancel_button.clicked.connect(self.close)
-
-        header = self.customers_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.Stretch)
-        header.setSectionResizeMode(3, QHeaderView.Stretch)
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
-
-        self.setLayout(self.layout)
-        self.show()
-
-    def select_and_close(self):
-        if not self.customers_table.row_data_customers:
-            return
-        else:
-            self.chosen_customer_id = self.customers_table.row_data_customers[0]
-            self.close()
-            self.parent().refresh_chosen_customer()
