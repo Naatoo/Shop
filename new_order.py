@@ -1,7 +1,7 @@
 import psycopg2
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton, QTabWidget
-from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox
+from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox, QHeaderView
 from PyQt5.QtCore import pyqtSlot
 
 from datetime import datetime
@@ -36,29 +36,35 @@ class NewOrderWidgetTab(QTabWidget):
         self.choose_customer_button = QPushButton("Choose customer", self)
         self.choose_customer_button.setToolTip("Add a customer which is not in the list yet")
         self.choose_customer_button.clicked.connect(self.choose_customer)
-        self.layout.addWidget(self.choose_customer_button)
 
         self.label_chosen_customer = QLabel("Choose customer")
-        self.layout.addWidget(self.label_chosen_customer)
 
         self.add_button = QPushButton("Add product", self)
         self.add_button.setToolTip("Add new product to the order")
         self.add_button.clicked.connect(self.add_item_to_order)
-        self.layout.addWidget(self.add_button)
 
         self.temp_products = ProductsTemp()
 
         self.delete_button = QPushButton("Delete product", self)
         self.delete_button.setToolTip("Delete selected product from this order")
         self.delete_button.clicked.connect(self.temp_products.delete)
-        self.layout.addWidget(self.delete_button)
-
- #       self.orders_data = orders.view_data("orders_view")
-        self.layout.addWidget(self.temp_products)
 
         self.finish_order_button = QPushButton("Finish order", self)
         self.finish_order_button.setToolTip("Finish this order")
         self.finish_order_button.clicked.connect(self.finish_order)
+
+        header = self.temp_products.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+
+        self.layout.addWidget(self.add_button, 0, 0)
+        self.layout.addWidget(self.delete_button, 0, 1)
+        self.layout.addWidget(self.label_chosen_customer, 1, 0)
+        self.layout.addWidget(self.choose_customer_button, 1, 1)
+        self.layout.addWidget(self.temp_products, 2, 0, 1, 2)
         self.layout.addWidget(self.finish_order_button)
         self.setLayout(self.layout)
 

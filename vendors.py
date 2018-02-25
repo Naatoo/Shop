@@ -2,8 +2,9 @@ import psycopg2
 from psycopg2.extensions import AsIs
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget, QHeaderView
 from PyQt5.QtCore import pyqtSlot
+
 
 from queries import view_data, view_column_names
 
@@ -117,6 +118,14 @@ class VendorsWidgetTab(QTabWidget):
         self.search_field = QLineEdit()
         self.search_field.textChanged.connect(self.search_vendors)
 
+        header = self.vendors_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+
         self.layout.addWidget(self.add_vendors_button, 0, 0)
         self.layout.addWidget(self.delete_button_vendors, 0, 1)
         self.layout.addWidget(self.update_button_vendors, 0, 2)
@@ -169,6 +178,10 @@ class VendorsTable(QTableWidget):
         self.setSelectionMode(QAbstractItemView.SingleSelection)
 
         self.refresh_vendors(search_by="All", text="")
+        self.setSortingEnabled(True)
+        self.resizeRowsToContents()
+        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
+
 
     def refresh_vendors(self, search_by, text):
         self.data = search_vendor((search_by, (text + "%",),))

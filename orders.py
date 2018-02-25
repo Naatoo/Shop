@@ -1,7 +1,7 @@
 import psycopg2
 
 from PyQt5.QtWidgets import QWidget, QPushButton, QVBoxLayout, QGridLayout, QLabel, QComboBox
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget, QLineEdit
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget, QLineEdit, QHeaderView
 from PyQt5.QtCore import pyqtSlot
 
 from datetime import datetime
@@ -144,6 +144,12 @@ class OrdersWidgetTab(QTabWidget):
         self.search_field = QLineEdit()
         self.search_field.textChanged.connect(self.search_orders)
 
+        header = self.orders_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+
         self.layout.addWidget(self.order_details_button, 0, 0)
         self.layout.addWidget(self.delete_button_orders, 0, 1)
         self.layout.addWidget(self.search_label, 1, 0)
@@ -170,14 +176,19 @@ class OrdersTable(QTableWidget):
 
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.refresh_orders(search_by="All", text="")
         self.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        self.refresh_orders(search_by="All", text="")
         self.change_orders()
 
+        self.setSortingEnabled(True)
+        self.resizeRowsToContents()
+        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
+
     def refresh_orders(self, search_by, text):
+        self.resizeRowsToContents()
         not_paid = {}
         self.data = OrderQueries.search_order((search_by, (text + "%",),))
- #       self.data = view_data("orders_view")
         self.setRowCount(len(self.data))
         for row_id, row in enumerate(self.data):
             for column_id, cell in enumerate(row):
@@ -233,6 +244,14 @@ class OrderDetailsWindow(QWidget):
         self.close_button = QPushButton("Close")
         self.close_button.clicked.connect(self.close)
 
+        header = self.order_details_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.Stretch)
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+
         self.layout.addWidget(self.close_button)
         self.layout.addWidget(self.order_details_table)
         self.setLayout(self.layout)
@@ -253,6 +272,10 @@ class OrderDetailsTable(QTableWidget):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.refresh_order()
+
+        self.setSortingEnabled(True)
+        self.resizeRowsToContents()
+        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
 
     def refresh_order(self):
         self.orders_data = view_data("orders_items_view")

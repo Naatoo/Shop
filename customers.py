@@ -1,7 +1,7 @@
 import psycopg2
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
-from PyQt5.QtWidgets import QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget
+from PyQt5.QtWidgets import QVBoxLayout, QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget, QHeaderView
 from PyQt5.QtCore import pyqtSlot
 
 from queries import view_column_names, view_data
@@ -115,6 +115,14 @@ class CustomersWidgetTab(QTabWidget):
         self.search_field = QLineEdit()
         self.search_field.textChanged.connect(self.search_customers)
 
+        header = self.customers_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+
         self.layout.addWidget(self.add_customers_button, 0, 0)
         self.layout.addWidget(self.delete_button_customers, 0, 1)
         self.layout.addWidget(self.update_button_customers, 0, 2)
@@ -166,6 +174,9 @@ class CustomersTable(QTableWidget):
 
         self.refresh_customers(search_by="All", text="")
         self.change_selection()
+        self.setSortingEnabled(True)
+        self.resizeRowsToContents()
+        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
 
     def refresh_customers(self, search_by, text):
         self.data = search_customer((search_by, (text + "%",),))
@@ -365,6 +376,14 @@ class CustomersWindow(QWidget):
         self.cancel_button = QPushButton("Cancel")
         self.layout.addWidget(self.cancel_button)
         self.cancel_button.clicked.connect(self.close)
+
+        header = self.customers_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeToContents)
 
         self.setLayout(self.layout)
         self.show()

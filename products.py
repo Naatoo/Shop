@@ -1,7 +1,7 @@
 import psycopg2
 
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton, QTabWidget
-from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox
+from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox, QHeaderView
 from PyQt5.QtCore import pyqtSlot
 from PyQt5 import QtWidgets
 
@@ -160,6 +160,13 @@ class ProductsWidgetTab(QTabWidget):
         self.search_field = QLineEdit()
         self.search_field.textChanged.connect(self.search_products)
 
+        header = self.products_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+
         self.layout.addWidget(self.add_button, 0, 0)
         self.layout.addWidget(self.delete_button, 0, 1)
         self.layout.addWidget(self.update_button, 0, 2)
@@ -168,7 +175,6 @@ class ProductsWidgetTab(QTabWidget):
         self.layout.addWidget(self.search_field, 1, 2)
         self.layout.addWidget(self.products_table, 2, 0, 1, 3)
         self.setLayout(self.layout)
-
 
     def search_products(self):
         self.products_table.refresh_products(self.dropdownlist_search.currentText(), self.search_field.text())
@@ -229,6 +235,13 @@ class SelectItem(QWidget):
 
         self.dropdownlist_category.activated.connect(self.select_category)
 
+        header = self.products_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+
         self.layout.addWidget(self.add_button)
         self.layout.addWidget(self.cancel_button)
         self.layout.addWidget(self.dropdownlist_category)
@@ -264,6 +277,10 @@ class ProductsTable(QTableWidget):
 
         self.refresh_products(search_by="All", text="")
 
+        self.setSortingEnabled(True)
+        self.resizeRowsToContents()
+        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
+
     def change_products(self):
         items = self.selectedItems()
         self.row_data = [cell.text() for cell in items]
@@ -295,6 +312,10 @@ class ProductsTemp(QTableWidget):
 
         self.change_products()
         self.refresh_products()
+
+        self.setSortingEnabled(True)
+        self.resizeRowsToContents()
+        self.horizontalHeader().sortIndicatorChanged.connect(self.resizeRowsToContents)
 
     def change_products(self):
         items = self.selectedItems()
@@ -414,7 +435,6 @@ class NewItem(QWidget):
         # if self.id_input.text() in [str(row[0]) for row in self.data] or self.id_input.text() == 0:
         #     return
         if self.price_sell_input.text() == "0,00":
-            return
         if len(self.category_input_edit.text()) != 3 or self.category_input_edit.text().isupper() is not True:
             return
         try:

@@ -24,8 +24,8 @@ class App(QMainWindow):
         self.title = "Shop"
         self.left = 30
         self.top = 30
-        self.width = 1000
-        self.height = 750
+        self.width = 1024
+        self.height = 768
 
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
