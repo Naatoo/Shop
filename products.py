@@ -271,7 +271,6 @@ class NewItem(QWidget):
 
     @pyqtSlot()
     def reset_to_default(self):
-        # self.id_input.setValue(self.id_default)
         self.name_input.setCurrentIndex(0)
         self.quantity_input.setValue(1)
         self.price_sell_input.setValue(100.00)
@@ -282,14 +281,11 @@ class NewItem(QWidget):
         self.data = view_data("products")
         if len(self.name_input_edit.text()) > 40 or self.name_input_edit.text() in [row[1] for row in self.data]:
             return
-        # if self.id_input.text() in [str(row[0]) for row in self.data] or self.id_input.text() == 0:
-        #     return
         if self.price_sell_input.text() == "0,00":
             return
         if len(self.category_input_edit.text()) != 3 or self.category_input_edit.text().isupper() is not True:
             return
         try:
-            # int(self.id_input.text())
             int(self.quantity_input.text())
             price = self.price_sell_input.text()
             price = price.replace(",", ".")
@@ -328,14 +324,12 @@ class UpdateItem(QWidget):
         self.quantity_label = QLabel("Quantity")
         self.quantity_input = QSpinBox()
         self.quantity_input.setMaximum(100000)
-        # self.default_quantity = self.data[self.parent().products_table.currentRow()][2]
         self.layout.addWidget(self.quantity_label, 2, 0)
         self.layout.addWidget(self.quantity_input, 2, 1)
 
         self.price_sell_label = QLabel("Selling price")
         self.price_sell_input = QDoubleSpinBox()
         self.price_sell_input.setMaximum(100000)
-        # self.default_price = self.data[self.parent().products_table.currentRow()][3]
         self.layout.addWidget(self.price_sell_label, 3, 0)
         self.layout.addWidget(self.price_sell_input, 3, 1)
 

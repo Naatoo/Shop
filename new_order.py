@@ -172,7 +172,6 @@ class NewOrderWidgetTab(QTabWidget):
                              for row in range(self.temp_products.rowCount())]
             price_list = [int(self.temp_products.cellWidget(row, 3).text()[:-3])
                           for row in range(self.temp_products.rowCount())]
-      #      free_order_id = max([val[0] for val in self.parent().tab_orders.orders_table.data]) + 1
             final_order_data = [[row[0], quantity_list[index], price_list[index], find_free_id()[0]]
                                 for index, row in enumerate(self.temp_products.rows)]
             now_datetime = str(datetime.now())[:-7]
@@ -270,16 +269,8 @@ class SelectItem(QWidget):
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.close)
 
-        self.dropdownlist_category = QComboBox()
-        self.data = view_data("products")
-        categories = list({item_id[4] for item_id in self.data})
-        categories.insert(0, "All products")
-        self.dropdownlist_category.addItems(categories)
-
         self.products_table = ProductsTable(parent=self)
         self.products_table.itemDoubleClicked.connect(self.add)
-
-        self.dropdownlist_category.activated.connect(self.select_category)
 
         header = self.products_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
@@ -290,7 +281,6 @@ class SelectItem(QWidget):
 
         self.layout.addWidget(self.add_button)
         self.layout.addWidget(self.cancel_button)
-        self.layout.addWidget(self.dropdownlist_category)
         self.layout.addWidget(self.products_table)
         self.setLayout(self.layout)
         self.show()
@@ -303,10 +293,6 @@ class SelectItem(QWidget):
             temp_insert(self.products_table.row_data)
             self.close()
             self.parent().refresh_products_in_order()
-
-    @pyqtSlot()
-    def select_category(self):
-        self.products_table.refresh_products()
 
 
 class SelectCustomerWindow(QWidget):

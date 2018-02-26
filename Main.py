@@ -7,12 +7,12 @@ from PyQt5.QtCore import pyqtSlot, QObject
 
 from datetime import datetime
 
-import products
-import orders
-import views
-import customers
-import vendors
-import new_order
+from products import ProductsWidgetTab
+from orders import OrdersWidgetTab
+from views import create_view_orders
+from customers import CustomersWidgetTab
+from vendors import VendorsWidgetTab
+from new_order import NewOrderWidgetTab
 
 
 class App(QMainWindow):
@@ -20,7 +20,7 @@ class App(QMainWindow):
         super().__init__()
         self.title = "Shop"
         self.left = 100
-        self.top = 3100
+        self.top = 100
         self.width = 1024
         self.height = 768
 
@@ -30,7 +30,7 @@ class App(QMainWindow):
         self.statusBar().showMessage("v0.3")
 
         self.main_widget = MainWidget(self)
-        self.setCentralWidget(self.table_widget)
+        self.setCentralWidget(self.main_widget)
 
         self.show()
 
@@ -41,11 +41,11 @@ class MainWidget(QWidget):
         self.layout = QVBoxLayout(self)
 
         self.tabs = QTabWidget()
-        self.tab_new_order = new_order.NewOrderWidgetTab()
-        self.tab_products = products.ProductsWidgetTab()
-        self.tab_orders = orders.OrdersWidgetTab()
-        self.tab_customers = customers.CustomersWidgetTab()
-        self.tab_vendors = vendors.VendorsWidgetTab()
+        self.tab_new_order = NewOrderWidgetTab()
+        self.tab_products = ProductsWidgetTab()
+        self.tab_orders = OrdersWidgetTab()
+        self.tab_customers = CustomersWidgetTab()
+        self.tab_vendors = VendorsWidgetTab()
 
         self.tabs.addTab(self.tab_new_order, "New Order")
         self.tabs.addTab(self.tab_products, "Products")
@@ -56,7 +56,7 @@ class MainWidget(QWidget):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
-        views.create_view_orders()
+        create_view_orders()
 
 
 if __name__ == "__main__":
