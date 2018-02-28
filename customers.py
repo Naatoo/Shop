@@ -8,7 +8,7 @@ from queries import view_column_names, view_data
 
 
 def insert_customer(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -23,7 +23,7 @@ def insert_customer(data):
 
 
 def delete_customer(id):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -37,7 +37,7 @@ def delete_customer(id):
 
 
 def update_customer(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -57,7 +57,7 @@ def update_customer(data):
 
 
 def search_customer(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
     if data[0] == "All":
         sql = '''

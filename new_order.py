@@ -13,7 +13,7 @@ from tables import create_temp
 
 
 def insert_ordered_position(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -29,7 +29,7 @@ def insert_ordered_position(data):
 
 
 def insert_order(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -43,7 +43,7 @@ def insert_order(data):
 
 
 def find_free_id():
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -59,7 +59,7 @@ def find_free_id():
 
 
 def temp_insert(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -75,7 +75,7 @@ def temp_insert(data):
 
 
 def delete_from_current_order(name):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -89,7 +89,7 @@ def delete_from_current_order(name):
 
 
 def update_quantity(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''

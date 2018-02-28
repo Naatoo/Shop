@@ -8,11 +8,11 @@ from datetime import datetime
 from functools import partial
 
 from queries import view_data, view_column_names
-from views import create_view_orders_items
+from views import create_view_orders_items, create_view_orders
 
 
 def update_order_paid(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -27,7 +27,7 @@ def update_order_paid(data):
 
 
 def search_order(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
     if data[0] == "All":
         sql = '''
@@ -87,6 +87,8 @@ def search_order(data):
 class OrdersWidgetTab(QTabWidget):
     def __init__(self):
         super(QWidget, self).__init__()
+
+        create_view_orders()
 
         self.layout = QGridLayout(self)
 

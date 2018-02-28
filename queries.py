@@ -2,7 +2,7 @@ import psycopg2
 
 
 def view_data(table_name):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -19,7 +19,7 @@ def view_data(table_name):
 
 def view_column_names(table_name):
     data = (table_name,)
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''

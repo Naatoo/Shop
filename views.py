@@ -2,7 +2,7 @@ import psycopg2
 
 
 def create_view_orders():
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -36,7 +36,7 @@ def create_view_orders():
 
 
 def create_view_orders_items(id_order):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
