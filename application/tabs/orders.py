@@ -7,8 +7,8 @@ from PyQt5.QtCore import pyqtSlot
 from datetime import datetime
 from functools import partial
 
-from queries import view_data, view_column_names
-from views import create_view_orders_items, create_view_orders
+from application.db.queries import view_data, view_column_names
+from application.db.views import create_view_orders_items, create_view_orders
 
 
 def update_order_paid(data):

@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QStyleFactory, QVBoxLayout, QTabWidget
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget
 
-from products import ProductsWidgetTab
-from orders import OrdersWidgetTab
-from customers import CustomersWidgetTab
-from vendors import VendorsWidgetTab
-from new_order import NewOrderWidgetTab
+from application.tabs.products import ProductsWidgetTab
+from application.tabs.orders import OrdersWidgetTab
+from application.tabs.customers import CustomersWidgetTab
+from application.tabs.vendors import VendorsWidgetTab
+from application.tabs.new_order import NewOrderWidgetTab
 
 
 class MainWidget(QWidget):

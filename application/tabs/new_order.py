@@ -1,15 +1,15 @@
 import psycopg2
 
-from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton, QTabWidget
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QPushButton, QTabWidget
 from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox, QHeaderView
 from PyQt5.QtCore import pyqtSlot
 
 from datetime import datetime
 
-from queries import view_column_names, view_data
-from products import ProductsTable
-from customers import CustomersTable
-from tables import create_temp
+from application.db.queries import view_column_names, view_data
+from application.tabs.products import ProductsTable
+from application.tabs.customers import CustomersTable
+from application.db.tables import create_temp
 
 
 def insert_ordered_position(data):

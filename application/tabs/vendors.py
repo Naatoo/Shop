@@ -1,10 +1,10 @@
 import psycopg2
 
-from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QComboBox, QLineEdit, QPushButton
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QTabWidget, QHeaderView
 from PyQt5.QtCore import pyqtSlot
 
-from queries import view_data, view_column_names
+from application.db.queries import view_data, view_column_names
 
 
 def insert_vendor(data):

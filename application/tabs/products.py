@@ -3,9 +3,8 @@ import psycopg2
 from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton, QTabWidget
 from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox, QHeaderView
 from PyQt5.QtCore import pyqtSlot
-from PyQt5 import QtWidgets
 
-from queries import view_column_names, view_data
+from application.db.queries import view_column_names, view_data
 
 
 def insert_product(data):
