@@ -196,6 +196,7 @@ class ProductsTable(QTableWidget):
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         self.refresh_products(search_by="All", text="")
+        self.change_products()
 
         self.setSortingEnabled(True)
         self.resizeRowsToContents()

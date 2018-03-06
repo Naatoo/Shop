@@ -88,6 +88,19 @@ def delete_from_current_order(name):
     connection.close()
 
 
+def delete_every_item():
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    cursor = connection.cursor()
+
+    sql = '''
+    TRUNCATE TABLE temp
+    '''
+    cursor.execute(sql)
+
+    connection.commit()
+    connection.close()
+
+
 def update_quantity(data):
     connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
     cursor = connection.cursor()
@@ -239,17 +252,22 @@ class ProductsTemp(QTableWidget):
 
     def delete(self):
         if self.rows and self.row_data_product:
+            print(self.rows)
+            print(self.row_data_product)
             name_deleted_item = self.row_data_product[1]
-            if name_deleted_item not in self.rows[-1]:
-                default_name = give_name_to_select(name_deleted_item)[0]
-                for row in self.rows:
-                    if default_name in row:
-                        self.row_data_product = row
-                        break
+            # if name_deleted_item not in self.rows[-1]:
+            #     default_name = give_name_to_select(name_deleted_item)[0]
+            #     for row in self.rows:
+            #         if default_name in row:
+            #             self.row_data_product = row
+            #             break
+            # else:
+            #     if len(self.rows) > 1:
+            #         self.row_data_product = self.rows[-2]
+            if len(self.rows) == 1:
+                delete_every_item()
             else:
-                if len(self.rows) > 1:
-                    self.row_data_product = self.rows[-2]
-            delete_from_current_order(name_deleted_item)
+                delete_from_current_order(name_deleted_item)
             self.refresh_products()
         else:
             pass
@@ -264,13 +282,13 @@ class SelectItem(QWidget):
 
         self.add_button = QPushButton("Add product", self)
         self.add_button.setToolTip("Add this item to an order")
-        self.add_button.clicked.connect(self.add)
+        self.add_button.clicked.connect(self.add_item)
 
         self.cancel_button = QPushButton("Cancel")
         self.cancel_button.clicked.connect(self.close)
 
         self.products_table = ProductsTable(parent=self)
-        self.products_table.itemDoubleClicked.connect(self.add)
+        self.products_table.itemDoubleClicked.connect(self.add_item)
 
         header = self.products_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
@@ -285,7 +303,9 @@ class SelectItem(QWidget):
         self.setLayout(self.layout)
         self.show()
 
-    def add(self):
+    def add_item(self):
+        if not self.products_table.row_data:
+            return
         if self.products_table.row_data[2] == "0":
             QMessageBox.information(self, "Error", "You do not have this item in stock")
             return

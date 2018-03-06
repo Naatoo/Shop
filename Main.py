@@ -39,7 +39,7 @@ class MainWidget(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
-
+        create_view_orders()
         self.tabs = QTabWidget()
         self.tab_new_order = NewOrderWidgetTab()
         self.tab_products = ProductsWidgetTab()
@@ -56,7 +56,7 @@ class MainWidget(QWidget):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
-        create_view_orders()
+
 
 
 if __name__ == "__main__":
