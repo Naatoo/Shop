@@ -2,7 +2,7 @@ import psycopg2
 
 
 def create_products(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''DROP TABLE IF EXISTS products CASCADE'''
@@ -38,7 +38,7 @@ data = (('Samsung S8/32GB/Black', 4, 2900, "MOB"), ('LG G6/32GB/Grey', 12, 2300,
 
 
 def create_orders(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''DROP TABLE IF EXISTS orders CASCADE'''
@@ -72,7 +72,7 @@ data_ord = (('2017-11-28 11:45:45', '2017-11-29 12:45:45', 1), ('2017-11-28 12:1
 
 
 def create_ordered_products(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''DROP TABLE IF EXISTS ordered_position CASCADE'''
@@ -107,7 +107,7 @@ data_pos = ((1, 2900, 1, 1), (2, 219, 3, 2), (5, 2900, 1, 2), (7, 700, 4, 2), (2
 
 
 def create_customers(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''DROP TABLE IF EXISTS customers CASCADE'''
@@ -144,7 +144,7 @@ data_customers = (
 
 
 def create_vendors(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''DROP TABLE IF EXISTS vendors CASCADE'''
@@ -180,7 +180,7 @@ data_vendors = (("Frapol", "Szczecin", "Ogrodowa", "143", "78-456"), ("Rinus", "
 
 
 def create_temp():
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''DROP TABLE IF EXISTS temp CASCADE'''

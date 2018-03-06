@@ -1,19 +1,19 @@
 import psycopg2
 
-from PyQt5.QtWidgets import QWidget, QGridLayout, QSpinBox, QLabel, QComboBox, QLineEdit, QPushButton, QTabWidget
+from PyQt5.QtWidgets import QWidget, QGridLayout, QLabel, QPushButton, QTabWidget
 from PyQt5.QtWidgets import QDoubleSpinBox, QTableWidget, QTableWidgetItem, QAbstractItemView, QMessageBox, QHeaderView
 from PyQt5.QtCore import pyqtSlot
 
 from datetime import datetime
 
-from queries import view_column_names, view_data
-from products import ProductsTable
-from customers import CustomersTable
-from tables import create_temp
+from application.db.queries import view_column_names, view_data
+from application.tabs.products import ProductsTable
+from application.tabs.customers import CustomersTable
+from application.db.tables import create_temp
 
 
 def insert_ordered_position(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -29,7 +29,7 @@ def insert_ordered_position(data):
 
 
 def insert_order(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -43,7 +43,7 @@ def insert_order(data):
 
 
 def find_free_id():
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -59,7 +59,7 @@ def find_free_id():
 
 
 def temp_insert(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -75,7 +75,7 @@ def temp_insert(data):
 
 
 def delete_from_current_order(name):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
@@ -102,7 +102,7 @@ def delete_every_item():
 
 
 def update_quantity(data):
-    connection = psycopg2.connect("dbname='shop' user='postgres' password='natoo123' host='localhost' port='5432'")
+    connection = psycopg2.connect("dbname='shop' user='postgres' password='postgres' host='localhost' port='5432'")
     cursor = connection.cursor()
 
     sql = '''
